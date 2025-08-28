@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import ClientBody from "./ClientBody";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
   title: "QR PDF Generator - Professional QR Code & PDF Creator",
@@ -31,12 +32,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="scroll-smooth">
-      <body className="antialiased" suppressHydrationWarning>
-        <ClientBody>
-          {children}
-          <Toaster />
-        </ClientBody>
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+      <body className="antialiased">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ClientBody>
+            {children}
+            <Toaster />
+          </ClientBody>
+        </ThemeProvider>
       </body>
     </html>
   );

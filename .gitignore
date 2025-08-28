@@ -78,3 +78,14 @@ temp/
 # Build artifacts
 dist/
 output/
+
+
+.augment
+.cursor
+.windsurf
+
+# Ignore semua file .md
+*.md
+
+# Kecualikan README.md
+!README.md

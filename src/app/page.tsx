@@ -35,6 +35,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { ShareOptions } from "@/components/share-options";
+import { DragDropZone } from "@/components/drag-drop-zone";
+import { UsageStats } from "@/components/usage-stats";
+import { QuickActions } from "@/components/quick-actions";
 import {
   Download,
   QrCode,
@@ -46,6 +51,9 @@ import {
   Zap,
   Star,
   Heart,
+  Moon,
+  Sun,
+  Monitor,
 } from "lucide-react";
 
 interface QROptions {
@@ -57,6 +65,10 @@ interface QROptions {
   background: string;
   format: "png" | "jpeg" | "webp";
   logoUrl?: string;
+  logoSize?: number;
+  logoBackground?: boolean;
+  pdfPassword?: string;
+  enablePdfPassword?: boolean;
 }
 
 export default function QRCodePDFDownloader() {
@@ -68,12 +80,19 @@ export default function QRCodePDFDownloader() {
     foreground: "#000000",
     background: "#ffffff",
     format: "png",
+    logoUrl: "",
+    logoSize: 60,
+    logoBackground: false,
+    pdfPassword: "",
+    enablePdfPassword: false,
   });
 
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [previewMode, setPreviewMode] = useState(true);
+  const [savedPresets, setSavedPresets] = useState<{ name: string; options: QROptions }[]>([]);
+  const [presetName, setPresetName] = useState("");
   const qrRef = useRef<HTMLDivElement>(null);
 
   const generateQRCode = useCallback(async () => {
@@ -189,6 +208,32 @@ export default function QRCodePDFDownloader() {
     toast.success("Image downloaded successfully!");
   };
 
+  const savePreset = () => {
+    if (!presetName.trim()) {
+      toast.error("Please enter a preset name");
+      return;
+    }
+    
+    const newPreset = { name: presetName, options: { ...qrOptions } };
+    const updatedPresets = [...savedPresets, newPreset];
+    setSavedPresets(updatedPresets);
+    localStorage.setItem('qr-presets', JSON.stringify(updatedPresets));
+    setPresetName("");
+    toast.success(`Preset "${presetName}" saved successfully!`);
+  };
+
+  const loadPreset = (preset: { name: string; options: QROptions }) => {
+    setQROptions(preset.options);
+    toast.success(`Preset "${preset.name}" loaded successfully!`);
+  };
+
+  const deletePreset = (index: number) => {
+    const updatedPresets = savedPresets.filter((_, i) => i !== index);
+    setSavedPresets(updatedPresets);
+    localStorage.setItem('qr-presets', JSON.stringify(updatedPresets));
+    toast.success("Preset deleted successfully!");
+  };
+
   const presetColors = [
     { name: "Classic", fg: "#000000", bg: "#ffffff" },
     { name: "Ocean", fg: "#0EA5E9", bg: "#F0F9FF" },
@@ -206,6 +251,14 @@ export default function QRCodePDFDownloader() {
     "Visit our website for more information!",
   ];
 
+  // Load presets from localStorage on component mount
+  useEffect(() => {
+    const storedPresets = localStorage.getItem('qr-presets');
+    if (storedPresets) {
+      setSavedPresets(JSON.parse(storedPresets));
+    }
+  }, []);
+
   // Auto-generate QR data URL for downloads when text changes
   useEffect(() => {
     if (qrOptions.text.trim()) {
@@ -213,15 +266,19 @@ export default function QRCodePDFDownloader() {
         generateQRCode();
       }, 500);
       return () => clearTimeout(debounceTimer);
-    } else {
-      setQrDataUrl('');
     }
+    setQrDataUrl('');
   }, [qrOptions, generateQRCode]);
 
   return (
     <TooltipProvider>
-      <div className="bg-gradient-to-br from-slate-50 via-white to-slate-100 py-4 px-4">
+      <div className="bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 min-h-screen py-4 px-4">
         <div className="max-w-7xl mx-auto space-y-8 pb-8">
+          {/* Theme Toggle */}
+          <div className="fixed right-4 top-4 z-50">
+            <ThemeToggle />
+          </div>
+          
           {/* Header */}
           <div className="text-center mb-8 pt-8">
             <div className="flex items-center justify-center gap-3 mb-4">
@@ -233,7 +290,7 @@ export default function QRCodePDFDownloader() {
               </h1>
               <Sparkles className="h-8 w-8 text-yellow-500" />
             </div>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Create stunning QR codes and download them as beautiful PDFs with
               advanced customization options
             </p>
@@ -253,10 +310,10 @@ export default function QRCodePDFDownloader() {
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
             {/* Left Panel - Controls */}
             <div className="space-y-6">
-              <Card className="shadow-xl border-0 bg-white/80 backdrop-blur">
+              <Card className="shadow-xl bg-card/80 backdrop-blur border-border">
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="h-5 w-5 text-blue-600" />
@@ -307,19 +364,45 @@ export default function QRCodePDFDownloader() {
                       ))}
                     </div>
                   </div>
+
+                  <div>
+                    <Label htmlFor="logo-url" className="text-sm font-medium">
+                      Logo URL (Optional)
+                    </Label>
+                    <Input
+                      id="logo-url"
+                      type="url"
+                      placeholder="https://example.com/logo.png"
+                      value={qrOptions.logoUrl}
+                      onChange={(e) =>
+                        setQROptions((prev) => ({
+                          ...prev,
+                          logoUrl: e.target.value,
+                        }))
+                      }
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <DragDropZone 
+                    onTextExtracted={(text) => 
+                      setQROptions((prev) => ({ ...prev, text }))
+                    }
+                    className="mt-4"
+                  />
                 </CardContent>
               </Card>
 
-              <Card className="shadow-xl border-0 bg-white/80 backdrop-blur">
+              <Card className="shadow-xl bg-card/80 backdrop-blur border-border">
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5 text-slate-600" />
+                    <Settings className="h-5 w-5 text-muted-foreground" />
                     Advanced Settings
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Tabs defaultValue="appearance" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-4">
                       <TabsTrigger
                         value="appearance"
                         className="flex items-center gap-1"
@@ -333,6 +416,13 @@ export default function QRCodePDFDownloader() {
                       >
                         <Settings className="h-3 w-3" />
                         Technical
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="presets"
+                        className="flex items-center gap-1"
+                      >
+                        <Star className="h-3 w-3" />
+                        Presets
                       </TabsTrigger>
                       <TabsTrigger
                         value="export"
@@ -521,6 +611,104 @@ export default function QRCodePDFDownloader() {
                           </SelectContent>
                         </Select>
                       </div>
+
+                      <div>
+                        <Label className="text-sm font-medium mb-2 block">
+                          Logo Size: {qrOptions.logoSize}px
+                        </Label>
+                        <Slider
+                          value={[qrOptions.logoSize || 60]}
+                          onValueChange={(value) =>
+                            setQROptions((prev) => ({
+                              ...prev,
+                              logoSize: value[0],
+                            }))
+                          }
+                          max={120}
+                          min={20}
+                          step={10}
+                          className="w-full"
+                        />
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id="logo-background"
+                          checked={qrOptions.logoBackground}
+                          onCheckedChange={(checked) =>
+                            setQROptions((prev) => ({
+                              ...prev,
+                              logoBackground: checked,
+                            }))
+                          }
+                        />
+                        <Label htmlFor="logo-background" className="text-sm font-medium">
+                          White Background for Logo
+                        </Label>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="presets" className="space-y-4 mt-4">
+                      <div>
+                        <Label htmlFor="preset-name" className="text-sm font-medium">
+                          Save Current Configuration
+                        </Label>
+                        <div className="flex gap-2 mt-2">
+                          <Input
+                            id="preset-name"
+                            placeholder="Enter preset name..."
+                            value={presetName}
+                            onChange={(e) => setPresetName(e.target.value)}
+                            className="flex-1"
+                          />
+                          <Button onClick={savePreset} size="sm">
+                            <Star className="h-4 w-4 mr-1" />
+                            Save
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label className="text-sm font-medium mb-2 block">
+                          Saved Presets ({savedPresets.length})
+                        </Label>
+                        {savedPresets.length > 0 ? (
+                          <div className="space-y-2 max-h-40 overflow-y-auto">
+                            {savedPresets.map((preset, index) => (
+                              <div
+                                key={`${preset.name}-${index}`}
+                                className="flex items-center justify-between p-2 border rounded-md bg-slate-50"
+                              >
+                                <span className="text-sm font-medium">
+                                  {preset.name}
+                                </span>
+                                <div className="flex gap-1">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => loadPreset(preset)}
+                                    className="h-7 px-2"
+                                  >
+                                    Load
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => deletePreset(index)}
+                                    className="h-7 px-2"
+                                  >
+                                    ×
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground text-center py-4">
+                            No saved presets yet. Save your current configuration above.
+                          </p>
+                        )}
+                      </div>
                     </TabsContent>
 
                     <TabsContent value="export" className="space-y-4 mt-4">
@@ -560,15 +748,58 @@ export default function QRCodePDFDownloader() {
                           Live Preview Mode
                         </Label>
                       </div>
+
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id="enable-pdf-password"
+                          checked={qrOptions.enablePdfPassword}
+                          onCheckedChange={(checked) =>
+                            setQROptions((prev) => ({
+                              ...prev,
+                              enablePdfPassword: checked,
+                            }))
+                          }
+                        />
+                        <Label htmlFor="enable-pdf-password" className="text-sm font-medium">
+                          Password Protect PDF
+                        </Label>
+                      </div>
+
+                      {qrOptions.enablePdfPassword && (
+                        <div>
+                          <Label htmlFor="pdf-password" className="text-sm font-medium">
+                            PDF Password
+                          </Label>
+                          <Input
+                            id="pdf-password"
+                            type="password"
+                            placeholder="Enter password for PDF..."
+                            value={qrOptions.pdfPassword}
+                            onChange={(e) =>
+                              setQROptions((prev) => ({
+                                ...prev,
+                                pdfPassword: e.target.value,
+                              }))
+                            }
+                            className="mt-2"
+                          />
+                        </div>
+                      )}
                     </TabsContent>
                   </Tabs>
                 </CardContent>
               </Card>
+
+              <QuickActions 
+                onQuickAction={(text) => 
+                  setQROptions((prev) => ({ ...prev, text }))
+                }
+              />
             </div>
 
             {/* Right Panel - Preview and Actions */}
             <div className="space-y-6">
-              <Card className="shadow-xl border-0 bg-white/80 backdrop-blur">
+              <Card className="shadow-xl bg-card/80 backdrop-blur border-border">
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-2">
                     <Image className="h-5 w-5 text-green-600" />
@@ -579,7 +810,7 @@ export default function QRCodePDFDownloader() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="aspect-square bg-slate-50 rounded-lg border-2 border-dashed border-slate-200 flex items-center justify-center relative overflow-hidden">
+                  <div className="aspect-square bg-muted/50 rounded-lg border-2 border-dashed border-border flex items-center justify-center relative overflow-hidden">
                     {qrOptions.text.trim() ? (
                       <div className="p-4">
                         <QRCodeSVG
@@ -620,7 +851,7 @@ export default function QRCodePDFDownloader() {
                 </CardContent>
               </Card>
 
-              <Card className="shadow-xl border-0 bg-white/80 backdrop-blur">
+              <Card className="shadow-xl bg-card/80 backdrop-blur border-border">
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-2">
                     <Download className="h-5 w-5 text-purple-600" />
@@ -635,12 +866,12 @@ export default function QRCodePDFDownloader() {
                     <Button
                       onClick={downloadPDF}
                       disabled={!qrDataUrl}
-                      className="h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                      className="h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:hover:scale-100 disabled:hover:shadow-none"
                     >
                       <FileText className="h-5 w-5 mr-2" />
                       Download as PDF
-                      <Badge variant="secondary" className="ml-2">
-                        Premium
+                      <Badge variant="outline" className="ml-2 border-white/30 text-white/90">
+                        Free
                       </Badge>
                     </Button>
 
@@ -648,12 +879,14 @@ export default function QRCodePDFDownloader() {
                       onClick={downloadImage}
                       disabled={!qrDataUrl}
                       variant="outline"
-                      className="h-14 border-2"
+                      className="h-14 border-2 transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:hover:scale-100 disabled:hover:shadow-none"
                     >
                       <Image className="h-5 w-5 mr-2" />
                       Download as {qrOptions.format.toUpperCase()}
                     </Button>
                   </div>
+
+                  <ShareOptions qrDataUrl={qrDataUrl} qrText={qrOptions.text} />
 
                   {!previewMode && (
                     <Button
@@ -678,22 +911,9 @@ export default function QRCodePDFDownloader() {
                 </CardContent>
               </Card>
 
-              <Card className="shadow-xl border-0 bg-gradient-to-br from-slate-50 to-white">
-                <CardContent className="p-6">
-                  <div className="text-center text-sm text-slate-600">
-                    <p className="mb-2">
-                      ✨ <strong>Pro Features:</strong>
-                    </p>
-                    <ul className="space-y-1 text-xs">
-                      <li>• High-resolution QR codes up to 1024px</li>
-                      <li>• Professional PDF layouts with metadata</li>
-                      <li>• Advanced error correction levels</li>
-                      <li>• Custom color schemes and presets</li>
-                      <li>• Real-time preview generation</li>
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
+
+
+              <UsageStats />
             </div>
           </div>
         </div>

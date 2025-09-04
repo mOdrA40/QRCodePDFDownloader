@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import QRCode from "qrcode";
 import { QRCodeSVG } from "qrcode.react";
 import jsPDF from "jspdf";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -51,9 +52,6 @@ import {
   Zap,
   Star,
   Heart,
-  Moon,
-  Sun,
-  Monitor,
 } from "lucide-react";
 
 interface QROptions {
@@ -93,7 +91,81 @@ export default function QRCodePDFDownloader() {
   const [previewMode, setPreviewMode] = useState(true);
   const [savedPresets, setSavedPresets] = useState<{ name: string; options: QROptions }[]>([]);
   const [presetName, setPresetName] = useState("");
-  const qrRef = useRef<HTMLDivElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+
+  // Fixed QR generation with proper DPI handling
+  const generateQRCodeWithProperDPI = useCallback(async (text: string, options: {
+    size?: number;
+    margin?: number;
+    errorCorrectionLevel?: string;
+    color?: { dark?: string; light?: string };
+    format?: "png" | "jpeg" | "webp";
+  }): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      try {
+
+
+        // Create canvas with proper DPI scaling
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        if (!ctx) {
+          reject(new Error('Failed to get canvas context'));
+          return;
+        }
+
+        const size = options.size || 512;
+        const dpr = window.devicePixelRatio || 1;
+        const format = options.format || 'png';
+
+        // Set actual canvas size (scaled for DPI)
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+
+        // Set display size (CSS pixels)
+        canvas.style.width = `${size}px`;
+        canvas.style.height = `${size}px`;
+
+        // Scale context to match DPI
+        ctx.scale(dpr, dpr);
+
+
+
+        // Generate QR using library but to our custom canvas
+        QRCode.toCanvas(canvas, text, {
+          width: size,
+          margin: options.margin || 4,
+          errorCorrectionLevel: 'M' as const,
+          color: {
+            dark: options.color?.dark || '#000000',
+            light: options.color?.light || '#ffffff',
+          },
+        }).then(() => {
+          // Convert to data URL with selected format
+          const quality = 0.95; // High quality for JPEG/WebP
+
+          let dataUrl: string;
+          switch (format) {
+            case 'jpeg':
+              dataUrl = canvas.toDataURL('image/jpeg', quality);
+              break;
+            case 'webp':
+              dataUrl = canvas.toDataURL('image/webp', quality);
+              break;
+            default:
+              dataUrl = canvas.toDataURL('image/png');
+              break;
+          }
+
+          resolve(dataUrl);
+        }).catch(reject);
+
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }, []);
 
   const generateQRCode = useCallback(async () => {
     if (!qrOptions.text.trim()) {
@@ -110,11 +182,14 @@ export default function QRCodePDFDownloader() {
         setDownloadProgress((prev) => Math.min(prev + 10, 90));
       }, 100);
 
-      // Generate QR code data URL for downloads using the original qrcode library
-      const dataUrl = await QRCode.toDataURL(qrOptions.text, {
-        width: qrOptions.size,
+
+
+      // Generate with proper DPI handling
+      const dataUrl = await generateQRCodeWithProperDPI(qrOptions.text, {
+        size: qrOptions.size,
         margin: qrOptions.margin,
         errorCorrectionLevel: qrOptions.errorCorrectionLevel,
+        format: qrOptions.format,
         color: {
           dark: qrOptions.foreground,
           light: qrOptions.background,
@@ -126,16 +201,15 @@ export default function QRCodePDFDownloader() {
 
       // Store data URL for downloads
       setQrDataUrl(dataUrl);
-      toast.success("QR code generated successfully!");
+      toast.success("QR code generated with proper DPI!");
     } catch (error) {
       toast.error("Failed to generate QR code");
-      console.error("QR Code generation error:", error);
-      setQrDataUrl(''); // Clear any invalid data
+      setQrDataUrl('');
     } finally {
       setIsGenerating(false);
       setTimeout(() => setDownloadProgress(0), 1000);
     }
-  }, [qrOptions]);
+  }, [qrOptions, generateQRCodeWithProperDPI]);
 
   const downloadPDF = async () => {
     if (!qrDataUrl) {
@@ -156,8 +230,9 @@ export default function QRCodePDFDownloader() {
       // Add subtitle
       pdf.setFontSize(12);
       pdf.setFont("helvetica", "normal");
+      const currentDate = isMounted ? new Date().toLocaleDateString() : new Date().toLocaleDateString();
       pdf.text(
-        `Generated on ${new Date().toLocaleDateString()}`,
+        `Generated on ${currentDate}`,
         pageWidth / 2,
         45,
         { align: "center" },
@@ -168,7 +243,16 @@ export default function QRCodePDFDownloader() {
       const qrX = (pageWidth - qrSize) / 2;
       const qrY = 60;
 
-      pdf.addImage(qrDataUrl, "PNG", qrX, qrY, qrSize, qrSize);
+      // Determine image format for PDF
+      let imageFormat = "PNG";
+      if (qrDataUrl.startsWith("data:image/jpeg")) {
+        imageFormat = "JPEG";
+      } else if (qrDataUrl.startsWith("data:image/webp")) {
+        // jsPDF doesn't support WebP directly, so we'll use PNG
+        imageFormat = "PNG";
+      }
+
+      pdf.addImage(qrDataUrl, imageFormat, qrX, qrY, qrSize, qrSize);
 
       // Add encoded text below QR code
       pdf.setFontSize(10);
@@ -187,12 +271,25 @@ export default function QRCodePDFDownloader() {
         { align: "center" },
       );
 
-      pdf.save(`qr-code-${Date.now()}.pdf`);
+      const timestamp = isMounted ? Date.now() : new Date().getTime();
+      pdf.save(`qr-code-${timestamp}.pdf`);
       toast.success("PDF downloaded successfully!");
     } catch (error) {
       toast.error("Failed to generate PDF");
-      console.error(error);
     }
+  };
+
+  // Convert data URL to Blob
+  const dataURLtoBlob = (dataURL: string): Blob => {
+    const arr = dataURL.split(',');
+    const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
   };
 
   const downloadImage = () => {
@@ -201,11 +298,53 @@ export default function QRCodePDFDownloader() {
       return;
     }
 
-    const link = document.createElement("a");
-    link.download = `qr-code-${Date.now()}.${qrOptions.format}`;
-    link.href = qrDataUrl;
-    link.click();
-    toast.success("Image downloaded successfully!");
+    try {
+      // Convert data URL to Blob
+      const blob = dataURLtoBlob(qrDataUrl);
+
+      // Create object URL from blob
+      const blobUrl = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      const timestamp = isMounted ? Date.now() : new Date().getTime();
+
+      // Get file extension based on selected format
+      const getFileExtension = (format: string) => {
+        switch (format) {
+          case 'jpeg':
+            return 'jpg';
+          case 'webp':
+            return 'webp';
+          default:
+            return 'png';
+        }
+      };
+
+      const fileExtension = getFileExtension(qrOptions.format);
+      const fileName = `qr-code-${timestamp}.${fileExtension}`;
+
+      link.download = fileName;
+      link.href = blobUrl;
+
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Clean up object URL
+      setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+      }, 1000);
+
+      // Show success message with correct format
+      const formatName = qrOptions.format.toUpperCase();
+      toast.success(`${formatName} image downloaded successfully!`, {
+        description: `File: ${fileName}`,
+        duration: 3000
+      });
+    } catch (error) {
+      toast.error("Failed to download image");
+    }
   };
 
   const savePreset = () => {
@@ -217,7 +356,11 @@ export default function QRCodePDFDownloader() {
     const newPreset = { name: presetName, options: { ...qrOptions } };
     const updatedPresets = [...savedPresets, newPreset];
     setSavedPresets(updatedPresets);
-    localStorage.setItem('qr-presets', JSON.stringify(updatedPresets));
+    
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('qr-presets', JSON.stringify(updatedPresets));
+    }
+    
     setPresetName("");
     toast.success(`Preset "${presetName}" saved successfully!`);
   };
@@ -230,7 +373,11 @@ export default function QRCodePDFDownloader() {
   const deletePreset = (index: number) => {
     const updatedPresets = savedPresets.filter((_, i) => i !== index);
     setSavedPresets(updatedPresets);
-    localStorage.setItem('qr-presets', JSON.stringify(updatedPresets));
+    
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('qr-presets', JSON.stringify(updatedPresets));
+    }
+    
     toast.success("Preset deleted successfully!");
   };
 
@@ -253,9 +400,13 @@ export default function QRCodePDFDownloader() {
 
   // Load presets from localStorage on component mount
   useEffect(() => {
-    const storedPresets = localStorage.getItem('qr-presets');
-    if (storedPresets) {
-      setSavedPresets(JSON.parse(storedPresets));
+    setIsMounted(true);
+    
+    if (typeof window !== 'undefined') {
+      const storedPresets = localStorage.getItem('qr-presets');
+      if (storedPresets) {
+        setSavedPresets(JSON.parse(storedPresets));
+      }
     }
   }, []);
 
@@ -269,6 +420,10 @@ export default function QRCodePDFDownloader() {
     }
     setQrDataUrl('');
   }, [qrOptions, generateQRCode]);
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <TooltipProvider>
@@ -549,6 +704,11 @@ export default function QRCodePDFDownloader() {
                       <div>
                         <Label className="text-sm font-medium mb-2 block">
                           Size: {qrOptions.size}px
+                          <span className="text-xs text-muted-foreground ml-2">
+                            ({qrOptions.size <= 416 ? 'Small' :
+                              qrOptions.size <= 600 ? 'Medium' :
+                              qrOptions.size <= 800 ? 'Large' : 'Extra Large'})
+                          </span>
                         </Label>
                         <Slider
                           value={[qrOptions.size]}
@@ -560,9 +720,56 @@ export default function QRCodePDFDownloader() {
                           }
                           max={1024}
                           min={128}
-                          step={32}
+                          step={16}
                           className="w-full"
                         />
+                        <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                          <span>128px</span>
+                          <span>416px</span>
+                          <span>600px</span>
+                          <span>800px</span>
+                          <span>1024px</span>
+                        </div>
+
+                        {/* Quick Size Presets */}
+                        <div className="flex gap-2 mt-3">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setQROptions(prev => ({ ...prev, size: 256 }))}
+                            className={qrOptions.size === 256 ? "bg-primary text-primary-foreground" : ""}
+                          >
+                            Small
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setQROptions(prev => ({ ...prev, size: 512 }))}
+                            className={qrOptions.size === 512 ? "bg-primary text-primary-foreground" : ""}
+                          >
+                            Medium
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setQROptions(prev => ({ ...prev, size: 768 }))}
+                            className={qrOptions.size === 768 ? "bg-primary text-primary-foreground" : ""}
+                          >
+                            Large
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setQROptions(prev => ({ ...prev, size: 1024 }))}
+                            className={qrOptions.size === 1024 ? "bg-primary text-primary-foreground" : ""}
+                          >
+                            XL
+                          </Button>
+                        </div>
                       </div>
 
                       <div>
@@ -804,49 +1011,72 @@ export default function QRCodePDFDownloader() {
                   <CardTitle className="flex items-center gap-2">
                     <Image className="h-5 w-5 text-green-600" />
                     QR Code Preview
+                    {qrOptions.text.trim() && (
+                      <span className="text-sm font-normal text-muted-foreground">
+                        ({qrOptions.size}×{qrOptions.size}px)
+                      </span>
+                    )}
                   </CardTitle>
                   <CardDescription>
                     Real-time preview of your QR code
+                    {qrOptions.size > 600 && (
+                      <span className="block text-xs text-amber-600 mt-1">
+                        ⚠️ Large size - scroll to view full QR code
+                      </span>
+                    )}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="aspect-square bg-muted/50 rounded-lg border-2 border-dashed border-border flex items-center justify-center relative overflow-hidden">
-                    {qrOptions.text.trim() ? (
-                      <div className="p-4">
-                        <QRCodeSVG
-                          value={qrOptions.text}
-                          size={Math.min(qrOptions.size, 400)}
-                          bgColor={qrOptions.background}
-                          fgColor={qrOptions.foreground}
-                          level={qrOptions.errorCorrectionLevel}
-                          marginSize={qrOptions.margin}
-                          className="w-full h-full"
-                        />
-                      </div>
-                    ) : (
-                      <div className="text-center text-slate-400">
-                        <QrCode className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                        <p className="text-lg font-medium">
-                          Enter text to generate QR code
-                        </p>
-                        <p className="text-sm">Your QR code will appear here</p>
-                      </div>
-                    )}
-
-                    {isGenerating && (
-                      <div className="absolute inset-0 bg-white/90 flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4" />
-                          <p className="text-sm font-medium">
-                            Generating QR Code...
-                          </p>
-                          <Progress
-                            value={downloadProgress}
-                            className="w-32 mt-2"
+                  <div
+                    className="bg-muted/50 rounded-lg border-2 border-dashed border-border relative"
+                    style={{
+                      height: qrOptions.size > 600 ? '600px' : 'auto',
+                      aspectRatio: qrOptions.size <= 600 ? '1' : 'auto'
+                    }}
+                  >
+                    <div
+                      className="overflow-auto w-full h-full flex items-center justify-center p-4"
+                      style={{
+                        minHeight: qrOptions.size <= 600 ? 'auto' : '600px'
+                      }}
+                    >
+                      {qrOptions.text.trim() ? (
+                        <div className="flex items-center justify-center" data-qr-preview>
+                          <QRCodeSVG
+                            value={qrOptions.text}
+                            size={qrOptions.size}
+                            bgColor={qrOptions.background}
+                            fgColor={qrOptions.foreground}
+                            level={qrOptions.errorCorrectionLevel}
+                            marginSize={qrOptions.margin}
+                            className="block"
                           />
                         </div>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="text-center text-slate-400">
+                          <QrCode className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                          <p className="text-lg font-medium">
+                            Enter text to generate QR code
+                          </p>
+                          <p className="text-sm">Your QR code will appear here</p>
+                        </div>
+                      )}
+
+                      {isGenerating && (
+                        <div className="absolute inset-0 bg-white/90 flex items-center justify-center">
+                          <div className="text-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4" />
+                            <p className="text-sm font-medium">
+                              Generating QR Code...
+                            </p>
+                            <Progress
+                              value={downloadProgress}
+                              className="w-32 mt-2"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -866,24 +1096,33 @@ export default function QRCodePDFDownloader() {
                     <Button
                       onClick={downloadPDF}
                       disabled={!qrDataUrl}
-                      className="h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:hover:scale-100 disabled:hover:shadow-none"
+                      className="h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white cursor-pointer relative z-10"
+                      type="button"
                     >
                       <FileText className="h-5 w-5 mr-2" />
                       Download as PDF
-                      <Badge variant="outline" className="ml-2 border-white/30 text-white/90">
-                        Free
-                      </Badge>
                     </Button>
 
                     <Button
                       onClick={downloadImage}
                       disabled={!qrDataUrl}
                       variant="outline"
-                      className="h-14 border-2 transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:hover:scale-100 disabled:hover:shadow-none"
+                      className="h-14 border-2 cursor-pointer relative z-10"
+                      type="button"
                     >
                       <Image className="h-5 w-5 mr-2" />
                       Download as {qrOptions.format.toUpperCase()}
                     </Button>
+
+
+
+
+
+
+
+
+
+
                   </div>
 
                   <ShareOptions qrDataUrl={qrDataUrl} qrText={qrOptions.text} />

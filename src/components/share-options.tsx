@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import React from "react"
-import { Share2, Mail, MessageCircle, Copy, ExternalLink } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import React, { memo, useCallback } from "react";
+import { Share2, Mail, MessageCircle, Copy, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,58 +10,80 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { toast } from "sonner"
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 interface ShareOptionsProps {
-  qrDataUrl: string
-  qrText: string
+  qrDataUrl: string;
+  qrText: string;
+  className?: string;
 }
 
-export function ShareOptions({ qrDataUrl, qrText }: ShareOptionsProps) {
-  const shareToEmail = () => {
-    const subject = "QR Code Generated"
-    const body = `Check out this QR code I generated! It contains: ${qrText}\n\nGenerated with QR PDF Generator`
-    window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`)
-    toast.success("Email client opened!")
-  }
+export const ShareOptions = memo(function ShareOptions({
+  qrDataUrl,
+  qrText,
+  className
+}: ShareOptionsProps) {
+  const shareToEmail = useCallback(() => {
+    const subject = "QR Code Generated";
+    const body = `Check out this QR code I generated! It contains: ${qrText}\n\nGenerated with QR PDF Generator`;
+    window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+    toast.success("Email client opened!");
+  }, [qrText]);
 
-  const shareToWhatsApp = () => {
-    const text = `Check out this QR code I generated! It contains: ${qrText}\n\nGenerated with QR PDF Generator`
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`)
-    toast.success("WhatsApp opened!")
-  }
+  const shareToWhatsApp = useCallback(() => {
+    const text = `Check out this QR code I generated! It contains: ${qrText}\n\nGenerated with QR PDF Generator`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`);
+    toast.success("WhatsApp opened!");
+  }, [qrText]);
 
-  const copyToClipboard = async () => {
+  const copyToClipboard = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText(qrText)
-      toast.success("QR code content copied to clipboard!")
+      await navigator.clipboard.writeText(qrText);
+      toast.success("QR code content copied to clipboard!");
     } catch (err) {
-      toast.error("Failed to copy to clipboard")
+      // Fallback for older browsers
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = qrText;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        toast.success("QR code content copied to clipboard!");
+      } catch (fallbackErr) {
+        toast.error("Failed to copy to clipboard");
+      }
     }
-  }
+  }, [qrText]);
 
-  const shareViaWebAPI = async () => {
-    if (typeof navigator !== 'undefined' && navigator.share) {
+  const shareViaWebAPI = useCallback(async () => {
+    if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share({
           title: "QR Code Generated",
           text: `Check out this QR code: ${qrText}`,
           url: window.location.href,
-        })
-        toast.success("Shared successfully!")
+        });
+        toast.success("Shared successfully!");
       } catch (err) {
-        toast.error("Sharing cancelled")
+        if ((err as Error).name !== "AbortError") {
+          toast.error("Sharing failed");
+        }
       }
     } else {
-      toast.error("Web Share API not supported")
+      toast.error("Web Share API not supported");
     }
-  }
+  }, [qrText]);
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full" disabled={!qrDataUrl}>
+        <Button
+          variant="outline"
+          className={`w-full ${className || ""}`}
+          disabled={!qrDataUrl || !qrText.trim()}
+        >
           <Share2 className="h-4 w-4 mr-2" />
           Share QR Code
         </Button>
@@ -74,23 +96,43 @@ export function ShareOptions({ qrDataUrl, qrText }: ShareOptionsProps) {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3">
-          <Button onClick={shareToEmail} variant="outline" className="justify-start">
+          <Button
+            onClick={shareToEmail}
+            variant="outline"
+            className="justify-start"
+            disabled={!qrText.trim()}
+          >
             <Mail className="h-4 w-4 mr-2" />
             Share via Email
           </Button>
-          
-          <Button onClick={shareToWhatsApp} variant="outline" className="justify-start">
+
+          <Button
+            onClick={shareToWhatsApp}
+            variant="outline"
+            className="justify-start"
+            disabled={!qrText.trim()}
+          >
             <MessageCircle className="h-4 w-4 mr-2" />
             Share to WhatsApp
           </Button>
-          
-          <Button onClick={copyToClipboard} variant="outline" className="justify-start">
+
+          <Button
+            onClick={copyToClipboard}
+            variant="outline"
+            className="justify-start"
+            disabled={!qrText.trim()}
+          >
             <Copy className="h-4 w-4 mr-2" />
             Copy Content
           </Button>
-          
-          {typeof navigator !== 'undefined' && 'share' in navigator && (
-            <Button onClick={shareViaWebAPI} variant="outline" className="justify-start">
+
+          {typeof navigator !== "undefined" && "share" in navigator && (
+            <Button
+              onClick={shareViaWebAPI}
+              variant="outline"
+              className="justify-start"
+              disabled={!qrText.trim()}
+            >
               <ExternalLink className="h-4 w-4 mr-2" />
               Share via System
             </Button>
@@ -98,5 +140,5 @@ export function ShareOptions({ qrDataUrl, qrText }: ShareOptionsProps) {
         </div>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+});

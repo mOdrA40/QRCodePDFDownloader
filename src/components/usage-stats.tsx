@@ -1,80 +1,46 @@
-"use client"
+"use client";
 
-import React, { useEffect, useState, useCallback } from "react"
-import { BarChart3, TrendingUp, Clock, Zap } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import React, { memo } from "react";
+import { BarChart3, TrendingUp, Clock, Zap } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useUsageStats } from "@/hooks";
 
-interface UsageStats {
-  totalGenerated: number
-  todayGenerated: number
-  favoriteFormat: string
-  averageSize: number
-  lastUsed: string
+interface UsageStatsProps {
+  className?: string;
 }
 
-export function UsageStats() {
-  const [stats, setStats] = useState<UsageStats>({
-    totalGenerated: 0,
-    todayGenerated: 0,
-    favoriteFormat: "PNG",
-    averageSize: 512,
-    lastUsed: "Never"
-  })
+export const UsageStats = memo(function UsageStats({ className }: UsageStatsProps) {
+  const { stats, isLoading, error } = useUsageStats();
 
-  useEffect(() => {
-    // Load stats from localStorage
-    const storedStats = localStorage.getItem('qr-usage-stats')
-    if (storedStats) {
-      const parsedStats = JSON.parse(storedStats)
-      setStats(parsedStats)
-    }
-  }, [])
-
-  const updateStats = useCallback((format: string, size: number) => {
-    const today = new Date().toDateString()
-    const now = new Date().toLocaleString()
-
-    setStats(prevStats => {
-      const newStats = {
-        ...prevStats,
-        totalGenerated: prevStats.totalGenerated + 1,
-        todayGenerated: prevStats.lastUsed.includes(today)
-          ? prevStats.todayGenerated + 1
-          : 1,
-        favoriteFormat: format,
-        averageSize: Math.round((prevStats.averageSize + size) / 2),
-        lastUsed: now
-      }
-
-      localStorage.setItem('qr-usage-stats', JSON.stringify(newStats))
-      return newStats
-    })
-  }, [])
-
-  // Expose updateStats function through a global reference
-  React.useEffect(() => {
-    // @ts-ignore - Global reference for parent components
-    window.updateUsageStats = updateStats
-    return () => {
-      // @ts-ignore
-      window.updateUsageStats = undefined
-    }
-  }, [updateStats])
-
-  const formatNumber = (num: number) => {
+  const formatNumber = (num: number): string => {
     if (num >= 1000) {
-      return `${(num / 1000).toFixed(1)}k`
+      return `${(num / 1000).toFixed(1)}k`;
     }
-    return num.toString()
+    return num.toString();
+  };
+
+  if (error) {
+    return (
+      <Card className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}>
+        <CardContent className="p-6">
+          <div className="text-center text-red-500">
+            <p className="text-sm">Failed to load usage statistics</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
-    <Card className="shadow-xl bg-card/80 backdrop-blur border-border">
+    <Card className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}>
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2">
           <BarChart3 className="h-5 w-5 text-emerald-600" />
           Usage Statistics
+          {isLoading && (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-emerald-600" />
+          )}
         </CardTitle>
         <CardDescription>
           Track your QR code generation activity
@@ -107,7 +73,7 @@ export function UsageStats() {
               <span className="text-sm font-medium">Favorite Format</span>
             </div>
             <Badge variant="secondary" className="font-semibold">
-              {stats.favoriteFormat}
+              {stats.favoriteFormat.toUpperCase()}
             </Badge>
           </div>
 
@@ -129,5 +95,5 @@ export function UsageStats() {
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+});

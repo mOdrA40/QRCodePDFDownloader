@@ -11,14 +11,15 @@ import {
   LocationModal,
   EventModal,
   WebsiteModal,
-  VCardModal
+  VCardModal,
+  SMSModal
 } from "./quick-action-modals"
 
 interface QuickActionsProps {
   onQuickAction: (text: string) => void
 }
 
-type ModalType = "wifi" | "phone" | "email" | "location" | "event" | "website" | "vcard" | null
+type ModalType = "wifi" | "phone" | "email" | "location" | "event" | "website" | "vcard" | "sms" | null
 
 export function QuickActions({ onQuickAction }: QuickActionsProps) {
   const [activeModal, setActiveModal] = useState<ModalType>(null)
@@ -37,6 +38,13 @@ export function QuickActions({ onQuickAction }: QuickActionsProps) {
       modalType: "phone" as const,
       color: "text-green-600 dark:text-green-400",
       bgColor: "bg-green-100 dark:bg-green-900"
+    },
+    {
+      icon: Mail,
+      label: "SMS",
+      modalType: "sms" as const,
+      color: "text-emerald-600 dark:text-emerald-400",
+      bgColor: "bg-emerald-100 dark:bg-emerald-900"
     },
     {
       icon: Mail,
@@ -143,6 +151,11 @@ export function QuickActions({ onQuickAction }: QuickActionsProps) {
       />
       <VCardModal
         open={activeModal === "vcard"}
+        onOpenChange={handleModalClose}
+        onGenerate={onQuickAction}
+      />
+      <SMSModal
+        open={activeModal === "sms"}
         onOpenChange={handleModalClose}
         onGenerate={onQuickAction}
       />

@@ -2,17 +2,18 @@
 
 import type React from "react"
 import { useState } from "react"
-import { 
-  Wifi, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Calendar, 
-  Link2, 
+import {
+  Wifi,
+  Phone,
+  Mail,
+  MapPin,
+  Calendar,
+  Link2,
   CreditCard,
   Loader2,
   Check,
-  AlertCircle
+  AlertCircle,
+  AlertTriangle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -28,6 +29,8 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
+import { qrFormatService } from "@/services/qr-format-service"
+import { securityService } from "@/services/security-service"
 
 interface BaseModalProps {
   open: boolean
@@ -58,22 +61,62 @@ export function WiFiModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
 
     try {
       const wifiString = `WIFI:T:${security};S:${ssid};P:${password};H:${hidden};;`
-      onGenerate(wifiString)
-      toast.success("WiFi QR code generated!", {
-        description: `Network: ${ssid} (${security} security)`,
-        icon: <Check className="h-4 w-4" />,
-        duration: 3000
-      })
-      onOpenChange(false)
+
+      // Security validation first
+      const securityValidation = securityService.validateInput(wifiString, 'wifi');
+      if (!securityValidation.isValid) {
+        setErrors({ ssid: `Security Error: ${securityValidation.errors.join(', ')}` });
+        setLoading(false);
+        return;
+      }
+
+      // Show security warnings if any
+      if (securityValidation.warnings.length > 0 && securityValidation.riskLevel !== 'low') {
+        toast.warning("Security Warning", {
+          description: securityValidation.warnings[0],
+          icon: <AlertTriangle className="h-4 w-4" />,
+          duration: 5000
+        });
+      }
+
+      // Validate and optimize format for maximum compatibility
+      const validation = qrFormatService.validateAndOptimize(securityValidation.sanitizedInput || wifiString, 'wifi');
+
+      if (!validation.isValid) {
+        setErrors({ ssid: validation.errors.join(', ') });
+        setLoading(false);
+        return;
+      }
+
+      // Use optimized format
+      const finalFormat = validation.optimizedFormat || wifiString;
+      onGenerate(finalFormat);
+
+      // Show warnings if any
+      if (validation.warnings.length > 0) {
+        toast.warning("WiFi QR code generated with warnings", {
+          description: validation.warnings[0],
+          icon: <AlertTriangle className="h-4 w-4" />,
+          duration: 4000
+        });
+      } else {
+        toast.success("WiFi QR code generated!", {
+          description: `Network: ${ssid} (${security} security) - Optimized for compatibility`,
+          icon: <Check className="h-4 w-4" />,
+          duration: 3000
+        });
+      }
+
+      onOpenChange(false);
       // Reset form
-      setSsid("")
-      setPassword("")
-      setSecurity("WPA")
-      setHidden(false)
+      setSsid("");
+      setPassword("");
+      setSecurity("WPA");
+      setHidden(false);
     } catch (error) {
-      toast.error("Failed to generate WiFi QR code")
+      toast.error("Failed to generate WiFi QR code");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -290,19 +333,58 @@ export function EmailModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
       if (body) params.push(`body=${encodeURIComponent(body)}`)
       if (params.length > 0) mailtoUrl += `?${params.join('&')}`
 
-      onGenerate(mailtoUrl)
-      toast.success("Email QR code generated!", {
-        description: `To: ${email}`,
-        icon: <Check className="h-4 w-4" />
-      })
-      onOpenChange(false)
-      setEmail("")
-      setSubject("")
-      setBody("")
+      // Security validation first
+      const securityValidation = securityService.validateInput(mailtoUrl, 'email');
+      if (!securityValidation.isValid) {
+        setErrors({ email: `Security Error: ${securityValidation.errors.join(', ')}` });
+        setLoading(false);
+        return;
+      }
+
+      // Show security warnings if any
+      if (securityValidation.warnings.length > 0 && securityValidation.riskLevel !== 'low') {
+        toast.warning("Security Warning", {
+          description: securityValidation.warnings[0],
+          icon: <AlertTriangle className="h-4 w-4" />,
+          duration: 5000
+        });
+      }
+
+      // Validate and optimize format for maximum compatibility
+      const validation = qrFormatService.validateAndOptimize(securityValidation.sanitizedInput || mailtoUrl, 'email');
+
+      if (!validation.isValid) {
+        setErrors({ email: validation.errors.join(', ') });
+        setLoading(false);
+        return;
+      }
+
+      // Use optimized format
+      const finalFormat = validation.optimizedFormat || mailtoUrl;
+      onGenerate(finalFormat);
+
+      // Show warnings if any
+      if (validation.warnings.length > 0) {
+        toast.warning("Email QR code generated with warnings", {
+          description: validation.warnings[0],
+          icon: <AlertTriangle className="h-4 w-4" />,
+          duration: 4000
+        });
+      } else {
+        toast.success("Email QR code generated!", {
+          description: `To: ${email} - Optimized for compatibility`,
+          icon: <Check className="h-4 w-4" />
+        });
+      }
+
+      onOpenChange(false);
+      setEmail("");
+      setSubject("");
+      setBody("");
     } catch (error) {
-      toast.error("Failed to generate email QR code")
+      toast.error("Failed to generate email QR code");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -889,6 +971,148 @@ export function VCardModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
               placeholder="example.com"
+            />
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Generate QR Code
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// SMS Modal Component
+interface SMSModalProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onGenerate: (text: string) => void
+}
+
+export function SMSModal({ open, onOpenChange, onGenerate }: SMSModalProps) {
+  const [phone, setPhone] = useState("")
+  const [message, setMessage] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const validatePhone = (phone: string): boolean => {
+    const phoneRegex = /^[\+]?[\d\s\-\(\)]{7,}$/
+    return phoneRegex.test(phone)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setErrors({})
+
+    if (!phone.trim()) {
+      setErrors({ phone: "Phone number is required" })
+      setLoading(false)
+      return
+    }
+
+    const cleanPhone = phone.replace(/[\s\-\(\)]/g, '')
+    if (!validatePhone(cleanPhone)) {
+      setErrors({ phone: "Please enter a valid phone number" })
+      setLoading(false)
+      return
+    }
+
+    try {
+      let smsString = `sms:${cleanPhone}`
+      if (message.trim()) {
+        smsString += `?body=${encodeURIComponent(message)}`
+      }
+
+      // Validate and optimize format for maximum compatibility
+      const validation = qrFormatService.validateAndOptimize(smsString, 'sms');
+
+      if (!validation.isValid) {
+        setErrors({ phone: validation.errors.join(', ') });
+        setLoading(false);
+        return;
+      }
+
+      // Use optimized format
+      const finalFormat = validation.optimizedFormat || smsString;
+      onGenerate(finalFormat);
+
+      // Show warnings if any
+      if (validation.warnings.length > 0) {
+        toast.warning("SMS QR code generated with warnings", {
+          description: validation.warnings[0],
+          icon: <AlertTriangle className="h-4 w-4" />,
+          duration: 4000
+        });
+      } else {
+        toast.success("SMS QR code generated!", {
+          description: `To: ${phone} - Optimized for compatibility`,
+          icon: <Check className="h-4 w-4" />
+        });
+      }
+
+      onOpenChange(false);
+      setPhone("");
+      setMessage("");
+    } catch (error) {
+      toast.error("Failed to generate SMS QR code");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+              <Mail className="h-5 w-5 text-green-600 dark:text-green-400" />
+            </div>
+            SMS Message
+          </DialogTitle>
+          <DialogDescription>
+            Create a QR code for SMS message
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="sms-phone">Phone Number *</Label>
+            <Input
+              id="sms-phone"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+1 (555) 123-4567"
+              className={errors.phone ? "border-red-500" : ""}
+            />
+            {errors.phone && (
+              <p className="text-sm text-red-500 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {errors.phone}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="sms-message">Message</Label>
+            <Textarea
+              id="sms-message"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Your message here (optional)"
+              rows={3}
             />
           </div>
 

@@ -5,10 +5,11 @@
 
 "use client";
 
-import React from "react";
-import { Download, FileText, Image, Zap } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Download, FileText, Image, Zap, Palette } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ShareOptions } from "@/components/share-options";
 import { useQRContext, useSettingsContext } from "@/contexts";
 import { pdfService, fileService } from "@/services";
@@ -23,7 +24,23 @@ export function QRExport({ className }: QRExportProps) {
   const { state: settingsState } = useSettingsContext();
   const { qrDataUrl, options, isGenerating } = state;
 
-  const downloadPDF = async () => {
+  // Fix hydration mismatch by initializing state after mount
+  const [selectedTheme, setSelectedTheme] = useState<"modern" | "elegant" | "professional" | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  const themes = [
+    { value: "modern", label: "Modern", description: "Clean blue design", color: "bg-blue-500" },
+    { value: "elegant", label: "Elegant", description: "Purple gradient", color: "bg-purple-500" },
+    { value: "professional", label: "Professional", description: "Green corporate", color: "bg-green-500" }
+  ] as const;
+
+  // Initialize theme after component mounts to prevent hydration mismatch
+  useEffect(() => {
+    setSelectedTheme("modern");
+    setIsMounted(true);
+  }, []);
+
+  const downloadPDF = async (theme: "modern" | "elegant" | "professional" = "modern") => {
     if (!qrDataUrl) {
       toast.error("Please generate a QR code first");
       return;
@@ -35,14 +52,20 @@ export function QRExport({ className }: QRExportProps) {
         options.text,
         {
           title: "QR Code Document",
-          author: "QR PDF Generator",
-          subject: "Generated QR Code",
+          author: "QR PDF Generator Pro",
+          subject: "Generated QR Code with Enhanced Design",
+          theme,
           password: options.enablePdfPassword ? options.pdfPassword : undefined,
         }
       );
 
       if (!result.success) {
         toast.error(result.error || "Failed to generate PDF");
+      } else {
+        toast.success("PDF generated successfully!", {
+          description: `Theme: ${theme.charAt(0).toUpperCase() + theme.slice(1)} | Type: ${result.contentType || 'Unknown'}`,
+          duration: 4000
+        });
       }
     } catch (error) {
       toast.error("Failed to generate PDF");
@@ -76,21 +99,57 @@ export function QRExport({ className }: QRExportProps) {
           Export your QR code in different formats
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
+        {/* Theme Selection */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Palette className="h-4 w-4 text-purple-600" />
+            <label className="text-sm font-medium">PDF Theme</label>
+          </div>
+          {isMounted ? (
+            <Select
+              value={selectedTheme || "modern"}
+              onValueChange={(value: "modern" | "elegant" | "professional") => setSelectedTheme(value)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select theme" />
+              </SelectTrigger>
+              <SelectContent>
+                {themes.map((theme) => (
+                  <SelectItem key={theme.value} value={theme.value}>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full ${theme.color}`} />
+                      <div>
+                        <div className="font-medium">{theme.label}</div>
+                        <div className="text-xs text-muted-foreground">{theme.description}</div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <div className="w-full h-10 bg-muted/50 rounded-md animate-pulse" />
+          )}
+        </div>
+
+        {/* Download Options */}
         <div className="grid grid-cols-1 gap-3">
           <Button
-            onClick={downloadPDF}
-            disabled={!qrDataUrl}
+            onClick={() => downloadPDF(selectedTheme || "modern")}
+            disabled={!qrDataUrl || !isMounted}
             className="h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white cursor-pointer relative z-10"
             type="button"
           >
-            <FileText className="h-5 w-5 mr-2" />
-            Download as PDF
-            {options.enablePdfPassword && (
-              <span className="ml-2 text-xs bg-white/20 px-2 py-1 rounded">
-                🔒 Protected
-              </span>
-            )}
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              <span className="font-medium">Download Enhanced PDF</span>
+              {options.enablePdfPassword && (
+                <span className="text-xs bg-white/20 px-2 py-1 rounded">
+                  🔒 Protected
+                </span>
+              )}
+            </div>
           </Button>
 
           <Button

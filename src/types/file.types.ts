@@ -62,6 +62,7 @@ export interface PDFGenerationOptions {
   subject?: string;
   keywords?: string[];
   password?: string;
+  theme?: "modern" | "elegant" | "professional";
   permissions?: {
     printing?: boolean;
     modifying?: boolean;
@@ -86,4 +87,5 @@ export interface ExportResult {
   format: string;
   downloadUrl?: string;
   error?: string;
+  contentType?: string;
 }

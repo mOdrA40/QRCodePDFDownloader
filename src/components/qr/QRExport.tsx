@@ -143,7 +143,7 @@ export function QRExport({ className }: QRExportProps) {
           >
             <div className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              <span className="font-medium">Download Enhanced PDF</span>
+              <span className="font-medium">Download as PDF</span>
               {options.enablePdfPassword && (
                 <span className="text-xs bg-white/20 px-2 py-1 rounded">
                   🔒 Protected

@@ -47,18 +47,18 @@ interface PDFIcons {
 export class PDFService {
   private static instance: PDFService;
 
-  // PDF-compatible icons (no Unicode emojis to prevent encoding issues)
+  // PDF-compatible icons using simple ASCII characters
   private readonly icons: PDFIcons = {
-    phone: '[PHONE]',
-    mobile: '[MOBILE]',
-    email: '[EMAIL]',
-    wifi: '[WIFI]',
-    website: '[WEB]',
-    contact: '[CONTACT]',
-    calendar: '[EVENT]',
-    location: '[LOCATION]',
-    text: '[TEXT]',
-    sms: '[SMS]'
+    phone: '>>',
+    mobile: '>>',
+    email: '>>',
+    wifi: '>>',
+    website: '>>',
+    contact: '>>',
+    calendar: '>>',
+    location: '>>',
+    text: '>>',
+    sms: '>>'
   };
 
   // Modern color themes for beautiful PDFs

@@ -7,6 +7,7 @@ export { QRService, qrService } from "./qr-service";
 export { PDFService, pdfService } from "./pdf-service";
 export { FileService, fileService } from "./file-service";
 export { StorageService, storageService } from "./storage-service";
+export { geolocationService } from "./geolocation-service";
 
 // Service registry for dependency injection (if needed in the future)
 const services = new Map<string, unknown>();
@@ -30,9 +31,11 @@ import { qrService } from "./qr-service";
 import { pdfService } from "./pdf-service";
 import { fileService } from "./file-service";
 import { storageService } from "./storage-service";
+import { geolocationService } from "./geolocation-service";
 
 // Register default services
 ServiceRegistry.register("qr", qrService);
 ServiceRegistry.register("pdf", pdfService);
 ServiceRegistry.register("file", fileService);
 ServiceRegistry.register("storage", storageService);
+ServiceRegistry.register("geolocation", geolocationService);

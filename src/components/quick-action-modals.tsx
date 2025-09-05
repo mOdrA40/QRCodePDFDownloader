@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { PhoneInput, validatePhoneNumber, getCleanPhoneNumber, type PhoneValue } from "@/components/ui/phone-input"
 import { toast } from "sonner"
 import { qrFormatService } from "@/services/qr-format-service"
 import { securityService } from "@/services/security-service"
@@ -199,41 +200,36 @@ export function WiFiModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
 
 // Phone Modal Component
 export function PhoneModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
-  const [phone, setPhone] = useState("")
+  const [phone, setPhone] = useState<PhoneValue>()
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<{ phone?: string }>({})
-
-  const validatePhone = (phoneNumber: string) => {
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/
-    return phoneRegex.test(phoneNumber.replace(/[\s\-\(\)]/g, ''))
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setErrors({})
 
-    if (!phone.trim()) {
+    if (!phone) {
       setErrors({ phone: "Phone number is required" })
       setLoading(false)
       return
     }
 
-    const cleanPhone = phone.replace(/[\s\-\(\)]/g, '')
-    if (!validatePhone(cleanPhone)) {
+    if (!validatePhoneNumber(phone)) {
       setErrors({ phone: "Please enter a valid phone number" })
       setLoading(false)
       return
     }
 
     try {
+      const cleanPhone = getCleanPhoneNumber(phone)
       onGenerate(`tel:${cleanPhone}`)
       toast.success("Phone QR code generated!", {
         description: `Number: ${phone}`,
         icon: <Check className="h-4 w-4" />
       })
       onOpenChange(false)
-      setPhone("")
+      setPhone(undefined)
     } catch (error) {
       toast.error("Failed to generate phone QR code")
     } finally {
@@ -256,25 +252,17 @@ export function PhoneModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number *</Label>
-            <Input
-              id="phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+1 (555) 123-4567"
-              className={errors.phone ? "border-red-500" : ""}
-            />
-            {errors.phone && (
-              <p className="text-sm text-red-500 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {errors.phone}
-              </p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              Include country code for international numbers
-            </p>
-          </div>
+          <PhoneInput
+            id="phone"
+            label="Phone Number"
+            value={phone}
+            onChange={setPhone}
+            placeholder="Enter phone number"
+            defaultCountry="ID"
+            enableIPDetection={true}
+            required
+            error={errors.phone}
+          />
 
           <DialogFooter>
             <Button
@@ -810,7 +798,7 @@ export function WebsiteModal({ open, onOpenChange, onGenerate }: BaseModalProps)
 // vCard Modal Component
 export function VCardModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
   const [name, setName] = useState("")
-  const [phone, setPhone] = useState("")
+  const [phone, setPhone] = useState<PhoneValue>()
   const [email, setEmail] = useState("")
   const [company, setCompany] = useState("")
   const [title, setTitle] = useState("")
@@ -824,12 +812,6 @@ export function VCardModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
     return emailRegex.test(email)
   }
 
-  const validatePhone = (phone: string) => {
-    if (!phone) return true // Optional field
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/
-    return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''))
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -838,7 +820,7 @@ export function VCardModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
     const newErrors: { name?: string; email?: string; phone?: string } = {}
     if (!name.trim()) newErrors.name = "Full name is required"
     if (email && !validateEmail(email)) newErrors.email = "Please enter a valid email address"
-    if (phone && !validatePhone(phone)) newErrors.phone = "Please enter a valid phone number"
+    if (phone && !validatePhoneNumber(phone)) newErrors.phone = "Please enter a valid phone number"
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
@@ -848,7 +830,7 @@ export function VCardModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
 
     try {
       let vCard = `BEGIN:VCARD\nVERSION:3.0\nFN:${name}`
-      if (phone) vCard += `\nTEL:${phone.replace(/[\s\-\(\)]/g, '')}`
+      if (phone) vCard += `\nTEL:${getCleanPhoneNumber(phone)}`
       if (email) vCard += `\nEMAIL:${email}`
       if (company) vCard += `\nORG:${company}`
       if (title) vCard += `\nTITLE:${title}`
@@ -865,7 +847,7 @@ export function VCardModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
       })
       onOpenChange(false)
       setName("")
-      setPhone("")
+      setPhone(undefined)
       setEmail("")
       setCompany("")
       setTitle("")
@@ -909,22 +891,16 @@ export function VCardModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
-            <Input
-              id="phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+1 (555) 123-4567"
-              className={errors.phone ? "border-red-500" : ""}
-            />
-            {errors.phone && (
-              <p className="text-sm text-red-500 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {errors.phone}
-              </p>
-            )}
-          </div>
+          <PhoneInput
+            id="phone"
+            label="Phone Number"
+            value={phone}
+            onChange={setPhone}
+            placeholder="Enter phone number"
+            defaultCountry="ID"
+            enableIPDetection={true}
+            error={errors.phone}
+          />
 
           <div className="space-y-2">
             <Label htmlFor="email">Email Address</Label>
@@ -1002,35 +978,30 @@ interface SMSModalProps {
 }
 
 export function SMSModal({ open, onOpenChange, onGenerate }: SMSModalProps) {
-  const [phone, setPhone] = useState("")
+  const [phone, setPhone] = useState<PhoneValue>()
   const [message, setMessage] = useState("")
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-
-  const validatePhone = (phone: string): boolean => {
-    const phoneRegex = /^[\+]?[\d\s\-\(\)]{7,}$/
-    return phoneRegex.test(phone)
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setErrors({})
 
-    if (!phone.trim()) {
+    if (!phone) {
       setErrors({ phone: "Phone number is required" })
       setLoading(false)
       return
     }
 
-    const cleanPhone = phone.replace(/[\s\-\(\)]/g, '')
-    if (!validatePhone(cleanPhone)) {
+    if (!validatePhoneNumber(phone)) {
       setErrors({ phone: "Please enter a valid phone number" })
       setLoading(false)
       return
     }
 
     try {
+      const cleanPhone = getCleanPhoneNumber(phone)
       let smsString = `sms:${cleanPhone}`
       if (message.trim()) {
         smsString += `?body=${encodeURIComponent(message)}`
@@ -1064,7 +1035,7 @@ export function SMSModal({ open, onOpenChange, onGenerate }: SMSModalProps) {
       }
 
       onOpenChange(false);
-      setPhone("");
+      setPhone(undefined);
       setMessage("");
     } catch (error) {
       toast.error("Failed to generate SMS QR code");
@@ -1088,22 +1059,17 @@ export function SMSModal({ open, onOpenChange, onGenerate }: SMSModalProps) {
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="sms-phone">Phone Number *</Label>
-            <Input
-              id="sms-phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+1 (555) 123-4567"
-              className={errors.phone ? "border-red-500" : ""}
-            />
-            {errors.phone && (
-              <p className="text-sm text-red-500 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
-                {errors.phone}
-              </p>
-            )}
-          </div>
+          <PhoneInput
+            id="sms-phone"
+            label="Phone Number"
+            value={phone}
+            onChange={setPhone}
+            placeholder="Enter phone number"
+            defaultCountry="ID"
+            enableIPDetection={true}
+            required
+            error={errors.phone}
+          />
 
           <div className="space-y-2">
             <Label htmlFor="sms-message">Message</Label>

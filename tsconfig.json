@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
+    "target": "ES2022",
     "lib": [
       "dom",
       "dom.iterable",
@@ -18,6 +18,18 @@
     "jsx": "preserve",
     "jsxImportSource": "bippy/dist",
     "incremental": true,
+
+    // Enhanced type checking for Next.js 15.5
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+
+    // Better module resolution
+    "allowImportingTsExtensions": false,
+    "verbatimModuleSyntax": false,
+
     "plugins": [
       {
         "name": "next"

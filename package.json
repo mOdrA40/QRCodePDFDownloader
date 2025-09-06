@@ -5,10 +5,13 @@
   "scripts": {
     "dev": "next dev -H 0.0.0.0 --turbopack",
     "build": "next build",
+    "build:turbo": "next build --turbopack",
     "start": "next start",
     "lint": "bunx biome lint --write && bunx tsc --noEmit",
     "typecheck": "bunx tsc --noEmit",
-    "format": "bunx biome format --write"
+    "format": "bunx biome format --write",
+    "check": "bunx biome check --write",
+    "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",
@@ -29,14 +32,14 @@
     "jspdf": "^3.0.1",
     "libphonenumber-js": "^1.12.15",
     "lucide-react": "^0.525.0",
-    "next": "^15.3.2",
+    "next": "15.5",
     "next-themes": "^0.4.6",
     "qrcode": "^1.5.4",
     "qrcode-generator": "^2.0.4",
     "qrcode-svg": "^1.1.0",
     "qrcode.react": "^4.2.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
     "react-phone-number-input": "^3.4.12",
     "sharp": "^0.34.3",
     "sonner": "^2.0.5",
@@ -44,13 +47,13 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
+    "@biomejs/biome": "^2.2.3",
     "@types/node": "^20.17.50",
-    "@types/react": "^18.3.22",
-    "@types/react-dom": "^18.3.7",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
     "bippy": "^0.3.16",
     "postcss": "^8.5.3",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   }
 }

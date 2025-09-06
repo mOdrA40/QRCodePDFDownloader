@@ -5,11 +5,8 @@
 
 "use client";
 
-import React from "react";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -17,8 +14,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { useQRContext } from "@/contexts";
 import type { QRErrorCorrectionLevel } from "@/types";
+import React from "react";
 
 export function QRTechnicalSettings() {
   const { state, updateOption } = useQRContext();
@@ -29,10 +29,10 @@ export function QRTechnicalSettings() {
   };
 
   const getSizeLabel = (size: number): string => {
-    if (size <= 416) return 'Small';
-    if (size <= 600) return 'Medium';
-    if (size <= 800) return 'Large';
-    return 'Extra Large';
+    if (size <= 416) return "Small";
+    if (size <= 600) return "Medium";
+    if (size <= 800) return "Large";
+    return "Extra Large";
   };
 
   return (
@@ -67,7 +67,9 @@ export function QRTechnicalSettings() {
             variant="outline"
             size="sm"
             onClick={() => handleSizePresetClick(256)}
-            className={options.size === 256 ? "bg-primary text-primary-foreground" : ""}
+            className={
+              options.size === 256 ? "bg-primary text-primary-foreground" : ""
+            }
           >
             Small
           </Button>
@@ -76,7 +78,9 @@ export function QRTechnicalSettings() {
             variant="outline"
             size="sm"
             onClick={() => handleSizePresetClick(512)}
-            className={options.size === 512 ? "bg-primary text-primary-foreground" : ""}
+            className={
+              options.size === 512 ? "bg-primary text-primary-foreground" : ""
+            }
           >
             Medium
           </Button>
@@ -85,7 +89,9 @@ export function QRTechnicalSettings() {
             variant="outline"
             size="sm"
             onClick={() => handleSizePresetClick(768)}
-            className={options.size === 768 ? "bg-primary text-primary-foreground" : ""}
+            className={
+              options.size === 768 ? "bg-primary text-primary-foreground" : ""
+            }
           >
             Large
           </Button>
@@ -94,7 +100,9 @@ export function QRTechnicalSettings() {
             variant="outline"
             size="sm"
             onClick={() => handleSizePresetClick(1024)}
-            className={options.size === 1024 ? "bg-primary text-primary-foreground" : ""}
+            className={
+              options.size === 1024 ? "bg-primary text-primary-foreground" : ""
+            }
           >
             XL
           </Button>
@@ -116,10 +124,7 @@ export function QRTechnicalSettings() {
       </div>
 
       <div>
-        <Label
-          htmlFor="error-correction"
-          className="text-sm font-medium"
-        >
+        <Label htmlFor="error-correction" className="text-sm font-medium">
           Error Correction Level
         </Label>
         <Select

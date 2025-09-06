@@ -50,7 +50,7 @@ export function useIsClient() {
  */
 export function useBrowserAPI<T>(
   getAPI: () => T,
-  fallback: T | null = null
+  fallback: T | null = null,
 ): T | null {
   const [api, setApi] = useState<T | null>(fallback);
   const isClient = useIsClient();

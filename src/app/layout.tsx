@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import ClientBody from "./ClientBody";
-import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
+import ClientBody from "./ClientBody";
 
 export const metadata: Metadata = {
   title: "QR PDF Generator - Professional QR Code & PDF Creator",

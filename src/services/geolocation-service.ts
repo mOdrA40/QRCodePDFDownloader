@@ -3,25 +3,25 @@
  * Detects user's country based on IP address for better UX
  */
 
-import type { Country } from "react-phone-number-input"
+import type { Country } from "react-phone-number-input";
 
 interface GeolocationResponse {
-  country_code?: string
-  country?: string
-  error?: string
+  country_code?: string;
+  country?: string;
+  error?: string;
 }
 
 interface CountryDetectionResult {
-  country: Country
-  detected: boolean
-  source: 'ip' | 'fallback'
+  country: Country;
+  detected: boolean;
+  source: "ip" | "fallback";
 }
 
 class GeolocationService {
-  private readonly fallbackCountry: Country = "ID" // Indonesia as fallback
-  private readonly timeout = 5000 // 5 seconds timeout
-  private cachedCountry: Country | null = null
-  private detectionAttempted = false
+  private readonly fallbackCountry: Country = "ID"; // Indonesia as fallback
+  private readonly timeout = 5000; // 5 seconds timeout
+  private cachedCountry: Country | null = null;
+  private detectionAttempted = false;
 
   /**
    * Detects user's country based on IP address
@@ -33,52 +33,52 @@ class GeolocationService {
       return {
         country: this.cachedCountry,
         detected: this.cachedCountry !== this.fallbackCountry,
-        source: this.cachedCountry !== this.fallbackCountry ? 'ip' : 'fallback'
-      }
+        source: this.cachedCountry !== this.fallbackCountry ? "ip" : "fallback",
+      };
     }
 
-    this.detectionAttempted = true
+    this.detectionAttempted = true;
 
     try {
       // Try multiple services for better reliability
       const services = [
-        'https://ipapi.co/json/',
-        'https://ip-api.com/json/',
-        'https://ipinfo.io/json'
-      ]
+        "https://ipapi.co/json/",
+        "https://ip-api.com/json/",
+        "https://ipinfo.io/json",
+      ];
 
       for (const serviceUrl of services) {
         try {
-          const country = await this.tryService(serviceUrl)
+          const country = await this.tryService(serviceUrl);
           if (country && this.isValidCountryCode(country)) {
-            this.cachedCountry = country
+            this.cachedCountry = country;
             return {
               country,
               detected: true,
-              source: 'ip'
-            }
+              source: "ip",
+            };
           }
         } catch (error) {
           // Continue to next service
-          console.warn(`Geolocation service ${serviceUrl} failed:`, error)
+          console.warn(`Geolocation service ${serviceUrl} failed:`, error);
         }
       }
 
       // All services failed, use fallback
-      this.cachedCountry = this.fallbackCountry
+      this.cachedCountry = this.fallbackCountry;
       return {
         country: this.fallbackCountry,
         detected: false,
-        source: 'fallback'
-      }
+        source: "fallback",
+      };
     } catch (error) {
-      console.warn('Country detection failed, using fallback:', error)
-      this.cachedCountry = this.fallbackCountry
+      console.warn("Country detection failed, using fallback:", error);
+      this.cachedCountry = this.fallbackCountry;
       return {
         country: this.fallbackCountry,
         detected: false,
-        source: 'fallback'
-      }
+        source: "fallback",
+      };
     }
   }
 
@@ -86,36 +86,36 @@ class GeolocationService {
    * Tries a specific geolocation service
    */
   private async tryService(url: string): Promise<Country | null> {
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), this.timeout)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
     try {
       const response = await fetch(url, {
         signal: controller.signal,
         headers: {
-          'Accept': 'application/json',
+          Accept: "application/json",
         },
-      })
+      });
 
-      clearTimeout(timeoutId)
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
+        throw new Error(`HTTP ${response.status}`);
       }
 
-      const data: GeolocationResponse = await response.json()
-      
+      const data: GeolocationResponse = await response.json();
+
       // Different services use different field names
-      const countryCode = data.country_code || data.country
-      
-      if (countryCode && typeof countryCode === 'string') {
-        return countryCode.toUpperCase() as Country
+      const countryCode = data.country_code || data.country;
+
+      if (countryCode && typeof countryCode === "string") {
+        return countryCode.toUpperCase() as Country;
       }
 
-      return null
+      return null;
     } catch (error) {
-      clearTimeout(timeoutId)
-      throw error
+      clearTimeout(timeoutId);
+      throw error;
     }
   }
 
@@ -124,32 +124,32 @@ class GeolocationService {
    */
   private isValidCountryCode(code: string): boolean {
     // Basic validation - should be 2 letter ISO code
-    return /^[A-Z]{2}$/.test(code)
+    return /^[A-Z]{2}$/.test(code);
   }
 
   /**
    * Gets the fallback country
    */
   getFallbackCountry(): Country {
-    return this.fallbackCountry
+    return this.fallbackCountry;
   }
 
   /**
    * Clears the cached country (useful for testing)
    */
   clearCache(): void {
-    this.cachedCountry = null
-    this.detectionAttempted = false
+    this.cachedCountry = null;
+    this.detectionAttempted = false;
   }
 
   /**
    * Gets cached country without making new requests
    */
   getCachedCountry(): Country | null {
-    return this.cachedCountry
+    return this.cachedCountry;
   }
 }
 
 // Export singleton instance
-export const geolocationService = new GeolocationService()
-export type { CountryDetectionResult }
+export const geolocationService = new GeolocationService();
+export type { CountryDetectionResult };

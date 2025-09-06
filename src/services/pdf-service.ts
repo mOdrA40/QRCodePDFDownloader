@@ -1,14 +1,20 @@
+import type { ExportResult, PDFGenerationOptions, QRMetadata } from "@/types";
 import jsPDF from "jspdf";
-import type {
-  PDFGenerationOptions,
-  ExportResult,
-  QRMetadata,
-} from "@/types";
+import { qrDataValidator } from "./qr-data-validator";
 import { securityService } from "./security-service";
 
 // Enhanced interfaces for better type safety and extensibility
 interface QRContentType {
-  type: 'email' | 'wifi' | 'phone' | 'url' | 'vcard' | 'event' | 'location' | 'sms' | 'text';
+  type:
+    | "email"
+    | "wifi"
+    | "phone"
+    | "url"
+    | "vcard"
+    | "event"
+    | "location"
+    | "sms"
+    | "text";
   data: Record<string, unknown>;
   displayName: string;
 }
@@ -49,44 +55,44 @@ export class PDFService {
 
   // PDF-compatible icons using simple ASCII characters
   private readonly icons: PDFIcons = {
-    phone: '>>',
-    mobile: '>>',
-    email: '>>',
-    wifi: '>>',
-    website: '>>',
-    contact: '>>',
-    calendar: '>>',
-    location: '>>',
-    text: '>>',
-    sms: '>>'
+    phone: ">>",
+    mobile: ">>",
+    email: ">>",
+    wifi: ">>",
+    website: ">>",
+    contact: ">>",
+    calendar: ">>",
+    location: ">>",
+    text: ">>",
+    sms: ">>",
   };
 
   // Modern color themes for beautiful PDFs
   private readonly themes: Record<string, PDFTheme> = {
     modern: {
-      primary: '#2563eb',
-      secondary: '#64748b',
-      accent: '#f59e0b',
-      background: '#f8fafc',
-      text: '#1e293b',
-      muted: '#64748b'
+      primary: "#2563eb",
+      secondary: "#64748b",
+      accent: "#f59e0b",
+      background: "#f8fafc",
+      text: "#1e293b",
+      muted: "#64748b",
     },
     elegant: {
-      primary: '#7c3aed',
-      secondary: '#a855f7',
-      accent: '#ec4899',
-      background: '#faf7ff',
-      text: '#374151',
-      muted: '#6b7280'
+      primary: "#7c3aed",
+      secondary: "#a855f7",
+      accent: "#ec4899",
+      background: "#faf7ff",
+      text: "#374151",
+      muted: "#6b7280",
     },
     professional: {
-      primary: '#059669',
-      secondary: '#047857',
-      accent: '#0891b2',
-      background: '#f0fdf4',
-      text: '#065f46',
-      muted: '#6b7280'
-    }
+      primary: "#059669",
+      secondary: "#047857",
+      accent: "#0891b2",
+      background: "#f0fdf4",
+      text: "#065f46",
+      muted: "#6b7280",
+    },
   };
 
   // Standard layout configuration
@@ -95,7 +101,7 @@ export class PDFService {
     headerHeight: 40,
     footerHeight: 15,
     qrSize: 100,
-    spacing: 12
+    spacing: 12,
   };
 
   public static getInstance(): PDFService {
@@ -112,7 +118,7 @@ export class PDFService {
   public async generatePDF(
     qrDataUrl: string,
     qrText: string,
-    options: PDFGenerationOptions = {}
+    options: PDFGenerationOptions = {},
   ): Promise<ExportResult> {
     const startTime = Date.now();
 
@@ -129,7 +135,9 @@ export class PDFService {
       // Security validation
       const securityValidation = securityService.validateInput(qrText);
       if (!securityValidation.isValid) {
-        throw new Error(`Security validation failed: ${securityValidation.errors.join(', ')}`);
+        throw new Error(
+          `Security validation failed: ${securityValidation.errors.join(", ")}`,
+        );
       }
 
       // Use sanitized input if available
@@ -137,19 +145,28 @@ export class PDFService {
 
       // Parse QR content to determine type and extract structured data
       const contentType = this.parseQRContent(sanitizedText);
-      const theme = this.themes[options.theme as keyof typeof this.themes] || this.themes.modern;
+      const theme =
+        this.themes[options.theme as keyof typeof this.themes] ||
+        this.themes.modern;
 
       // Validate PDF options
       this.validatePDFOptions(options);
 
       const pdf = this.createPDFDocument(options);
-      await this.addEnhancedContent(pdf, qrDataUrl, contentType, theme, options);
+      await this.addEnhancedContent(
+        pdf,
+        qrDataUrl,
+        contentType,
+        theme,
+        options,
+      );
 
       const filename = this.generateFilename(options.title, contentType.type);
       const blob = pdf.output("blob");
 
       // Security check on generated PDF size
-      if (blob.size > 50 * 1024 * 1024) { // 50MB limit
+      if (blob.size > 50 * 1024 * 1024) {
+        // 50MB limit
         throw new Error("Generated PDF exceeds maximum size limit");
       }
 
@@ -193,7 +210,8 @@ export class PDFService {
       title: options.title || "QR Code Document",
       author: options.author || "QR PDF Generator Pro",
       subject: options.subject || "Generated QR Code with Enhanced Design",
-      keywords: options.keywords?.join(", ") || "QR Code, PDF, Generator, Professional",
+      keywords:
+        options.keywords?.join(", ") || "QR Code, PDF, Generator, Professional",
       creator: "QR PDF Generator Pro v2.0",
     });
 
@@ -207,22 +225,22 @@ export class PDFService {
     const text = qrText.trim();
 
     // Email detection
-    if (text.startsWith('mailto:')) {
+    if (text.startsWith("mailto:")) {
       return this.parseEmailContent(text);
     }
 
     // WiFi detection
-    if (text.startsWith('WIFI:')) {
+    if (text.startsWith("WIFI:")) {
       return this.parseWiFiContent(text);
     }
 
     // Phone detection
-    if (text.startsWith('tel:')) {
+    if (text.startsWith("tel:")) {
       return this.parsePhoneContent(text);
     }
 
     // SMS detection
-    if (text.startsWith('sms:')) {
+    if (text.startsWith("sms:")) {
       return this.parseSMSContent(text);
     }
 
@@ -232,25 +250,25 @@ export class PDFService {
     }
 
     // vCard detection
-    if (text.startsWith('BEGIN:VCARD')) {
+    if (text.startsWith("BEGIN:VCARD")) {
       return this.parseVCardContent(text);
     }
 
     // Event detection
-    if (text.startsWith('BEGIN:VEVENT')) {
+    if (text.startsWith("BEGIN:VEVENT")) {
       return this.parseEventContent(text);
     }
 
     // Location detection
-    if (text.startsWith('geo:')) {
+    if (text.startsWith("geo:")) {
       return this.parseLocationContent(text);
     }
 
     // Default to text
     return {
-      type: 'text',
+      type: "text",
       data: { content: text },
-      displayName: 'Text Content'
+      displayName: "Text Content",
     };
   }
 
@@ -262,7 +280,7 @@ export class PDFService {
     qrDataUrl: string,
     contentType: QRContentType,
     theme: PDFTheme,
-    options: PDFGenerationOptions
+    options: PDFGenerationOptions,
   ): Promise<void> {
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
@@ -273,11 +291,25 @@ export class PDFService {
 
     // Add QR code with enhanced styling
     const qrY = layout.margins.top + layout.headerHeight + layout.spacing;
-    this.addStyledQRCode(pdf, qrDataUrl, theme, pageWidth, qrY, layout.qrSize);
+    await this.addStyledQRCode(
+      pdf,
+      qrDataUrl,
+      theme,
+      pageWidth,
+      qrY,
+      layout.qrSize,
+    );
 
     // Add content-specific information
     const contentY = qrY + layout.qrSize + layout.spacing * 2;
-    this.addContentSpecificInfo(pdf, contentType, theme, pageWidth, contentY, layout);
+    this.addContentSpecificInfo(
+      pdf,
+      contentType,
+      theme,
+      pageWidth,
+      contentY,
+      layout,
+    );
 
     // Add enhanced footer
     this.addEnhancedFooter(pdf, theme, pageWidth, pageHeight, layout);
@@ -289,13 +321,13 @@ export class PDFService {
   private parseEmailContent(text: string): QRContentType {
     const url = new URL(text);
     const email = url.pathname;
-    const subject = url.searchParams.get('subject') || '';
-    const body = url.searchParams.get('body') || '';
+    const subject = url.searchParams.get("subject") || "";
+    const body = url.searchParams.get("body") || "";
 
     return {
-      type: 'email',
+      type: "email",
       data: { email, subject, body },
-      displayName: 'Email'
+      displayName: "Email",
     };
   }
 
@@ -303,25 +335,33 @@ export class PDFService {
    * Parses WiFi content from WIFI string
    */
   private parseWiFiContent(text: string): QRContentType {
-    const parts = text.split(';');
+    const parts = text.split(";");
     const data: Record<string, string> = {};
 
     for (const part of parts) {
-      const [key, value] = part.split(':');
+      const [key, value] = part.split(":");
       if (key && value) {
         switch (key) {
-          case 'T': data.security = value; break;
-          case 'S': data.ssid = value; break;
-          case 'P': data.password = value; break;
-          case 'H': data.hidden = value === 'true' ? 'Yes' : 'No'; break;
+          case "T":
+            data.security = value;
+            break;
+          case "S":
+            data.ssid = value;
+            break;
+          case "P":
+            data.password = value;
+            break;
+          case "H":
+            data.hidden = value === "true" ? "Yes" : "No";
+            break;
         }
       }
     }
 
     return {
-      type: 'wifi',
+      type: "wifi",
       data,
-      displayName: 'WiFi Network'
+      displayName: "WiFi Network",
     };
   }
 
@@ -329,12 +369,12 @@ export class PDFService {
    * Parses phone content from tel URL
    */
   private parsePhoneContent(text: string): QRContentType {
-    const phone = text.replace('tel:', '');
+    const phone = text.replace("tel:", "");
 
     return {
-      type: 'phone',
+      type: "phone",
       data: { phone },
-      displayName: 'Phone Number'
+      displayName: "Phone Number",
     };
   }
 
@@ -345,20 +385,20 @@ export class PDFService {
     try {
       const url = new URL(text);
       const phone = url.pathname;
-      const body = url.searchParams.get('body') || '';
+      const body = url.searchParams.get("body") || "";
 
       return {
-        type: 'sms',
+        type: "sms",
         data: { phone, message: body },
-        displayName: 'SMS Message'
+        displayName: "SMS Message",
       };
     } catch {
       // Fallback for simple sms:phone format
-      const phone = text.replace('sms:', '');
+      const phone = text.replace("sms:", "");
       return {
-        type: 'sms',
-        data: { phone, message: '' },
-        displayName: 'SMS Message'
+        type: "sms",
+        data: { phone, message: "" },
+        displayName: "SMS Message",
       };
     }
   }
@@ -370,19 +410,19 @@ export class PDFService {
     try {
       const url = new URL(text);
       return {
-        type: 'url',
+        type: "url",
         data: {
           url: text,
           domain: url.hostname,
-          protocol: url.protocol
+          protocol: url.protocol,
         },
-        displayName: 'Website'
+        displayName: "Website",
       };
     } catch {
       return {
-        type: 'url',
+        type: "url",
         data: { url: text },
-        displayName: 'Website'
+        displayName: "Website",
       };
     }
   }
@@ -391,27 +431,39 @@ export class PDFService {
    * Parses vCard content
    */
   private parseVCardContent(text: string): QRContentType {
-    const lines = text.split('\n');
+    const lines = text.split("\n");
     const data: Record<string, string> = {};
 
     for (const line of lines) {
-      const [key, value] = line.split(':');
+      const [key, value] = line.split(":");
       if (key && value) {
         switch (key) {
-          case 'FN': data.name = value; break;
-          case 'TEL': data.phone = value; break;
-          case 'EMAIL': data.email = value; break;
-          case 'ORG': data.organization = value; break;
-          case 'TITLE': data.title = value; break;
-          case 'URL': data.website = value; break;
+          case "FN":
+            data.name = value;
+            break;
+          case "TEL":
+            data.phone = value;
+            break;
+          case "EMAIL":
+            data.email = value;
+            break;
+          case "ORG":
+            data.organization = value;
+            break;
+          case "TITLE":
+            data.title = value;
+            break;
+          case "URL":
+            data.website = value;
+            break;
         }
       }
     }
 
     return {
-      type: 'vcard',
+      type: "vcard",
       data,
-      displayName: 'Contact Card'
+      displayName: "Contact Card",
     };
   }
 
@@ -419,25 +471,33 @@ export class PDFService {
    * Parses event content
    */
   private parseEventContent(text: string): QRContentType {
-    const lines = text.split('\n');
+    const lines = text.split("\n");
     const data: Record<string, string> = {};
 
     for (const line of lines) {
-      const [key, value] = line.split(':');
+      const [key, value] = line.split(":");
       if (key && value) {
         switch (key) {
-          case 'SUMMARY': data.title = value; break;
-          case 'DTSTART': data.startDate = this.formatEventDate(value); break;
-          case 'LOCATION': data.location = value; break;
-          case 'DESCRIPTION': data.description = value; break;
+          case "SUMMARY":
+            data.title = value;
+            break;
+          case "DTSTART":
+            data.startDate = this.formatEventDate(value);
+            break;
+          case "LOCATION":
+            data.location = value;
+            break;
+          case "DESCRIPTION":
+            data.description = value;
+            break;
         }
       }
     }
 
     return {
-      type: 'event',
+      type: "event",
       data,
-      displayName: 'Calendar Event'
+      displayName: "Calendar Event",
     };
   }
 
@@ -446,12 +506,12 @@ export class PDFService {
    */
   private parseLocationContent(text: string): QRContentType {
     const url = new URL(text);
-    const query = url.searchParams.get('q') || '';
+    const query = url.searchParams.get("q") || "";
 
     return {
-      type: 'location',
+      type: "location",
       data: { address: query },
-      displayName: 'Location'
+      displayName: "Location",
     };
   }
 
@@ -460,7 +520,12 @@ export class PDFService {
    */
   private formatEventDate(isoString: string): string {
     try {
-      const date = new Date(isoString.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/, '$1-$2-$3T$4:$5:$6Z'));
+      const date = new Date(
+        isoString.replace(
+          /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,
+          "$1-$2-$3T$4:$5:$6Z",
+        ),
+      );
       return date.toLocaleString();
     } catch {
       return isoString;
@@ -482,70 +547,135 @@ export class PDFService {
     contentType: QRContentType,
     theme: PDFTheme,
     pageWidth: number,
-    layout: PDFLayout
+    layout: PDFLayout,
   ): void {
     const { margins, headerHeight } = layout;
 
     // Add background gradient effect (simulated with rectangles)
     pdf.setFillColor(theme.background);
-    pdf.rect(0, 0, pageWidth, headerHeight + margins.top, 'F');
+    pdf.rect(0, 0, pageWidth, headerHeight + margins.top, "F");
 
     // Add main title
     pdf.setTextColor(theme.primary);
     pdf.setFontSize(28);
     pdf.setFont("helvetica", "bold");
-    pdf.text("QR Code Document", pageWidth / 2, margins.top + 12, { align: "center" });
+    pdf.text("QR Code Document", pageWidth / 2, margins.top + 12, {
+      align: "center",
+    });
 
     // Add content type badge
     pdf.setTextColor(theme.accent);
     pdf.setFontSize(14);
     pdf.setFont("helvetica", "normal");
-    pdf.text(`${contentType.displayName}`, pageWidth / 2, margins.top + 22, { align: "center" });
+    pdf.text(`${contentType.displayName}`, pageWidth / 2, margins.top + 22, {
+      align: "center",
+    });
 
     // Add date
     pdf.setTextColor(theme.muted);
     pdf.setFontSize(10);
-    const currentDate = new Date().toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    const currentDate = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
-    pdf.text(`Generated on ${currentDate}`, pageWidth / 2, margins.top + 32, { align: "center" });
+    pdf.text(`Generated on ${currentDate}`, pageWidth / 2, margins.top + 32, {
+      align: "center",
+    });
   }
 
   /**
-   * Adds styled QR code with border and shadow effect
+   * Adds styled QR code with enhanced validation and error handling
    */
-  private addStyledQRCode(
+  private async addStyledQRCode(
     pdf: jsPDF,
     qrDataUrl: string,
     theme: PDFTheme,
     pageWidth: number,
     y: number,
-    size: number
-  ): void {
+    size: number,
+  ): Promise<void> {
     const x = (pageWidth - size) / 2;
 
-    // Add shadow effect
-    pdf.setFillColor('#00000020');
-    pdf.rect(x + 2, y + 2, size, size, 'F');
+    try {
+      // Validate and convert QR data for PDF compatibility
+      const conversionResult = await qrDataValidator.convertForPDF(qrDataUrl, {
+        targetFormat: "png",
+        fallbackToSVG: true,
+        maxSize: 10 * 1024 * 1024, // 10MB limit
+      });
 
+      if (!conversionResult.success) {
+        console.warn("QR data conversion failed:", conversionResult.error);
+        this.addErrorPlaceholder(pdf, x, y, size, theme);
+        return;
+      }
+
+      // Add shadow effect
+      pdf.setFillColor("#00000020");
+      pdf.rect(x + 2, y + 2, size, size, "F");
+
+      // Add border
+      pdf.setDrawColor(theme.secondary);
+      pdf.setLineWidth(0.5);
+      pdf.rect(x - 2, y - 2, size + 4, size + 4, "S");
+
+      // Add QR code with validated data
+      const imageFormat = this.getImageFormat(conversionResult.dataUrl);
+
+      try {
+        pdf.addImage(conversionResult.dataUrl, imageFormat, x, y, size, size);
+      } catch (imageError) {
+        console.error("Failed to add image to PDF:", imageError);
+        this.addErrorPlaceholder(pdf, x, y, size, theme);
+      }
+    } catch (error) {
+      console.error("QR code processing failed:", error);
+      this.addErrorPlaceholder(pdf, x, y, size, theme);
+    }
+  }
+
+  /**
+   * Adds error placeholder when QR code cannot be processed
+   */
+  private addErrorPlaceholder(
+    pdf: jsPDF,
+    x: number,
+    y: number,
+    size: number,
+    theme: PDFTheme,
+  ): void {
     // Add border
     pdf.setDrawColor(theme.secondary);
     pdf.setLineWidth(0.5);
-    pdf.rect(x - 2, y - 2, size + 4, size + 4, 'S');
+    pdf.rect(x, y, size, size, "S");
 
-    // Add QR code
-    const imageFormat = this.getImageFormat(qrDataUrl);
-    pdf.addImage(qrDataUrl, imageFormat, x, y, size, size);
+    // Add error background
+    pdf.setFillColor("#f8f9fa");
+    pdf.rect(x, y, size, size, "F");
+
+    // Add error text
+    pdf.setTextColor("#6c757d");
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "normal");
+
+    const centerX = x + size / 2;
+    const centerY = y + size / 2;
+
+    pdf.text("QR Code", centerX, centerY - 10, { align: "center" });
+    pdf.text("Generation Error", centerX, centerY, { align: "center" });
+    pdf.text("Please regenerate", centerX, centerY + 10, { align: "center" });
   }
 
   /**
    * Generates enhanced filename with content type
    */
   private generateFilename(title?: string, contentType?: string): string {
-    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, "-");
-    const typePrefix = contentType ? `${contentType}-` : '';
+    const timestamp = new Date()
+      .toISOString()
+      .slice(0, 19)
+      .replace(/[:.]/g, "-");
+    const typePrefix = contentType ? `${contentType}-` : "";
     const baseName = title ? this.sanitizeFilename(title) : "qr-code";
     return `${typePrefix}${baseName}-${timestamp}.pdf`;
   }
@@ -559,7 +689,7 @@ export class PDFService {
     theme: PDFTheme,
     pageWidth: number,
     startY: number,
-    layout: PDFLayout
+    layout: PDFLayout,
   ): void {
     let currentY = startY;
     const { margins } = layout;
@@ -574,32 +704,95 @@ export class PDFService {
 
     // Add content based on type
     switch (contentType.type) {
-      case 'email':
-        this.addEmailInfo(pdf, contentType.data, theme, margins.left, currentY, contentWidth);
+      case "email":
+        this.addEmailInfo(
+          pdf,
+          contentType.data,
+          theme,
+          margins.left,
+          currentY,
+          contentWidth,
+        );
         break;
-      case 'wifi':
-        this.addWiFiInfo(pdf, contentType.data, theme, margins.left, currentY, contentWidth);
+      case "wifi":
+        this.addWiFiInfo(
+          pdf,
+          contentType.data,
+          theme,
+          margins.left,
+          currentY,
+          contentWidth,
+        );
         break;
-      case 'phone':
-        this.addPhoneInfo(pdf, contentType.data, theme, margins.left, currentY, contentWidth);
+      case "phone":
+        this.addPhoneInfo(
+          pdf,
+          contentType.data,
+          theme,
+          margins.left,
+          currentY,
+          contentWidth,
+        );
         break;
-      case 'sms':
-        this.addSMSInfo(pdf, contentType.data, theme, margins.left, currentY, contentWidth);
+      case "sms":
+        this.addSMSInfo(
+          pdf,
+          contentType.data,
+          theme,
+          margins.left,
+          currentY,
+          contentWidth,
+        );
         break;
-      case 'url':
-        this.addUrlInfo(pdf, contentType.data, theme, margins.left, currentY, contentWidth);
+      case "url":
+        this.addUrlInfo(
+          pdf,
+          contentType.data,
+          theme,
+          margins.left,
+          currentY,
+          contentWidth,
+        );
         break;
-      case 'vcard':
-        this.addVCardInfo(pdf, contentType.data, theme, margins.left, currentY, contentWidth);
+      case "vcard":
+        this.addVCardInfo(
+          pdf,
+          contentType.data,
+          theme,
+          margins.left,
+          currentY,
+          contentWidth,
+        );
         break;
-      case 'event':
-        this.addEventInfo(pdf, contentType.data, theme, margins.left, currentY, contentWidth);
+      case "event":
+        this.addEventInfo(
+          pdf,
+          contentType.data,
+          theme,
+          margins.left,
+          currentY,
+          contentWidth,
+        );
         break;
-      case 'location':
-        this.addLocationInfo(pdf, contentType.data, theme, margins.left, currentY, contentWidth);
+      case "location":
+        this.addLocationInfo(
+          pdf,
+          contentType.data,
+          theme,
+          margins.left,
+          currentY,
+          contentWidth,
+        );
         break;
       default:
-        this.addTextInfo(pdf, contentType.data, theme, margins.left, currentY, contentWidth);
+        this.addTextInfo(
+          pdf,
+          contentType.data,
+          theme,
+          margins.left,
+          currentY,
+          contentWidth,
+        );
     }
   }
 
@@ -612,23 +805,54 @@ export class PDFService {
     theme: PDFTheme,
     x: number,
     y: number,
-    width: number
+    width: number,
   ): void {
     let currentY = y;
 
     // Add section header with email icon
-    currentY = this.addSectionHeader(pdf, this.icons.email, "Email Composition", theme, x, currentY);
+    currentY = this.addSectionHeader(
+      pdf,
+      this.icons.email,
+      "Email Composition",
+      theme,
+      x,
+      currentY,
+    );
 
-    this.addInfoField(pdf, "Email Address:", String(data.email || ''), theme, x, currentY, width);
+    this.addInfoField(
+      pdf,
+      "Email Address:",
+      String(data.email || ""),
+      theme,
+      x,
+      currentY,
+      width,
+    );
     currentY += 8;
 
     if (data.subject) {
-      this.addInfoField(pdf, "Subject:", String(data.subject), theme, x, currentY, width);
+      this.addInfoField(
+        pdf,
+        "Subject:",
+        String(data.subject),
+        theme,
+        x,
+        currentY,
+        width,
+      );
       currentY += 8;
     }
 
     if (data.body) {
-      this.addInfoField(pdf, "Message:", String(data.body), theme, x, currentY, width);
+      this.addInfoField(
+        pdf,
+        "Message:",
+        String(data.body),
+        theme,
+        x,
+        currentY,
+        width,
+      );
       currentY += 8;
     }
 
@@ -638,7 +862,7 @@ export class PDFService {
       "Scan this QR code to open email app with pre-filled content",
       theme,
       x,
-      currentY + 4
+      currentY + 4,
     );
   }
 
@@ -662,24 +886,63 @@ export class PDFService {
     theme: PDFTheme,
     x: number,
     y: number,
-    width: number
+    width: number,
   ): void {
     let currentY = y;
 
     // Add section header with WiFi icon
-    currentY = this.addSectionHeader(pdf, this.icons.wifi, "WiFi Network Configuration", theme, x, currentY);
+    currentY = this.addSectionHeader(
+      pdf,
+      this.icons.wifi,
+      "WiFi Network Configuration",
+      theme,
+      x,
+      currentY,
+    );
 
-    this.addInfoField(pdf, "Network Name (SSID):", String(data.ssid || ''), theme, x, currentY, width);
+    this.addInfoField(
+      pdf,
+      "Network Name (SSID):",
+      String(data.ssid || ""),
+      theme,
+      x,
+      currentY,
+      width,
+    );
     currentY += 8;
-    this.addInfoField(pdf, "Security Type:", String(data.security || ''), theme, x, currentY, width);
+    this.addInfoField(
+      pdf,
+      "Security Type:",
+      String(data.security || ""),
+      theme,
+      x,
+      currentY,
+      width,
+    );
     currentY += 8;
 
     if (data.password) {
-      this.addInfoField(pdf, "Password:", String(data.password), theme, x, currentY, width);
+      this.addInfoField(
+        pdf,
+        "Password:",
+        String(data.password),
+        theme,
+        x,
+        currentY,
+        width,
+      );
       currentY += 8;
     }
 
-    this.addInfoField(pdf, "Hidden Network:", String(data.hidden || 'No'), theme, x, currentY, width);
+    this.addInfoField(
+      pdf,
+      "Hidden Network:",
+      String(data.hidden || "No"),
+      theme,
+      x,
+      currentY,
+      width,
+    );
     currentY += 12;
 
     // Add instructions with mobile icon
@@ -688,7 +951,7 @@ export class PDFService {
       "Scan this QR code to automatically connect to the WiFi network",
       theme,
       x,
-      currentY
+      currentY,
     );
   }
 
@@ -701,14 +964,29 @@ export class PDFService {
     theme: PDFTheme,
     x: number,
     y: number,
-    width: number
+    width: number,
   ): void {
     let currentY = y;
 
     // Add section header with phone icon
-    currentY = this.addSectionHeader(pdf, this.icons.phone, "Phone Number", theme, x, currentY);
+    currentY = this.addSectionHeader(
+      pdf,
+      this.icons.phone,
+      "Phone Number",
+      theme,
+      x,
+      currentY,
+    );
 
-    this.addInfoField(pdf, "Phone Number:", String(data.phone || ''), theme, x, currentY, width);
+    this.addInfoField(
+      pdf,
+      "Phone Number:",
+      String(data.phone || ""),
+      theme,
+      x,
+      currentY,
+      width,
+    );
     currentY += 12;
 
     // Add instructions with mobile icon
@@ -717,7 +995,7 @@ export class PDFService {
       "Scan this QR code to dial the number automatically",
       theme,
       x,
-      currentY
+      currentY,
     );
   }
 
@@ -730,18 +1008,41 @@ export class PDFService {
     theme: PDFTheme,
     x: number,
     y: number,
-    width: number
+    width: number,
   ): void {
     let currentY = y;
 
     // Add section header with SMS icon
-    currentY = this.addSectionHeader(pdf, this.icons.sms, "SMS Message", theme, x, currentY);
+    currentY = this.addSectionHeader(
+      pdf,
+      this.icons.sms,
+      "SMS Message",
+      theme,
+      x,
+      currentY,
+    );
 
-    this.addInfoField(pdf, "Phone Number:", String(data.phone || ''), theme, x, currentY, width);
+    this.addInfoField(
+      pdf,
+      "Phone Number:",
+      String(data.phone || ""),
+      theme,
+      x,
+      currentY,
+      width,
+    );
     currentY += 8;
 
     if (data.message) {
-      this.addInfoField(pdf, "Message:", String(data.message), theme, x, currentY, width);
+      this.addInfoField(
+        pdf,
+        "Message:",
+        String(data.message),
+        theme,
+        x,
+        currentY,
+        width,
+      );
       currentY += 8;
     }
 
@@ -751,7 +1052,7 @@ export class PDFService {
       "Scan this QR code to open SMS app with pre-filled content",
       theme,
       x,
-      currentY + 4
+      currentY + 4,
     );
   }
 
@@ -764,23 +1065,54 @@ export class PDFService {
     theme: PDFTheme,
     x: number,
     y: number,
-    width: number
+    width: number,
   ): void {
     let currentY = y;
 
     // Add section header with website icon
-    currentY = this.addSectionHeader(pdf, this.icons.website, "Website Link", theme, x, currentY);
+    currentY = this.addSectionHeader(
+      pdf,
+      this.icons.website,
+      "Website Link",
+      theme,
+      x,
+      currentY,
+    );
 
-    this.addInfoField(pdf, "Website URL:", String(data.url || ''), theme, x, currentY, width);
+    this.addInfoField(
+      pdf,
+      "Website URL:",
+      String(data.url || ""),
+      theme,
+      x,
+      currentY,
+      width,
+    );
     currentY += 8;
 
     if (data.domain) {
-      this.addInfoField(pdf, "Domain:", String(data.domain), theme, x, currentY, width);
+      this.addInfoField(
+        pdf,
+        "Domain:",
+        String(data.domain),
+        theme,
+        x,
+        currentY,
+        width,
+      );
       currentY += 8;
     }
 
     if (data.protocol) {
-      this.addInfoField(pdf, "Protocol:", String(data.protocol), theme, x, currentY, width);
+      this.addInfoField(
+        pdf,
+        "Protocol:",
+        String(data.protocol),
+        theme,
+        x,
+        currentY,
+        width,
+      );
       currentY += 8;
     }
 
@@ -790,7 +1122,7 @@ export class PDFService {
       "Scan this QR code to open the website in your browser",
       theme,
       x,
-      currentY + 4
+      currentY + 4,
     );
   }
 
@@ -803,40 +1135,95 @@ export class PDFService {
     theme: PDFTheme,
     x: number,
     y: number,
-    width: number
+    width: number,
   ): void {
     let currentY = y;
 
     // Add section header with contact icon
-    currentY = this.addSectionHeader(pdf, this.icons.contact, "Contact Information", theme, x, currentY);
+    currentY = this.addSectionHeader(
+      pdf,
+      this.icons.contact,
+      "Contact Information",
+      theme,
+      x,
+      currentY,
+    );
 
     if (data.name) {
-      this.addInfoField(pdf, "Name:", String(data.name), theme, x, currentY, width);
+      this.addInfoField(
+        pdf,
+        "Name:",
+        String(data.name),
+        theme,
+        x,
+        currentY,
+        width,
+      );
       currentY += 8;
     }
 
     if (data.title) {
-      this.addInfoField(pdf, "Title:", String(data.title), theme, x, currentY, width);
+      this.addInfoField(
+        pdf,
+        "Title:",
+        String(data.title),
+        theme,
+        x,
+        currentY,
+        width,
+      );
       currentY += 8;
     }
 
     if (data.organization) {
-      this.addInfoField(pdf, "Organization:", String(data.organization), theme, x, currentY, width);
+      this.addInfoField(
+        pdf,
+        "Organization:",
+        String(data.organization),
+        theme,
+        x,
+        currentY,
+        width,
+      );
       currentY += 8;
     }
 
     if (data.phone) {
-      this.addInfoField(pdf, "Phone:", String(data.phone), theme, x, currentY, width);
+      this.addInfoField(
+        pdf,
+        "Phone:",
+        String(data.phone),
+        theme,
+        x,
+        currentY,
+        width,
+      );
       currentY += 8;
     }
 
     if (data.email) {
-      this.addInfoField(pdf, "Email:", String(data.email), theme, x, currentY, width);
+      this.addInfoField(
+        pdf,
+        "Email:",
+        String(data.email),
+        theme,
+        x,
+        currentY,
+        width,
+      );
       currentY += 8;
     }
 
     if (data.website) {
-      this.addInfoField(pdf, "Website:", String(data.website), theme, x, currentY, width);
+      this.addInfoField(
+        pdf,
+        "Website:",
+        String(data.website),
+        theme,
+        x,
+        currentY,
+        width,
+      );
       currentY += 8;
     }
 
@@ -846,7 +1233,7 @@ export class PDFService {
       "Scan this QR code to add contact to your phonebook",
       theme,
       x,
-      currentY + 4
+      currentY + 4,
     );
   }
 
@@ -855,11 +1242,16 @@ export class PDFService {
    */
   private sanitizeText(text: string): string {
     // Remove potentially harmful characters and limit length
-    const sanitized = text.split('').filter(char => {
-      const code = char.charCodeAt(0);
-      // Allow newline (10), tab (9), and printable characters (32-126)
-      return code === 9 || code === 10 || (code >= 32 && code <= 126) || code > 127;
-    }).join('');
+    const sanitized = text
+      .split("")
+      .filter((char) => {
+        const code = char.charCodeAt(0);
+        // Allow newline (10), tab (9), and printable characters (32-126)
+        return (
+          code === 9 || code === 10 || (code >= 32 && code <= 126) || code > 127
+        );
+      })
+      .join("");
 
     return sanitized.slice(0, 2000); // Limit to 2000 characters
   }
@@ -873,30 +1265,69 @@ export class PDFService {
     theme: PDFTheme,
     x: number,
     y: number,
-    width: number
+    width: number,
   ): void {
     let currentY = y;
 
     // Add section header with calendar icon
-    currentY = this.addSectionHeader(pdf, this.icons.calendar, "Calendar Event", theme, x, currentY);
+    currentY = this.addSectionHeader(
+      pdf,
+      this.icons.calendar,
+      "Calendar Event",
+      theme,
+      x,
+      currentY,
+    );
 
     if (data.title) {
-      this.addInfoField(pdf, "Event Title:", String(data.title), theme, x, currentY, width);
+      this.addInfoField(
+        pdf,
+        "Event Title:",
+        String(data.title),
+        theme,
+        x,
+        currentY,
+        width,
+      );
       currentY += 8;
     }
 
     if (data.startDate) {
-      this.addInfoField(pdf, "Date & Time:", String(data.startDate), theme, x, currentY, width);
+      this.addInfoField(
+        pdf,
+        "Date & Time:",
+        String(data.startDate),
+        theme,
+        x,
+        currentY,
+        width,
+      );
       currentY += 8;
     }
 
     if (data.location) {
-      this.addInfoField(pdf, "Location:", String(data.location), theme, x, currentY, width);
+      this.addInfoField(
+        pdf,
+        "Location:",
+        String(data.location),
+        theme,
+        x,
+        currentY,
+        width,
+      );
       currentY += 8;
     }
 
     if (data.description) {
-      this.addInfoField(pdf, "Description:", String(data.description), theme, x, currentY, width);
+      this.addInfoField(
+        pdf,
+        "Description:",
+        String(data.description),
+        theme,
+        x,
+        currentY,
+        width,
+      );
       currentY += 8;
     }
 
@@ -906,7 +1337,7 @@ export class PDFService {
       "Scan this QR code to add event to your calendar",
       theme,
       x,
-      currentY + 4
+      currentY + 4,
     );
   }
 
@@ -919,14 +1350,29 @@ export class PDFService {
     theme: PDFTheme,
     x: number,
     y: number,
-    width: number
+    width: number,
   ): void {
     let currentY = y;
 
     // Add section header with location icon
-    currentY = this.addSectionHeader(pdf, this.icons.location, "Location", theme, x, currentY);
+    currentY = this.addSectionHeader(
+      pdf,
+      this.icons.location,
+      "Location",
+      theme,
+      x,
+      currentY,
+    );
 
-    this.addInfoField(pdf, "Address:", String(data.address || ''), theme, x, currentY, width);
+    this.addInfoField(
+      pdf,
+      "Address:",
+      String(data.address || ""),
+      theme,
+      x,
+      currentY,
+      width,
+    );
     currentY += 12;
 
     // Add instructions with mobile icon
@@ -935,7 +1381,7 @@ export class PDFService {
       "Scan this QR code to open location in maps app",
       theme,
       x,
-      currentY
+      currentY,
     );
   }
 
@@ -948,14 +1394,29 @@ export class PDFService {
     theme: PDFTheme,
     x: number,
     y: number,
-    width: number
+    width: number,
   ): void {
     let currentY = y;
 
     // Add section header with text icon
-    currentY = this.addSectionHeader(pdf, this.icons.text, "Text Content", theme, x, currentY);
+    currentY = this.addSectionHeader(
+      pdf,
+      this.icons.text,
+      "Text Content",
+      theme,
+      x,
+      currentY,
+    );
 
-    this.addInfoField(pdf, "Content:", String(data.content || ''), theme, x, currentY, width);
+    this.addInfoField(
+      pdf,
+      "Content:",
+      String(data.content || ""),
+      theme,
+      x,
+      currentY,
+      width,
+    );
     currentY += 12;
 
     // Add instructions with mobile icon
@@ -964,7 +1425,7 @@ export class PDFService {
       "Scan this QR code to view the text content",
       theme,
       x,
-      currentY
+      currentY,
     );
   }
 
@@ -977,7 +1438,7 @@ export class PDFService {
     title: string,
     theme: PDFTheme,
     x: number,
-    y: number
+    y: number,
   ): number {
     // Add icon with special styling
     pdf.setTextColor(theme.accent);
@@ -1000,7 +1461,7 @@ export class PDFService {
     instruction: string,
     theme: PDFTheme,
     x: number,
-    y: number
+    y: number,
   ): void {
     pdf.setTextColor(theme.muted);
     pdf.setFontSize(9);
@@ -1021,7 +1482,7 @@ export class PDFService {
     theme: PDFTheme,
     x: number,
     y: number,
-    width: number
+    width: number,
   ): void {
     // Add label
     pdf.setTextColor(theme.secondary);
@@ -1045,14 +1506,19 @@ export class PDFService {
     theme: PDFTheme,
     pageWidth: number,
     pageHeight: number,
-    layout: PDFLayout
+    layout: PDFLayout,
   ): void {
     const footerY = pageHeight - layout.margins.bottom;
 
     // Add separator line
     pdf.setDrawColor(theme.secondary);
     pdf.setLineWidth(0.3);
-    pdf.line(layout.margins.left, footerY - 8, pageWidth - layout.margins.right, footerY - 8);
+    pdf.line(
+      layout.margins.left,
+      footerY - 8,
+      pageWidth - layout.margins.right,
+      footerY - 8,
+    );
 
     // Add footer text
     pdf.setTextColor(theme.muted);
@@ -1062,7 +1528,7 @@ export class PDFService {
       "Generated by QR PDF Generator Pro - Professional QR Code Solutions",
       pageWidth / 2,
       footerY,
-      { align: "center" }
+      { align: "center" },
     );
   }
 
@@ -1072,19 +1538,28 @@ export class PDFService {
   private validatePDFOptions(options: PDFGenerationOptions): void {
     // Validate theme
     if (options.theme && !Object.keys(this.themes).includes(options.theme)) {
-      throw new Error(`Invalid theme: ${options.theme}. Available themes: ${Object.keys(this.themes).join(', ')}`);
+      throw new Error(
+        `Invalid theme: ${options.theme}. Available themes: ${Object.keys(this.themes).join(", ")}`,
+      );
     }
 
     // Validate page size
-    const validPageSizes = ['a4', 'letter', 'legal'];
+    const validPageSizes = ["a4", "letter", "legal"];
     if (options.pageSize && !validPageSizes.includes(options.pageSize)) {
-      throw new Error(`Invalid page size: ${options.pageSize}. Valid sizes: ${validPageSizes.join(', ')}`);
+      throw new Error(
+        `Invalid page size: ${options.pageSize}. Valid sizes: ${validPageSizes.join(", ")}`,
+      );
     }
 
     // Validate orientation
-    const validOrientations = ['portrait', 'landscape'];
-    if (options.orientation && !validOrientations.includes(options.orientation)) {
-      throw new Error(`Invalid orientation: ${options.orientation}. Valid orientations: ${validOrientations.join(', ')}`);
+    const validOrientations = ["portrait", "landscape"];
+    if (
+      options.orientation &&
+      !validOrientations.includes(options.orientation)
+    ) {
+      throw new Error(
+        `Invalid orientation: ${options.orientation}. Valid orientations: ${validOrientations.join(", ")}`,
+      );
     }
   }
 
@@ -1100,7 +1575,10 @@ export class PDFService {
   /**
    * Validates PDF generation options
    */
-  public validateOptions(options: PDFGenerationOptions): { isValid: boolean; errors: string[] } {
+  public validateOptions(options: PDFGenerationOptions): {
+    isValid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     if (options.title && options.title.length > 100) {

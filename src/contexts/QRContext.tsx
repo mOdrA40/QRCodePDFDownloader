@@ -5,17 +5,23 @@
 
 "use client";
 
-import type React from "react";
-import { createContext, useContext, useReducer, useCallback, useEffect } from "react";
-import { toast } from "sonner";
 import { qrService, storageService } from "@/services";
 import type {
+  ComponentState,
+  QRGenerationResult,
   QROptions,
   QRPreset,
-  QRGenerationResult,
   QRValidationResult,
-  ComponentState,
 } from "@/types";
+import type React from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useReducer,
+} from "react";
+import { toast } from "sonner";
 
 // Action types
 type QRAction =
@@ -42,14 +48,17 @@ interface QRState {
 interface QRContextType {
   // State
   state: QRState;
-  
+
   // Actions
   setOptions: (options: QROptions) => void;
-  updateOption: <K extends keyof QROptions>(key: K, value: QROptions[K]) => void;
+  updateOption: <K extends keyof QROptions>(
+    key: K,
+    value: QROptions[K],
+  ) => void;
   generateQRCode: () => Promise<void>;
   validateInput: (text: string) => QRValidationResult;
   resetQR: () => void;
-  
+
   // Presets
   savePreset: (name: string) => Promise<boolean>;
   loadPreset: (preset: QRPreset) => void;
@@ -88,31 +97,34 @@ function qrReducer(state: QRState, action: QRAction): QRState {
   switch (action.type) {
     case "SET_OPTIONS":
       return { ...state, options: action.payload };
-    
+
     case "UPDATE_OPTION":
       return {
         ...state,
-        options: { ...state.options, [action.payload.key]: action.payload.value },
+        options: {
+          ...state.options,
+          [action.payload.key]: action.payload.value,
+        },
       };
-    
+
     case "SET_QR_DATA":
       return { ...state, qrDataUrl: action.payload };
-    
+
     case "SET_GENERATING":
       return { ...state, isGenerating: action.payload };
-    
+
     case "SET_PROGRESS":
       return { ...state, progress: action.payload };
-    
+
     case "SET_STATE":
       return { ...state, state: action.payload };
-    
+
     case "SET_VALIDATION":
       return { ...state, validation: action.payload };
-    
+
     case "RESET":
       return initialState;
-    
+
     default:
       return state;
   }
@@ -135,21 +147,24 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
   /**
    * Updates a specific QR option
    */
-  const updateOption = useCallback(<K extends keyof QROptions>(
-    key: K,
-    value: QROptions[K]
-  ) => {
-    dispatch({ type: "UPDATE_OPTION", payload: { key, value } });
-  }, []);
+  const updateOption = useCallback(
+    <K extends keyof QROptions>(key: K, value: QROptions[K]) => {
+      dispatch({ type: "UPDATE_OPTION", payload: { key, value } });
+    },
+    [],
+  );
 
   /**
    * Validates QR input
    */
-  const validateInput = useCallback((text: string): QRValidationResult => {
-    const result = qrService.validateQRInput(text, state.options);
-    dispatch({ type: "SET_VALIDATION", payload: result });
-    return result;
-  }, [state.options]);
+  const validateInput = useCallback(
+    (text: string): QRValidationResult => {
+      const result = qrService.validateQRInput(text, state.options);
+      dispatch({ type: "SET_VALIDATION", payload: result });
+      return result;
+    },
+    [state.options],
+  );
 
   /**
    * Generates QR code
@@ -180,27 +195,30 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
       }, 100);
 
       // Generate QR code
-      const result: QRGenerationResult = await qrService.generateQRCode(state.options.text, {
-        size: state.options.size,
-        margin: state.options.margin,
-        errorCorrectionLevel: state.options.errorCorrectionLevel,
-        format: state.options.format,
-        color: {
-          dark: state.options.foreground,
-          light: state.options.background,
+      const result: QRGenerationResult = await qrService.generateQRCode(
+        state.options.text,
+        {
+          size: state.options.size,
+          margin: state.options.margin,
+          errorCorrectionLevel: state.options.errorCorrectionLevel,
+          format: state.options.format,
+          color: {
+            dark: state.options.foreground,
+            light: state.options.background,
+          },
         },
-      });
+      );
 
       clearInterval(progressInterval);
       dispatch({ type: "SET_PROGRESS", payload: 100 });
       dispatch({ type: "SET_QR_DATA", payload: result.dataUrl });
       dispatch({ type: "SET_STATE", payload: "success" });
-      
-      toast.success("QR code generated successfully!");
 
+      toast.success("QR code generated successfully!");
     } catch (error) {
       dispatch({ type: "SET_STATE", payload: "error" });
-      const errorMessage = error instanceof Error ? error.message : "Failed to generate QR code";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to generate QR code";
       toast.error(errorMessage);
       dispatch({ type: "SET_QR_DATA", payload: "" });
     } finally {
@@ -222,37 +240,43 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
   /**
    * Saves current options as preset
    */
-  const savePreset = useCallback(async (name: string): Promise<boolean> => {
-    if (!name.trim()) {
-      toast.error("Please enter a preset name");
-      return false;
-    }
-
-    try {
-      const success = storageService.savePreset({
-        name: name.trim(),
-        options: state.options,
-      });
-
-      if (success) {
-        toast.success(`Preset "${name}" saved successfully!`);
-        return true;
+  const savePreset = useCallback(
+    async (name: string): Promise<boolean> => {
+      if (!name.trim()) {
+        toast.error("Please enter a preset name");
+        return false;
       }
-      toast.error("Failed to save preset");
-      return false;
-    } catch (error) {
-      toast.error("Failed to save preset");
-      return false;
-    }
-  }, [state.options]);
+
+      try {
+        const success = storageService.savePreset({
+          name: name.trim(),
+          options: state.options,
+        });
+
+        if (success) {
+          toast.success(`Preset "${name}" saved successfully!`);
+          return true;
+        }
+        toast.error("Failed to save preset");
+        return false;
+      } catch (error) {
+        toast.error("Failed to save preset");
+        return false;
+      }
+    },
+    [state.options],
+  );
 
   /**
    * Loads a preset
    */
-  const loadPreset = useCallback((preset: QRPreset) => {
-    setOptions(preset.options);
-    toast.success(`Preset "${preset.name}" loaded successfully!`);
-  }, [setOptions]);
+  const loadPreset = useCallback(
+    (preset: QRPreset) => {
+      setOptions(preset.options);
+      toast.success(`Preset "${preset.name}" loaded successfully!`);
+    },
+    [setOptions],
+  );
 
   /**
    * Deletes a preset
@@ -312,9 +336,7 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <QRContext.Provider value={contextValue}>
-      {children}
-    </QRContext.Provider>
+    <QRContext.Provider value={contextValue}>{children}</QRContext.Provider>
   );
 }
 

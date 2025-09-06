@@ -5,10 +5,10 @@
 
 "use client";
 
-import type React from "react";
-import { memo, useState, type RefObject } from "react";
 import { useIntersectionObserver } from "@/lib/performance";
 import { cn } from "@/lib/utils";
+import type React from "react";
+import { type RefObject, memo, useState } from "react";
 
 interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -32,7 +32,7 @@ export const LazyImage = memo(function LazyImage({
     threshold: 0.1,
     rootMargin: "50px",
   }) as [RefObject<HTMLDivElement>, boolean];
-  
+
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
 
@@ -48,10 +48,7 @@ export const LazyImage = memo(function LazyImage({
   return (
     <div
       ref={ref}
-      className={cn(
-        "relative overflow-hidden bg-muted",
-        containerClassName
-      )}
+      className={cn("relative overflow-hidden bg-muted", containerClassName)}
     >
       {isIntersecting && (
         <img
@@ -62,12 +59,12 @@ export const LazyImage = memo(function LazyImage({
           className={cn(
             "transition-opacity duration-300",
             isLoaded ? "opacity-100" : "opacity-0",
-            className
+            className,
           )}
           {...props}
         />
       )}
-      
+
       {!isLoaded && (
         <div className="absolute inset-0 flex items-center justify-center">
           {placeholder || (

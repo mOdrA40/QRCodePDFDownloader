@@ -5,18 +5,18 @@
 
 "use client";
 
-import React from "react";
-import { QrCode, Sparkles, Zap, Star, Heart } from "lucide-react";
+import { QuickActions } from "@/components/quick-actions";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Badge } from "@/components/ui/badge";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { QRControls } from "./QRControls";
-import { QRPreview } from "./QRPreview";
-import { QRSettings } from "./QRSettings";
-import { QRExport } from "./QRExport";
-import { QuickActions } from "@/components/quick-actions";
 import { UsageStats } from "@/components/usage-stats";
 import { useQRContext } from "@/contexts";
+import { Heart, QrCode, Sparkles, Star, Zap } from "lucide-react";
+import React from "react";
+import { QRControls } from "./QRControls";
+import { QRExport } from "./QRExport";
+import { QRPreview } from "./QRPreview";
+import { QRSettings } from "./QRSettings";
 
 interface QRGeneratorProps {
   className?: string;
@@ -31,13 +31,15 @@ export function QRGenerator({ className }: QRGeneratorProps) {
 
   return (
     <TooltipProvider>
-      <div className={`bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 min-h-screen py-4 px-4 ${className}`}>
+      <div
+        className={`bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 min-h-screen py-4 px-4 ${className}`}
+      >
         <div className="max-w-7xl mx-auto space-y-8 pb-8">
           {/* Theme Toggle */}
           <div className="fixed right-4 top-4 z-50">
             <ThemeToggle />
           </div>
-          
+
           {/* Header */}
           <div className="text-center mb-8 pt-8">
             <div className="flex items-center justify-center gap-3 mb-4">

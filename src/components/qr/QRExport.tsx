@@ -5,14 +5,27 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Download, FileText, Image, Zap, Palette } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BrowserCompatibilityModal } from "@/components/browser-compatibility-modal";
 import { ShareOptions } from "@/components/share-options";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useQRContext, useSettingsContext } from "@/contexts";
-import { pdfService, fileService } from "@/services";
+import { browserDetectionService, fileService, pdfService } from "@/services";
+import { Download, FileText, Image, Palette, Zap } from "lucide-react";
+import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 interface QRExportProps {
@@ -25,13 +38,34 @@ export function QRExport({ className }: QRExportProps) {
   const { qrDataUrl, options, isGenerating } = state;
 
   // Fix hydration mismatch by initializing state after mount
-  const [selectedTheme, setSelectedTheme] = useState<"modern" | "elegant" | "professional" | null>(null);
+  const [selectedTheme, setSelectedTheme] = useState<
+    "modern" | "elegant" | "professional" | null
+  >(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [showCompatibilityModal, setShowCompatibilityModal] = useState(false);
+  const [pendingPDFDownload, setPendingPDFDownload] = useState<
+    "modern" | "elegant" | "professional" | null
+  >(null);
 
   const themes = [
-    { value: "modern", label: "Modern", description: "Clean blue design", color: "bg-blue-500" },
-    { value: "elegant", label: "Elegant", description: "Purple gradient", color: "bg-purple-500" },
-    { value: "professional", label: "Professional", description: "Green corporate", color: "bg-green-500" }
+    {
+      value: "modern",
+      label: "Modern",
+      description: "Clean blue design",
+      color: "bg-blue-500",
+    },
+    {
+      value: "elegant",
+      label: "Elegant",
+      description: "Purple gradient",
+      color: "bg-purple-500",
+    },
+    {
+      value: "professional",
+      label: "Professional",
+      description: "Green corporate",
+      color: "bg-green-500",
+    },
   ] as const;
 
   // Initialize theme after component mounts to prevent hydration mismatch
@@ -40,31 +74,46 @@ export function QRExport({ className }: QRExportProps) {
     setIsMounted(true);
   }, []);
 
-  const downloadPDF = async (theme: "modern" | "elegant" | "professional" = "modern") => {
+  const downloadPDF = async (
+    theme: "modern" | "elegant" | "professional" = "modern",
+  ) => {
     if (!qrDataUrl) {
       toast.error("Please generate a QR code first");
       return;
     }
 
+    // Check browser compatibility for PDF generation
+    const capabilities = browserDetectionService.detectCapabilities();
+
+    // Show modal for problematic browsers
+    if (capabilities.isPrivacyBrowser || !capabilities.supportsCanvas) {
+      setPendingPDFDownload(theme);
+      setShowCompatibilityModal(true);
+      return;
+    }
+
+    // Proceed with direct download for compatible browsers
+    await performPDFDownload(theme);
+  };
+
+  const performPDFDownload = async (
+    theme: "modern" | "elegant" | "professional",
+  ) => {
     try {
-      const result = await pdfService.generatePDF(
-        qrDataUrl,
-        options.text,
-        {
-          title: "QR Code Document",
-          author: "QR PDF Generator Pro",
-          subject: "Generated QR Code with Enhanced Design",
-          theme,
-          password: options.enablePdfPassword ? options.pdfPassword : undefined,
-        }
-      );
+      const result = await pdfService.generatePDF(qrDataUrl, options.text, {
+        title: "QR Code Document",
+        author: "QR PDF Generator Pro",
+        subject: "Generated QR Code with Enhanced Design",
+        theme,
+        password: options.enablePdfPassword ? options.pdfPassword : undefined,
+      });
 
       if (!result.success) {
         toast.error(result.error || "Failed to generate PDF");
       } else {
         toast.success("PDF generated successfully!", {
-          description: `Theme: ${theme.charAt(0).toUpperCase() + theme.slice(1)} | Type: ${result.contentType || 'Unknown'}`,
-          duration: 4000
+          description: `Theme: ${theme.charAt(0).toUpperCase() + theme.slice(1)} | Type: ${result.contentType || "Unknown"}`,
+          duration: 4000,
         });
       }
     } catch (error) {
@@ -88,8 +137,24 @@ export function QRExport({ className }: QRExportProps) {
     }
   };
 
+  // Modal handlers
+  const handleModalContinue = async () => {
+    setShowCompatibilityModal(false);
+    if (pendingPDFDownload) {
+      await performPDFDownload(pendingPDFDownload);
+      setPendingPDFDownload(null);
+    }
+  };
+
+  const handleModalClose = () => {
+    setShowCompatibilityModal(false);
+    setPendingPDFDownload(null);
+  };
+
   return (
-    <Card className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}>
+    <Card
+      className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}
+    >
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2">
           <Download className="h-5 w-5 text-purple-600" />
@@ -109,7 +174,9 @@ export function QRExport({ className }: QRExportProps) {
           {isMounted ? (
             <Select
               value={selectedTheme || "modern"}
-              onValueChange={(value: "modern" | "elegant" | "professional") => setSelectedTheme(value)}
+              onValueChange={(value: "modern" | "elegant" | "professional") =>
+                setSelectedTheme(value)
+              }
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select theme" />
@@ -121,7 +188,9 @@ export function QRExport({ className }: QRExportProps) {
                       <div className={`w-3 h-3 rounded-full ${theme.color}`} />
                       <div>
                         <div className="font-medium">{theme.label}</div>
-                        <div className="text-xs text-muted-foreground">{theme.description}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {theme.description}
+                        </div>
                       </div>
                     </div>
                   </SelectItem>
@@ -192,25 +261,42 @@ export function QRExport({ className }: QRExportProps) {
           <div className="text-xs text-muted-foreground space-y-1">
             <div className="flex justify-between">
               <span>Format:</span>
-              <span className="font-medium">{options.format.toUpperCase()}</span>
+              <span className="font-medium">
+                {options.format.toUpperCase()}
+              </span>
             </div>
             <div className="flex justify-between">
               <span>Size:</span>
-              <span className="font-medium">{options.size}×{options.size}px</span>
+              <span className="font-medium">
+                {options.size}×{options.size}px
+              </span>
             </div>
             <div className="flex justify-between">
               <span>Error Correction:</span>
-              <span className="font-medium">{options.errorCorrectionLevel}</span>
+              <span className="font-medium">
+                {options.errorCorrectionLevel}
+              </span>
             </div>
             {qrDataUrl && (
               <div className="flex justify-between">
                 <span>Status:</span>
-                <span className="font-medium text-green-600">Ready to download</span>
+                <span className="font-medium text-green-600">
+                  Ready to download
+                </span>
               </div>
             )}
           </div>
         </div>
       </CardContent>
+
+      {/* Browser Compatibility Modal */}
+      <BrowserCompatibilityModal
+        isOpen={showCompatibilityModal}
+        onClose={handleModalClose}
+        onContinue={handleModalContinue}
+        title="PDF Download - Browser Compatibility"
+        description="We've detected your browser may need special handling for optimal PDF generation."
+      />
     </Card>
   );
 }

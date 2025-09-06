@@ -5,14 +5,14 @@
 
 "use client";
 
-import React from "react";
-import { Settings, Palette, Star, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Download, Palette, Settings, Star } from "lucide-react";
+import React from "react";
 import { QRAppearanceSettings } from "./settings/QRAppearanceSettings";
-import { QRTechnicalSettings } from "./settings/QRTechnicalSettings";
-import { QRPresetSettings } from "./settings/QRPresetSettings";
 import { QRExportSettings } from "./settings/QRExportSettings";
+import { QRPresetSettings } from "./settings/QRPresetSettings";
+import { QRTechnicalSettings } from "./settings/QRTechnicalSettings";
 
 interface QRSettingsProps {
   className?: string;
@@ -20,7 +20,9 @@ interface QRSettingsProps {
 
 export function QRSettings({ className }: QRSettingsProps) {
   return (
-    <Card className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}>
+    <Card
+      className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}
+    >
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2">
           <Settings className="h-5 w-5 text-muted-foreground" />
@@ -30,31 +32,19 @@ export function QRSettings({ className }: QRSettingsProps) {
       <CardContent>
         <Tabs defaultValue="appearance" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger
-              value="appearance"
-              className="flex items-center gap-1"
-            >
+            <TabsTrigger value="appearance" className="flex items-center gap-1">
               <Palette className="h-3 w-3" />
               Style
             </TabsTrigger>
-            <TabsTrigger
-              value="technical"
-              className="flex items-center gap-1"
-            >
+            <TabsTrigger value="technical" className="flex items-center gap-1">
               <Settings className="h-3 w-3" />
               Technical
             </TabsTrigger>
-            <TabsTrigger
-              value="presets"
-              className="flex items-center gap-1"
-            >
+            <TabsTrigger value="presets" className="flex items-center gap-1">
               <Star className="h-3 w-3" />
               Presets
             </TabsTrigger>
-            <TabsTrigger
-              value="export"
-              className="flex items-center gap-1"
-            >
+            <TabsTrigger value="export" className="flex items-center gap-1">
               <Download className="h-3 w-3" />
               Export
             </TabsTrigger>

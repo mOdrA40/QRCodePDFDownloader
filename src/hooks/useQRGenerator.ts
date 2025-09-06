@@ -3,15 +3,15 @@
  * Manages QR code generation state and operations
  */
 
-import { useState, useCallback, useEffect } from "react";
-import { toast } from "sonner";
 import { qrService } from "@/services";
 import type {
-  QROptions,
-  QRGenerationResult,
-  QRValidationResult,
   ComponentState,
+  QRGenerationResult,
+  QROptions,
+  QRValidationResult,
 } from "@/types";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface UseQRGeneratorReturn {
   // State
@@ -27,7 +27,10 @@ interface UseQRGeneratorReturn {
   generateQRCode: () => Promise<void>;
   validateInput: (text: string) => QRValidationResult;
   resetGenerator: () => void;
-  updateOption: <K extends keyof QROptions>(key: K, value: QROptions[K]) => void;
+  updateOption: <K extends keyof QROptions>(
+    key: K,
+    value: QROptions[K],
+  ) => void;
 }
 
 const defaultQROptions: QROptions = {
@@ -45,26 +48,32 @@ const defaultQROptions: QROptions = {
   enablePdfPassword: false,
 };
 
-export function useQRGenerator(initialOptions?: Partial<QROptions>): UseQRGeneratorReturn {
+export function useQRGenerator(
+  initialOptions?: Partial<QROptions>,
+): UseQRGeneratorReturn {
   const [qrOptions, setQROptions] = useState<QROptions>({
     ...defaultQROptions,
     ...initialOptions,
   });
-  
+
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(0);
-  const [validationResult, setValidationResult] = useState<QRValidationResult | null>(null);
+  const [validationResult, setValidationResult] =
+    useState<QRValidationResult | null>(null);
   const [state, setState] = useState<ComponentState>("idle");
 
   /**
    * Validates QR input
    */
-  const validateInput = useCallback((text: string): QRValidationResult => {
-    const result = qrService.validateQRInput(text, qrOptions);
-    setValidationResult(result);
-    return result;
-  }, [qrOptions]);
+  const validateInput = useCallback(
+    (text: string): QRValidationResult => {
+      const result = qrService.validateQRInput(text, qrOptions);
+      setValidationResult(result);
+      return result;
+    },
+    [qrOptions],
+  );
 
   /**
    * Generates QR code with progress tracking
@@ -93,16 +102,19 @@ export function useQRGenerator(initialOptions?: Partial<QROptions>): UseQRGenera
       }, 100);
 
       // Generate QR code
-      const result: QRGenerationResult = await qrService.generateQRCode(qrOptions.text, {
-        size: qrOptions.size,
-        margin: qrOptions.margin,
-        errorCorrectionLevel: qrOptions.errorCorrectionLevel,
-        format: qrOptions.format,
-        color: {
-          dark: qrOptions.foreground,
-          light: qrOptions.background,
+      const result: QRGenerationResult = await qrService.generateQRCode(
+        qrOptions.text,
+        {
+          size: qrOptions.size,
+          margin: qrOptions.margin,
+          errorCorrectionLevel: qrOptions.errorCorrectionLevel,
+          format: qrOptions.format,
+          color: {
+            dark: qrOptions.foreground,
+            light: qrOptions.background,
+          },
         },
-      });
+      );
 
       clearInterval(progressInterval);
       setGenerationProgress(100);
@@ -111,10 +123,10 @@ export function useQRGenerator(initialOptions?: Partial<QROptions>): UseQRGenera
       setQrDataUrl(result.dataUrl);
       setState("success");
       toast.success("QR code generated successfully!");
-
     } catch (error) {
       setState("error");
-      const errorMessage = error instanceof Error ? error.message : "Failed to generate QR code";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to generate QR code";
       toast.error(errorMessage);
       setQrDataUrl("");
     } finally {
@@ -131,15 +143,15 @@ export function useQRGenerator(initialOptions?: Partial<QROptions>): UseQRGenera
   /**
    * Updates a specific QR option
    */
-  const updateOption = useCallback(<K extends keyof QROptions>(
-    key: K,
-    value: QROptions[K]
-  ): void => {
-    setQROptions(prev => ({
-      ...prev,
-      [key]: value,
-    }));
-  }, []);
+  const updateOption = useCallback(
+    <K extends keyof QROptions>(key: K, value: QROptions[K]): void => {
+      setQROptions((prev) => ({
+        ...prev,
+        [key]: value,
+      }));
+    },
+    [],
+  );
 
   /**
    * Resets the generator to initial state

@@ -4,7 +4,11 @@
  */
 
 export { useQRGenerator } from "./useQRGenerator";
-export { useLocalStorage, useQRPresets, useAppSettings } from "./useLocalStorage";
+export {
+  useLocalStorage,
+  useQRPresets,
+  useAppSettings,
+} from "./useLocalStorage";
 export { useUsageStats } from "./useUsageStats";
 export { useFileHandler } from "./useFileHandler";
 
@@ -48,12 +52,12 @@ export const hookUtils = {
    */
   useIsMounted: (): boolean => {
     const [isMounted, setIsMounted] = React.useState(false);
-    
+
     React.useEffect(() => {
       setIsMounted(true);
       return () => setIsMounted(false);
     }, []);
-    
+
     return isMounted;
   },
 };

@@ -6,7 +6,15 @@
 export type Theme = "light" | "dark" | "system";
 
 // Modal types for quick actions
-export type ModalType = "wifi" | "phone" | "email" | "location" | "event" | "website" | "vcard" | null;
+export type ModalType =
+  | "wifi"
+  | "phone"
+  | "email"
+  | "location"
+  | "event"
+  | "website"
+  | "vcard"
+  | null;
 
 // Component state types
 export type ComponentState = "idle" | "loading" | "success" | "error";
@@ -37,7 +45,14 @@ export interface QuickActionConfig {
 
 // Share options
 export interface ShareOption {
-  platform: "email" | "whatsapp" | "twitter" | "facebook" | "linkedin" | "copy" | "native";
+  platform:
+    | "email"
+    | "whatsapp"
+    | "twitter"
+    | "facebook"
+    | "linkedin"
+    | "copy"
+    | "native";
   label: string;
   icon: React.ComponentType;
   action: (data: ShareData) => void | Promise<void>;

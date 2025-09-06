@@ -4,11 +4,11 @@
  */
 
 import type {
-  FileProcessingResult,
-  FileValidationResult,
-  FileUploadConfig,
   DownloadOptions,
   ExportResult,
+  FileProcessingResult,
+  FileUploadConfig,
+  FileValidationResult,
   SupportedFileType,
 } from "@/types";
 
@@ -38,14 +38,19 @@ export class FileService {
   /**
    * Validates uploaded file against security rules
    */
-  public validateFile(file: File, config?: Partial<FileUploadConfig>): FileValidationResult {
+  public validateFile(
+    file: File,
+    config?: Partial<FileUploadConfig>,
+  ): FileValidationResult {
     const finalConfig = { ...this.defaultConfig, ...config };
     const errors: string[] = [];
     const warnings: string[] = [];
 
     // Size validation
     if (file.size > finalConfig.maxSize) {
-      errors.push(`File size (${this.formatFileSize(file.size)}) exceeds maximum allowed size (${this.formatFileSize(finalConfig.maxSize)})`);
+      errors.push(
+        `File size (${this.formatFileSize(file.size)}) exceeds maximum allowed size (${this.formatFileSize(finalConfig.maxSize)})`,
+      );
     }
 
     // Type validation
@@ -114,7 +119,8 @@ export class FileService {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "File processing failed",
+        error:
+          error instanceof Error ? error.message : "File processing failed",
         fileInfo: {
           name: file.name,
           size: file.size,
@@ -158,9 +164,14 @@ export class FileService {
   /**
    * Downloads data as file with proper security measures
    */
-  public downloadFile(data: string | Blob, options: DownloadOptions): ExportResult {
+  public downloadFile(
+    data: string | Blob,
+    options: DownloadOptions,
+  ): ExportResult {
     try {
-      const filename = this.sanitizeFilename(options.filename || `download-${Date.now()}`);
+      const filename = this.sanitizeFilename(
+        options.filename || `download-${Date.now()}`,
+      );
       let blob: Blob;
 
       if (typeof data === "string") {
@@ -179,7 +190,7 @@ export class FileService {
       const link = document.createElement("a");
       link.href = url;
       link.download = filename;
-      
+
       // Trigger download
       document.body.appendChild(link);
       link.click();
@@ -213,11 +224,11 @@ export class FileService {
     const bstr = atob(arr[1]);
     let n = bstr.length;
     const u8arr = new Uint8Array(n);
-    
+
     while (n--) {
       u8arr[n] = bstr.charCodeAt(n);
     }
-    
+
     return new Blob([u8arr], { type: mime });
   }
 
@@ -237,11 +248,16 @@ export class FileService {
    */
   private sanitizeExtractedText(text: string): string {
     // Remove control characters except newlines and tabs
-    const sanitized = text.split('').filter(char => {
-      const code = char.charCodeAt(0);
-      // Allow newline (10), tab (9), and printable characters (32-126)
-      return code === 9 || code === 10 || (code >= 32 && code <= 126) || code > 127;
-    }).join('');
+    const sanitized = text
+      .split("")
+      .filter((char) => {
+        const code = char.charCodeAt(0);
+        // Allow newline (10), tab (9), and printable characters (32-126)
+        return (
+          code === 9 || code === 10 || (code >= 32 && code <= 126) || code > 127
+        );
+      })
+      .join("");
 
     return sanitized.slice(0, 10000); // Limit to 10k characters
   }
@@ -257,7 +273,7 @@ export class FileService {
       /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i,
     ];
 
-    return suspiciousPatterns.some(pattern => pattern.test(filename));
+    return suspiciousPatterns.some((pattern) => pattern.test(filename));
   }
 
   /**
@@ -265,11 +281,11 @@ export class FileService {
    */
   private formatFileSize(bytes: number): string {
     if (bytes === 0) return "0 Bytes";
-    
+
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
+
     return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
   }
 }

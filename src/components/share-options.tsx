@@ -1,7 +1,5 @@
 "use client";
 
-import React, { memo, useCallback } from "react";
-import { Share2, Mail, MessageCircle, Copy, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,6 +9,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Copy, ExternalLink, Mail, MessageCircle, Share2 } from "lucide-react";
+import React, { memo, useCallback } from "react";
 import { toast } from "sonner";
 
 interface ShareOptionsProps {
@@ -22,12 +22,14 @@ interface ShareOptionsProps {
 export const ShareOptions = memo(function ShareOptions({
   qrDataUrl,
   qrText,
-  className
+  className,
 }: ShareOptionsProps) {
   const shareToEmail = useCallback(() => {
     const subject = "QR Code Generated";
     const body = `Check out this QR code I generated! It contains: ${qrText}\n\nGenerated with QR PDF Generator`;
-    window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+    window.open(
+      `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
+    );
     toast.success("Email client opened!");
   }, [qrText]);
 

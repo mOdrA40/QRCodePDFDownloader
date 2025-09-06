@@ -3,9 +3,9 @@
  * Provides type-safe localStorage operations with error handling
  */
 
-import { useState, useEffect, useCallback } from "react";
 import { storageService } from "@/services";
-import type { QROptions, QRPreset, AppConfig } from "@/types";
+import type { AppConfig, QROptions, QRPreset } from "@/types";
+import { useCallback, useEffect, useState } from "react";
 
 type SetValue<T> = T | ((val: T) => T);
 
@@ -22,7 +22,7 @@ interface UseLocalStorageReturn<T> {
  */
 export function useLocalStorage<T>(
   key: string,
-  initialValue: T
+  initialValue: T,
 ): UseLocalStorageReturn<T> {
   const [storedValue, setStoredValue] = useState<T>(initialValue);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,7 +46,9 @@ export function useLocalStorage<T>(
         setStoredValue(parsed);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to read from localStorage");
+      setError(
+        err instanceof Error ? err.message : "Failed to read from localStorage",
+      );
       console.error(`Error reading localStorage key "${key}":`, err);
     } finally {
       setIsLoading(false);
@@ -58,23 +60,26 @@ export function useLocalStorage<T>(
     (value: SetValue<T>) => {
       try {
         setError(null);
-        
+
         // Allow value to be a function so we have the same API as useState
-        const valueToStore = value instanceof Function ? value(storedValue) : value;
-        
+        const valueToStore =
+          value instanceof Function ? value(storedValue) : value;
+
         // Save state
         setStoredValue(valueToStore);
-        
+
         // Save to localStorage
         if (typeof window !== "undefined") {
           window.localStorage.setItem(key, JSON.stringify(valueToStore));
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to save to localStorage");
+        setError(
+          err instanceof Error ? err.message : "Failed to save to localStorage",
+        );
         console.error(`Error setting localStorage key "${key}":`, err);
       }
     },
-    [key, storedValue]
+    [key, storedValue],
   );
 
   // Remove from localStorage
@@ -82,12 +87,16 @@ export function useLocalStorage<T>(
     try {
       setError(null);
       setStoredValue(initialValue);
-      
+
       if (typeof window !== "undefined") {
         window.localStorage.removeItem(key);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to remove from localStorage");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to remove from localStorage",
+      );
       console.error(`Error removing localStorage key "${key}":`, err);
     }
   }, [key, initialValue]);
@@ -147,24 +156,32 @@ export function useQRPresets() {
     }
   }, []);
 
-  const updatePreset = useCallback(async (id: string, updates: Partial<Omit<QRPreset, "id" | "createdAt">>) => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  const updatePreset = useCallback(
+    async (
+      id: string,
+      updates: Partial<Omit<QRPreset, "id" | "createdAt">>,
+    ) => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
-      const success = storageService.updatePreset(id, updates);
-      if (success) {
-        setPresets(storageService.getPresets());
-        return true;
+        const success = storageService.updatePreset(id, updates);
+        if (success) {
+          setPresets(storageService.getPresets());
+          return true;
+        }
+        throw new Error("Failed to update preset");
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to update preset",
+        );
+        return false;
+      } finally {
+        setIsLoading(false);
       }
-      throw new Error("Failed to update preset");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update preset");
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   return {
     presets,
@@ -184,24 +201,29 @@ export function useAppSettings() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const updateSettings = useCallback(async (newSettings: Partial<AppConfig>) => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  const updateSettings = useCallback(
+    async (newSettings: Partial<AppConfig>) => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
-      const success = storageService.updateSettings(newSettings);
-      if (success) {
-        setSettings(storageService.getSettings());
-        return true;
+        const success = storageService.updateSettings(newSettings);
+        if (success) {
+          setSettings(storageService.getSettings());
+          return true;
+        }
+        throw new Error("Failed to update settings");
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to update settings",
+        );
+        return false;
+      } finally {
+        setIsLoading(false);
       }
-      throw new Error("Failed to update settings");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update settings");
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   const resetSettings = useCallback(async () => {
     try {

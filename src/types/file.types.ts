@@ -3,7 +3,7 @@
  */
 
 // Supported file types for drag and drop
-export type SupportedFileType = 
+export type SupportedFileType =
   | "text/plain"
   | "application/json"
   | "text/csv"
@@ -50,7 +50,7 @@ export interface FileUploadConfig {
 // Download options
 export interface DownloadOptions {
   filename?: string;
-  format: "pdf" | "png" | "jpeg" | "webp";
+  format: "pdf" | "png" | "jpeg" | "webp" | "svg";
   quality?: number; // for lossy formats
   metadata?: Record<string, string>;
 }

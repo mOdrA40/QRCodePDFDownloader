@@ -5,16 +5,17 @@
 
 "use client";
 
-import type React from "react";
-import { createContext, useContext, useReducer, useCallback, useEffect } from "react";
-import { useTheme } from "next-themes";
 import { storageService } from "@/services";
-import type {
-  AppConfig,
-  Theme,
-  UsageStats,
-  QRColorTheme,
-} from "@/types";
+import type { AppConfig, QRColorTheme, Theme, UsageStats } from "@/types";
+import { useTheme } from "next-themes";
+import type React from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useReducer,
+} from "react";
 
 // Action types
 type SettingsAction =
@@ -40,18 +41,21 @@ interface SettingsState {
 interface SettingsContextType {
   // State
   state: SettingsState;
-  
+
   // Actions
-  updateConfig: <K extends keyof AppConfig>(key: K, value: AppConfig[K]) => void;
+  updateConfig: <K extends keyof AppConfig>(
+    key: K,
+    value: AppConfig[K],
+  ) => void;
   setTheme: (theme: Theme) => void;
   setPreviewMode: (enabled: boolean) => void;
   setAutoGenerate: (enabled: boolean) => void;
   resetSettings: () => void;
-  
+
   // Usage stats
   refreshUsageStats: () => void;
   clearUsageStats: () => void;
-  
+
   // Utilities
   exportSettings: () => string;
   importSettings: (settingsJson: string) => boolean;
@@ -90,39 +94,44 @@ const initialState: SettingsState = {
 };
 
 // Reducer
-function settingsReducer(state: SettingsState, action: SettingsAction): SettingsState {
+function settingsReducer(
+  state: SettingsState,
+  action: SettingsAction,
+): SettingsState {
   switch (action.type) {
     case "SET_CONFIG":
       return { ...state, config: { ...state.config, ...action.payload } };
-    
+
     case "UPDATE_CONFIG":
       return {
         ...state,
         config: { ...state.config, [action.payload.key]: action.payload.value },
       };
-    
+
     case "SET_USAGE_STATS":
       return { ...state, usageStats: action.payload };
-    
+
     case "SET_THEME":
       return { ...state, theme: action.payload };
-    
+
     case "SET_PREVIEW_MODE":
       return { ...state, previewMode: action.payload };
-    
+
     case "SET_AUTO_GENERATE":
       return { ...state, autoGenerate: action.payload };
-    
+
     case "RESET_SETTINGS":
       return initialState;
-    
+
     default:
       return state;
   }
 }
 
 // Create context
-const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
+const SettingsContext = createContext<SettingsContextType | undefined>(
+  undefined,
+);
 
 // Provider component
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
@@ -132,25 +141,28 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   /**
    * Updates app configuration
    */
-  const updateConfig = useCallback(<K extends keyof AppConfig>(
-    key: K,
-    value: AppConfig[K]
-  ) => {
-    dispatch({ type: "UPDATE_CONFIG", payload: { key, value } });
-    
-    // Save to storage
-    const updatedConfig = { ...state.config, [key]: value };
-    storageService.updateSettings(updatedConfig);
-  }, [state.config]);
+  const updateConfig = useCallback(
+    <K extends keyof AppConfig>(key: K, value: AppConfig[K]) => {
+      dispatch({ type: "UPDATE_CONFIG", payload: { key, value } });
+
+      // Save to storage
+      const updatedConfig = { ...state.config, [key]: value };
+      storageService.updateSettings(updatedConfig);
+    },
+    [state.config],
+  );
 
   /**
    * Sets theme
    */
-  const setTheme = useCallback((theme: Theme) => {
-    dispatch({ type: "SET_THEME", payload: theme });
-    setNextTheme(theme);
-    storageService.setTheme(theme);
-  }, [setNextTheme]);
+  const setTheme = useCallback(
+    (theme: Theme) => {
+      dispatch({ type: "SET_THEME", payload: theme });
+      setNextTheme(theme);
+      storageService.setTheme(theme);
+    },
+    [setNextTheme],
+  );
 
   /**
    * Sets preview mode
@@ -207,54 +219,57 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       exportedAt: new Date().toISOString(),
       version: "1.0.0",
     };
-    
+
     return JSON.stringify(exportData, null, 2);
   }, [state]);
 
   /**
    * Imports settings from JSON string
    */
-  const importSettings = useCallback((settingsJson: string): boolean => {
-    try {
-      const importData = JSON.parse(settingsJson);
-      
-      // Validate import data structure
-      if (!importData.config || !importData.version) {
-        throw new Error("Invalid settings format");
-      }
+  const importSettings = useCallback(
+    (settingsJson: string): boolean => {
+      try {
+        const importData = JSON.parse(settingsJson);
 
-      // Import configuration
-      if (importData.config) {
-        dispatch({ type: "SET_CONFIG", payload: importData.config });
-        storageService.updateSettings(importData.config);
-      }
+        // Validate import data structure
+        if (!importData.config || !importData.version) {
+          throw new Error("Invalid settings format");
+        }
 
-      // Import theme
-      if (importData.theme) {
-        setTheme(importData.theme);
-      }
+        // Import configuration
+        if (importData.config) {
+          dispatch({ type: "SET_CONFIG", payload: importData.config });
+          storageService.updateSettings(importData.config);
+        }
 
-      // Import other settings
-      if (typeof importData.previewMode === "boolean") {
-        setPreviewMode(importData.previewMode);
-      }
+        // Import theme
+        if (importData.theme) {
+          setTheme(importData.theme);
+        }
 
-      if (typeof importData.autoGenerate === "boolean") {
-        setAutoGenerate(importData.autoGenerate);
-      }
+        // Import other settings
+        if (typeof importData.previewMode === "boolean") {
+          setPreviewMode(importData.previewMode);
+        }
 
-      // Import presets (if any)
-      if (importData.presets && Array.isArray(importData.presets)) {
-        // Note: This would require extending storage service to import presets
-        // For now, we'll skip preset import
-      }
+        if (typeof importData.autoGenerate === "boolean") {
+          setAutoGenerate(importData.autoGenerate);
+        }
 
-      return true;
-    } catch (error) {
-      console.error("Failed to import settings:", error);
-      return false;
-    }
-  }, [setTheme, setPreviewMode, setAutoGenerate]);
+        // Import presets (if any)
+        if (importData.presets && Array.isArray(importData.presets)) {
+          // Note: This would require extending storage service to import presets
+          // For now, we'll skip preset import
+        }
+
+        return true;
+      } catch (error) {
+        console.error("Failed to import settings:", error);
+        return false;
+      }
+    },
+    [setTheme, setPreviewMode, setAutoGenerate],
+  );
 
   // Load settings from storage on mount (client-only to prevent hydration mismatch)
   useEffect(() => {
@@ -281,11 +296,17 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
         // Load other preferences
         if (savedConfig.previewMode !== undefined) {
-          dispatch({ type: "SET_PREVIEW_MODE", payload: savedConfig.previewMode });
+          dispatch({
+            type: "SET_PREVIEW_MODE",
+            payload: savedConfig.previewMode,
+          });
         }
 
         if (savedConfig.autoGenerate !== undefined) {
-          dispatch({ type: "SET_AUTO_GENERATE", payload: savedConfig.autoGenerate });
+          dispatch({
+            type: "SET_AUTO_GENERATE",
+            payload: savedConfig.autoGenerate,
+          });
         }
       } catch (error) {
         console.warn("Failed to load settings from storage:", error);
@@ -332,7 +353,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 export function useSettingsContext(): SettingsContextType {
   const context = useContext(SettingsContext);
   if (context === undefined) {
-    throw new Error("useSettingsContext must be used within a SettingsProvider");
+    throw new Error(
+      "useSettingsContext must be used within a SettingsProvider",
+    );
   }
   return context;
 }

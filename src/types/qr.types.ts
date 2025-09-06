@@ -6,8 +6,8 @@
 // Error correction levels for QR codes
 export type QRErrorCorrectionLevel = "L" | "M" | "Q" | "H";
 
-// Supported image formats for QR code export
-export type QRImageFormat = "png" | "jpeg" | "webp";
+// Supported image formats for QR code export (including SVG for browser compatibility)
+export type QRImageFormat = "png" | "jpeg" | "webp" | "svg";
 
 // QR code size presets
 export type QRSizePreset = "small" | "medium" | "large" | "xl";
@@ -47,12 +47,15 @@ export interface QRGenerationConfig {
   format?: QRImageFormat;
 }
 
-// QR generation result
+// QR generation result with enhanced browser compatibility info
 export interface QRGenerationResult {
   dataUrl: string;
   format: QRImageFormat;
   size: number;
   timestamp: number;
+  method?: string; // Generation method used (server-side, client-canvas, client-svg, fallback)
+  browserInfo?: string; // Browser information for debugging
+  warning?: string; // Any warnings during generation
 }
 
 // QR preset for saving/loading configurations

@@ -1,28 +1,52 @@
-"use client"
+"use client";
 
-import React, { useState } from "react"
-import { Zap, Wifi, Phone, Mail, MapPin, Calendar, Link2, CreditCard } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button";
 import {
-  WiFiModal,
-  PhoneModal,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Calendar,
+  CreditCard,
+  Link2,
+  Mail,
+  MapPin,
+  Phone,
+  Wifi,
+  Zap,
+} from "lucide-react";
+import React, { useState } from "react";
+import {
   EmailModal,
-  LocationModal,
   EventModal,
-  WebsiteModal,
+  LocationModal,
+  PhoneModal,
+  SMSModal,
   VCardModal,
-  SMSModal
-} from "./quick-action-modals"
+  WebsiteModal,
+  WiFiModal,
+} from "./quick-action-modals";
 
 interface QuickActionsProps {
-  onQuickAction: (text: string) => void
+  onQuickAction: (text: string) => void;
 }
 
-type ModalType = "wifi" | "phone" | "email" | "location" | "event" | "website" | "vcard" | "sms" | null
+type ModalType =
+  | "wifi"
+  | "phone"
+  | "email"
+  | "location"
+  | "event"
+  | "website"
+  | "vcard"
+  | "sms"
+  | null;
 
 export function QuickActions({ onQuickAction }: QuickActionsProps) {
-  const [activeModal, setActiveModal] = useState<ModalType>(null)
+  const [activeModal, setActiveModal] = useState<ModalType>(null);
 
   const quickActions = [
     {
@@ -30,62 +54,62 @@ export function QuickActions({ onQuickAction }: QuickActionsProps) {
       label: "WiFi",
       modalType: "wifi" as const,
       color: "text-blue-600 dark:text-blue-400",
-      bgColor: "bg-blue-100 dark:bg-blue-900"
+      bgColor: "bg-blue-100 dark:bg-blue-900",
     },
     {
       icon: Phone,
       label: "Phone",
       modalType: "phone" as const,
       color: "text-green-600 dark:text-green-400",
-      bgColor: "bg-green-100 dark:bg-green-900"
+      bgColor: "bg-green-100 dark:bg-green-900",
     },
     {
       icon: Mail,
       label: "SMS",
       modalType: "sms" as const,
       color: "text-emerald-600 dark:text-emerald-400",
-      bgColor: "bg-emerald-100 dark:bg-emerald-900"
+      bgColor: "bg-emerald-100 dark:bg-emerald-900",
     },
     {
       icon: Mail,
       label: "Email",
       modalType: "email" as const,
       color: "text-purple-600 dark:text-purple-400",
-      bgColor: "bg-purple-100 dark:bg-purple-900"
+      bgColor: "bg-purple-100 dark:bg-purple-900",
     },
     {
       icon: MapPin,
       label: "Location",
       modalType: "location" as const,
       color: "text-red-600 dark:text-red-400",
-      bgColor: "bg-red-100 dark:bg-red-900"
+      bgColor: "bg-red-100 dark:bg-red-900",
     },
     {
       icon: Calendar,
       label: "Event",
       modalType: "event" as const,
       color: "text-orange-600 dark:text-orange-400",
-      bgColor: "bg-orange-100 dark:bg-orange-900"
+      bgColor: "bg-orange-100 dark:bg-orange-900",
     },
     {
       icon: Link2,
       label: "Website",
       modalType: "website" as const,
       color: "text-cyan-600 dark:text-cyan-400",
-      bgColor: "bg-cyan-100 dark:bg-cyan-900"
+      bgColor: "bg-cyan-100 dark:bg-cyan-900",
     },
     {
       icon: CreditCard,
       label: "vCard",
       modalType: "vcard" as const,
       color: "text-indigo-600 dark:text-indigo-400",
-      bgColor: "bg-indigo-100 dark:bg-indigo-900"
-    }
-  ]
+      bgColor: "bg-indigo-100 dark:bg-indigo-900",
+    },
+  ];
 
   const handleModalClose = () => {
-    setActiveModal(null)
-  }
+    setActiveModal(null);
+  };
 
   return (
     <>
@@ -108,10 +132,16 @@ export function QuickActions({ onQuickAction }: QuickActionsProps) {
                 onClick={() => setActiveModal(action.modalType)}
                 className="h-16 flex flex-col gap-1 p-2 transition-all duration-200 hover:scale-105 hover:shadow-md hover:border-primary/50 group"
               >
-                <div className={`p-1 rounded transition-all duration-200 group-hover:scale-110 ${action.bgColor}`}>
-                  <action.icon className={`h-4 w-4 transition-colors duration-200 ${action.color}`} />
+                <div
+                  className={`p-1 rounded transition-all duration-200 group-hover:scale-110 ${action.bgColor}`}
+                >
+                  <action.icon
+                    className={`h-4 w-4 transition-colors duration-200 ${action.color}`}
+                  />
                 </div>
-                <span className="text-xs font-medium transition-colors duration-200 group-hover:text-primary">{action.label}</span>
+                <span className="text-xs font-medium transition-colors duration-200 group-hover:text-primary">
+                  {action.label}
+                </span>
               </Button>
             ))}
           </div>
@@ -160,5 +190,5 @@ export function QuickActions({ onQuickAction }: QuickActionsProps) {
         onGenerate={onQuickAction}
       />
     </>
-  )
+  );
 }

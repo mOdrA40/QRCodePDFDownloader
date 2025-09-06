@@ -301,6 +301,7 @@
   color: hsl(var(--primary-foreground)) !important;
 }
 
+.PhoneInputCountrySelectDropdown input[type="search"] {
   width: 100%;
   padding: 8px 12px;
   border: none !important;

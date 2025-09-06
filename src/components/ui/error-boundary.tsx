@@ -5,10 +5,16 @@
 
 "use client";
 
-import React, { Component, type ErrorInfo, type ReactNode } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
+import React, { Component, type ErrorInfo, type ReactNode } from "react";
 import { Button } from "./button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./card";
 
 interface Props {
   children: ReactNode;
@@ -34,7 +40,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({ error, errorInfo });
-    
+
     // Log error to console in development
     if (process.env.NODE_ENV === "development") {
       console.error("Error caught by boundary:", error, errorInfo);
@@ -77,16 +83,13 @@ export class ErrorBoundary extends Component<Props, State> {
                 </pre>
               </details>
             )}
-            
+
             <div className="flex gap-2">
               <Button onClick={this.handleReset} variant="outline" size="sm">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Try Again
               </Button>
-              <Button 
-                onClick={() => window.location.reload()} 
-                size="sm"
-              >
+              <Button onClick={() => window.location.reload()} size="sm">
                 Refresh Page
               </Button>
             </div>
@@ -105,7 +108,7 @@ export class ErrorBoundary extends Component<Props, State> {
 export function useErrorHandler() {
   return (error: Error, errorInfo?: ErrorInfo) => {
     console.error("Error caught:", error, errorInfo);
-    
+
     // You can integrate with error reporting services here
     // Example: Sentry, LogRocket, etc.
   };

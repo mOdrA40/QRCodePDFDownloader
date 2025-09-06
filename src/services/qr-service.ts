@@ -1,19 +1,44 @@
 /**
- * QR Code Generation Service
- * Handles all QR code generation logic with proper error handling and validation
+ * Enhanced QR Code Generation Service
+ * Handles all QR code generation logic with server-side support, browser compatibility,
+ * and proper error handling for LibreWolf and other privacy-focused browsers
  */
 
-import QRCode from "qrcode";
 import type {
-  QROptions,
   QRGenerationConfig,
   QRGenerationResult,
-  QRValidationResult,
   QRMetadata,
+  QROptions,
+  QRValidationResult,
 } from "@/types";
+import QRCode from "qrcode";
+import {
+  RecommendedMethod,
+  browserDetectionService,
+} from "./browser-detection-service";
+import { svgQRService } from "./svg-qr-service";
+
+// Enhanced generation methods enum
+enum QRGenerationMethod {
+  SERVER_SIDE = "server-side",
+  CLIENT_CANVAS = "client-canvas",
+  CLIENT_SVG = "client-svg",
+  FALLBACK = "fallback",
+}
+
+// Browser capability detection interface
+interface BrowserCapabilities {
+  supportsCanvas: boolean;
+  supportsWebGL: boolean;
+  isPrivacyBrowser: boolean;
+  devicePixelRatio: number;
+  userAgent: string;
+}
 
 export class QRService {
   private static instance: QRService;
+  private browserCapabilities: BrowserCapabilities | null = null;
+  private preferredMethod: QRGenerationMethod = QRGenerationMethod.SERVER_SIDE;
 
   public static getInstance(): QRService {
     if (!QRService.instance) {
@@ -23,9 +48,74 @@ export class QRService {
   }
 
   /**
+   * Initialize browser capabilities detection
+   */
+  private initializeBrowserCapabilities(): BrowserCapabilities {
+    if (typeof window === "undefined") {
+      return {
+        supportsCanvas: false,
+        supportsWebGL: false,
+        isPrivacyBrowser: false,
+        devicePixelRatio: 1,
+        userAgent: "server",
+      };
+    }
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const webglCtx =
+      canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+
+    // Detect privacy-focused browsers
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isPrivacyBrowser =
+      userAgent.includes("librewolf") ||
+      userAgent.includes("tor") ||
+      userAgent.includes("brave") ||
+      (userAgent.includes("firefox") && navigator.doNotTrack === "1");
+
+    return {
+      supportsCanvas: !!ctx,
+      supportsWebGL: !!webglCtx,
+      isPrivacyBrowser,
+      devicePixelRatio: window.devicePixelRatio || 1,
+      userAgent: navigator.userAgent,
+    };
+  }
+
+  /**
+   * Determine the best QR generation method using advanced browser detection
+   */
+  private determineBestMethod(): QRGenerationMethod {
+    // Use advanced browser detection service
+    const capabilities = browserDetectionService.detectCapabilities();
+
+    console.log(
+      "Browser capabilities:",
+      browserDetectionService.getCapabilitySummary(),
+    );
+
+    // Map recommended method to our internal enum
+    switch (capabilities.recommendedMethod) {
+      case RecommendedMethod.SERVER_SIDE:
+        return QRGenerationMethod.SERVER_SIDE;
+      case RecommendedMethod.SVG_PURE:
+        return QRGenerationMethod.CLIENT_SVG;
+      case RecommendedMethod.CANVAS_ENHANCED:
+      case RecommendedMethod.CANVAS_BASIC:
+        return QRGenerationMethod.CLIENT_CANVAS;
+      default:
+        return QRGenerationMethod.FALLBACK;
+    }
+  }
+
+  /**
    * Validates QR code input and configuration
    */
-  public validateQRInput(text: string, options?: Partial<QROptions>): QRValidationResult {
+  public validateQRInput(
+    text: string,
+    options?: Partial<QROptions>,
+  ): QRValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
@@ -76,11 +166,12 @@ export class QRService {
   }
 
   /**
-   * Generates QR code with proper DPI handling and error management
+   * Enhanced QR code generation with automatic method selection
+   * Supports server-side generation for maximum browser compatibility
    */
   public async generateQRCode(
     text: string,
-    options: QRGenerationConfig = {}
+    options: QRGenerationConfig = {},
   ): Promise<QRGenerationResult> {
     try {
       // Validate input
@@ -90,7 +181,164 @@ export class QRService {
       }
 
       const config = this.buildQRConfig(options);
-      const dataUrl = await this.generateWithCanvas(text, config);
+      const method = this.determineBestMethod();
+
+      console.log(`Using QR generation method: ${method}`);
+
+      let result: QRGenerationResult;
+
+      switch (method) {
+        case QRGenerationMethod.SERVER_SIDE:
+          result = await this.generateServerSide(text, config);
+          break;
+        case QRGenerationMethod.CLIENT_SVG:
+          result = await this.generateWithSVG(text, config);
+          break;
+        case QRGenerationMethod.CLIENT_CANVAS:
+          result = await this.generateWithCanvas(text, config);
+          break;
+        default:
+          result = await this.generateFallback(text, config);
+          break;
+      }
+
+      return {
+        ...result,
+        method,
+        browserInfo: this.browserCapabilities?.userAgent || "unknown",
+      };
+    } catch (error) {
+      console.error("Primary QR generation failed, trying fallback:", error);
+
+      // Try fallback method if primary fails
+      try {
+        const fallbackResult = await this.generateFallback(
+          text,
+          this.buildQRConfig(options),
+        );
+        return {
+          ...fallbackResult,
+          method: QRGenerationMethod.FALLBACK,
+          browserInfo: this.browserCapabilities?.userAgent || "unknown",
+          warning: "Used fallback method due to primary generation failure",
+        };
+      } catch (fallbackError) {
+        throw new Error(
+          `QR generation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
+      }
+    }
+  }
+
+  /**
+   * Server-side QR generation via API endpoint
+   * Most reliable method for privacy browsers like LibreWolf
+   */
+  private async generateServerSide(
+    text: string,
+    config: QRGenerationConfig,
+  ): Promise<QRGenerationResult> {
+    try {
+      const response = await fetch("/api/qr/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text,
+          size: config.size,
+          margin: config.margin,
+          errorCorrectionLevel: config.errorCorrectionLevel,
+          format: config.format,
+          color: config.color,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Server responded with ${response.status}: ${response.statusText}`,
+        );
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Server-side generation failed");
+      }
+
+      return {
+        dataUrl: result.dataUrl || result.svgString,
+        format: result.format,
+        size: result.size,
+        timestamp: result.timestamp,
+      };
+    } catch (error) {
+      throw new Error(
+        `Server-side generation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+    }
+  }
+
+  /**
+   * Client-side SVG generation (browser-independent)
+   * Uses dedicated SVG service for maximum compatibility with privacy browsers
+   */
+  private async generateWithSVG(
+    text: string,
+    config: QRGenerationConfig,
+  ): Promise<QRGenerationResult> {
+    try {
+      // Use dedicated SVG service for better compatibility
+      return await svgQRService.generateSVGQR(text, config);
+    } catch (error) {
+      // Fallback to basic SVG generation if dedicated service fails
+      try {
+        const svgString = await QRCode.toString(text, {
+          type: "svg",
+          width: config.size || 512,
+          margin: config.margin || 4,
+          errorCorrectionLevel: config.errorCorrectionLevel || "M",
+          color: {
+            dark: config.color?.dark || "#000000",
+            light: config.color?.light || "#ffffff",
+          },
+        });
+
+        // Convert SVG to data URL with proper encoding
+        const dataUrl = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgString)))}`;
+
+        return {
+          dataUrl,
+          format: "svg",
+          size: config.size || 512,
+          timestamp: Date.now(),
+          method: "basic-svg-fallback",
+        };
+      } catch (fallbackError) {
+        throw new Error(
+          `SVG generation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
+      }
+    }
+  }
+
+  /**
+   * Fallback generation method using pure QRCode library
+   */
+  private async generateFallback(
+    text: string,
+    config: QRGenerationConfig,
+  ): Promise<QRGenerationResult> {
+    try {
+      const dataUrl = await QRCode.toDataURL(text, {
+        width: config.size || 512,
+        margin: config.margin || 4,
+        errorCorrectionLevel: config.errorCorrectionLevel || "M",
+        color: {
+          dark: config.color?.dark || "#000000",
+          light: config.color?.light || "#ffffff",
+        },
+      });
 
       return {
         dataUrl,
@@ -99,7 +347,9 @@ export class QRService {
         timestamp: Date.now(),
       };
     } catch (error) {
-      throw new Error(`QR generation failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+      throw new Error(
+        `Fallback generation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   }
 
@@ -108,8 +358,8 @@ export class QRService {
    */
   private async generateWithCanvas(
     text: string,
-    config: QRGenerationConfig
-  ): Promise<string> {
+    config: QRGenerationConfig,
+  ): Promise<QRGenerationResult> {
     return new Promise((resolve, reject) => {
       try {
         const canvas = document.createElement("canvas");
@@ -159,7 +409,13 @@ export class QRService {
                 break;
             }
 
-            resolve(dataUrl);
+            resolve({
+              dataUrl,
+              format: config.format || "png",
+              size: config.size || 512,
+              timestamp: Date.now(),
+              method: "client-canvas",
+            });
           })
           .catch(reject);
       } catch (error) {

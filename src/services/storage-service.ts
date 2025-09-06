@@ -3,12 +3,7 @@
  * Manages localStorage operations with error handling and data validation
  */
 
-import type {
-  QRPreset,
-  UsageStats,
-  UsageEvent,
-  AppConfig,
-} from "@/types";
+import type { AppConfig, QRPreset, UsageEvent, UsageStats } from "@/types";
 
 export class StorageService {
   private static instance: StorageService;
@@ -115,7 +110,9 @@ export class StorageService {
   /**
    * Saves a new QR preset
    */
-  public savePreset(preset: Omit<QRPreset, "id" | "createdAt" | "updatedAt">): boolean {
+  public savePreset(
+    preset: Omit<QRPreset, "id" | "createdAt" | "updatedAt">,
+  ): boolean {
     const presets = this.getPresets();
     const newPreset: QRPreset = {
       ...preset,
@@ -131,10 +128,13 @@ export class StorageService {
   /**
    * Updates an existing preset
    */
-  public updatePreset(id: string, updates: Partial<Omit<QRPreset, "id" | "createdAt">>): boolean {
+  public updatePreset(
+    id: string,
+    updates: Partial<Omit<QRPreset, "id" | "createdAt">>,
+  ): boolean {
     const presets = this.getPresets();
-    const index = presets.findIndex(p => p.id === id);
-    
+    const index = presets.findIndex((p) => p.id === id);
+
     if (index === -1) {
       return false;
     }
@@ -153,7 +153,7 @@ export class StorageService {
    */
   public deletePreset(id: string): boolean {
     const presets = this.getPresets();
-    const filtered = presets.filter(p => p.id !== id);
+    const filtered = presets.filter((p) => p.id !== id);
     return this.setItem(this.keys.presets, filtered);
   }
 
@@ -220,7 +220,7 @@ export class StorageService {
     cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
 
     const filteredEvents = events.filter(
-      event => new Date(event.timestamp) > cutoffDate
+      (event) => new Date(event.timestamp) > cutoffDate,
     );
 
     return this.setItem(this.keys.usageEvents, filteredEvents);
@@ -278,7 +278,11 @@ export class StorageService {
   /**
    * Gets storage usage information
    */
-  public getStorageInfo(): { used: number; available: number; percentage: number } {
+  public getStorageInfo(): {
+    used: number;
+    available: number;
+    percentage: number;
+  } {
     if (!this.isStorageAvailable()) {
       return { used: 0, available: 0, percentage: 0 };
     }

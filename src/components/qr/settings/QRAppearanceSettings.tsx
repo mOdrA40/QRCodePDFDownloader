@@ -5,10 +5,9 @@
 
 "use client";
 
-import React from "react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Tooltip,
   TooltipContent,
@@ -16,6 +15,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useQRContext } from "@/contexts";
 import { getColorThemes } from "@/contexts";
+import React from "react";
 
 export function QRAppearanceSettings() {
   const { state, updateOption } = useQRContext();
@@ -30,9 +30,7 @@ export function QRAppearanceSettings() {
   return (
     <>
       <div>
-        <Label className="text-sm font-medium mb-3 block">
-          Color Presets
-        </Label>
+        <Label className="text-sm font-medium mb-3 block">Color Presets</Label>
         <div className="grid grid-cols-3 gap-2">
           {presetColors.map((preset) => (
             <Tooltip key={preset.name}>
@@ -40,7 +38,9 @@ export function QRAppearanceSettings() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleColorPresetClick(preset.foreground, preset.background)}
+                  onClick={() =>
+                    handleColorPresetClick(preset.foreground, preset.background)
+                  }
                   className="h-12 p-1"
                 >
                   <div
@@ -65,10 +65,7 @@ export function QRAppearanceSettings() {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label
-            htmlFor="foreground"
-            className="text-sm font-medium"
-          >
+          <Label htmlFor="foreground" className="text-sm font-medium">
             Foreground Color
           </Label>
           <div className="flex gap-2 mt-2">
@@ -91,10 +88,7 @@ export function QRAppearanceSettings() {
         </div>
 
         <div>
-          <Label
-            htmlFor="background"
-            className="text-sm font-medium"
-          >
+          <Label htmlFor="background" className="text-sm font-medium">
             Background Color
           </Label>
           <div className="flex gap-2 mt-2">

@@ -7,7 +7,11 @@
 
 import type React from "react";
 import { QRProvider, useQRContext } from "./QRContext";
-import { SettingsProvider, useSettingsContext, getColorThemes } from "./SettingsContext";
+import {
+  SettingsProvider,
+  getColorThemes,
+  useSettingsContext,
+} from "./SettingsContext";
 
 // Combined provider component
 interface AppProvidersProps {
@@ -17,9 +21,7 @@ interface AppProvidersProps {
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <SettingsProvider>
-      <QRProvider>
-        {children}
-      </QRProvider>
+      <QRProvider>{children}</QRProvider>
     </SettingsProvider>
   );
 }
@@ -29,7 +31,6 @@ export {
   // QR Context
   QRProvider,
   useQRContext,
-  
   // Settings Context
   SettingsProvider,
   useSettingsContext,
@@ -40,7 +41,7 @@ export {
 export function useAppContext() {
   const qrContext = useQRContext();
   const settingsContext = useSettingsContext();
-  
+
   return {
     qr: qrContext,
     settings: settingsContext,

@@ -5,15 +5,21 @@
 
 "use client";
 
-import React from "react";
-import { FileText } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DragDropZone } from "@/components/drag-drop-zone";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { DragDropZone } from "@/components/drag-drop-zone";
 import { useQRContext } from "@/contexts";
+import { FileText } from "lucide-react";
+import React from "react";
 
 interface QRControlsProps {
   className?: string;
@@ -39,7 +45,9 @@ export function QRControls({ className }: QRControlsProps) {
   };
 
   return (
-    <Card className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}>
+    <Card
+      className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}
+    >
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2">
           <FileText className="h-5 w-5 text-blue-600" />
@@ -77,9 +85,7 @@ export function QRControls({ className }: QRControlsProps) {
                 onClick={() => handleTextChange(sample)}
                 className="text-xs"
               >
-                {sample.length > 20
-                  ? `${sample.substring(0, 20)}...`
-                  : sample}
+                {sample.length > 20 ? `${sample.substring(0, 20)}...` : sample}
               </Button>
             ))}
           </div>
@@ -100,10 +106,7 @@ export function QRControls({ className }: QRControlsProps) {
           />
         </div>
 
-        <DragDropZone 
-          onTextExtracted={handleTextChange}
-          className="mt-4"
-        />
+        <DragDropZone onTextExtracted={handleTextChange} className="mt-4" />
       </CardContent>
     </Card>
   );

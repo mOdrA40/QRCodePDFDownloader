@@ -5,14 +5,14 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Star } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useQRContext } from "@/contexts";
-import { toast } from "sonner";
 import type { QRPreset } from "@/types";
+import { Star } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 export function QRPresetSettings() {
   const { savePreset, loadPreset, deletePreset, getPresets } = useQRContext();
@@ -27,7 +27,7 @@ export function QRPresetSettings() {
     };
 
     loadSavedPresets();
-    
+
     // Set up interval to refresh presets (in case they're modified elsewhere)
     const interval = setInterval(loadSavedPresets, 1000);
     return () => clearInterval(interval);

@@ -1,16 +1,24 @@
 "use client";
 
-import React, { memo } from "react";
-import { BarChart3, TrendingUp, Clock, Zap } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useUsageStats } from "@/hooks";
+import { BarChart3, Clock, TrendingUp, Zap } from "lucide-react";
+import React, { memo } from "react";
 
 interface UsageStatsProps {
   className?: string;
 }
 
-export const UsageStats = memo(function UsageStats({ className }: UsageStatsProps) {
+export const UsageStats = memo(function UsageStats({
+  className,
+}: UsageStatsProps) {
   const { stats, isLoading, error } = useUsageStats();
 
   const formatNumber = (num: number): string => {
@@ -22,7 +30,9 @@ export const UsageStats = memo(function UsageStats({ className }: UsageStatsProp
 
   if (error) {
     return (
-      <Card className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}>
+      <Card
+        className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}
+      >
         <CardContent className="p-6">
           <div className="text-center text-red-500">
             <p className="text-sm">Failed to load usage statistics</p>
@@ -33,7 +43,9 @@ export const UsageStats = memo(function UsageStats({ className }: UsageStatsProp
   }
 
   return (
-    <Card className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}>
+    <Card
+      className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}
+    >
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2">
           <BarChart3 className="h-5 w-5 text-emerald-600" />

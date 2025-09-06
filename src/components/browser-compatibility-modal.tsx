@@ -67,77 +67,91 @@ export function BrowserCompatibilityModal({
   const getBrowserIcon = (type: BrowserType) => {
     switch (type) {
       case BrowserType.LIBREWOLF:
-        return <Shield className="h-5 w-5 text-blue-600" />;
+        return <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />;
       case BrowserType.FIREFOX:
-        return <Monitor className="h-5 w-5 text-orange-600" />;
+        return <Monitor className="h-5 w-5 text-orange-600 dark:text-orange-400" />;
       case BrowserType.CHROME:
-        return <Monitor className="h-5 w-5 text-green-600" />;
+        return <Monitor className="h-5 w-5 text-green-600 dark:text-green-400" />;
       case BrowserType.SAFARI:
-        return <Monitor className="h-5 w-5 text-blue-500" />;
+        return <Monitor className="h-5 w-5 text-blue-500 dark:text-blue-400" />;
       case BrowserType.BRAVE:
-        return <Shield className="h-5 w-5 text-orange-500" />;
+        return <Shield className="h-5 w-5 text-orange-500 dark:text-orange-400" />;
       case BrowserType.TOR:
-        return <Shield className="h-5 w-5 text-purple-600" />;
+        return <Shield className="h-5 w-5 text-purple-600 dark:text-purple-400" />;
       default:
-        return <Monitor className="h-5 w-5 text-gray-600" />;
+        return <Monitor className="h-5 w-5 text-gray-600 dark:text-gray-400" />;
     }
   };
 
   const getPrivacyBadgeColor = (level: PrivacyLevel) => {
     switch (level) {
       case PrivacyLevel.HIGH:
-        return "bg-red-100 text-red-800 border-red-200";
+        return "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800";
       case PrivacyLevel.MEDIUM:
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        return "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800";
       case PrivacyLevel.LOW:
-        return "bg-green-100 text-green-800 border-green-200";
+        return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700";
     }
   };
 
   const getCompatibilityStatus = () => {
     if (capabilities.type === BrowserType.LIBREWOLF) {
       return {
-        icon: <CheckCircle className="h-5 w-5 text-green-600" />,
+        icon: <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />,
         text: "LibreWolf Optimized",
         description:
           "This application is fully optimized for LibreWolf browser",
-        severity: "success",
+        severity: "success" as const,
       };
     }
 
     if (capabilities.isPrivacyBrowser) {
       return {
-        icon: <Shield className="h-5 w-5 text-blue-600" />,
+        icon: <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />,
         text: "Privacy Browser Detected",
         description:
           "Enhanced compatibility mode will be used for optimal performance",
-        severity: "info",
+        severity: "info" as const,
       };
     }
 
     if (!capabilities.supportsCanvas) {
       return {
-        icon: <AlertTriangle className="h-5 w-5 text-yellow-600" />,
+        icon: <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />,
         text: "Limited Canvas Support",
         description:
           "Canvas operations are blocked. SVG fallback will be used.",
-        severity: "warning",
+        severity: "warning" as const,
       };
     }
 
     return {
-      icon: <CheckCircle className="h-5 w-5 text-green-600" />,
+      icon: <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />,
       text: "Fully Compatible",
       description: "All features are available and working optimally",
-      severity: "success",
+      severity: "success" as const,
     };
   };
 
   const status = getCompatibilityStatus();
   const recommendations =
     browserDetectionService.getOptimizationRecommendations();
+
+  // Get alert styling based on severity with proper dark mode support
+  const getAlertStyling = (severity: "success" | "warning" | "info") => {
+    switch (severity) {
+      case "success":
+        return "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/30";
+      case "warning":
+        return "border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950/30";
+      case "info":
+        return "border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30";
+      default:
+        return "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/30";
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -176,23 +190,21 @@ export function BrowserCompatibilityModal({
           </div>
 
           {/* Status Alert */}
-          <Alert
-            className={`border-${status.severity === "success" ? "green" : status.severity === "warning" ? "yellow" : "blue"}-200 bg-${status.severity === "success" ? "green" : status.severity === "warning" ? "yellow" : "blue"}-50`}
-          >
+          <Alert className={getAlertStyling(status.severity)}>
             {status.icon}
             <AlertDescription>
               <div>
-                <p className="font-medium">{status.text}</p>
-                <p className="text-sm">{status.description}</p>
+                <p className="font-medium text-foreground">{status.text}</p>
+                <p className="text-sm text-muted-foreground">{status.description}</p>
               </div>
             </AlertDescription>
           </Alert>
 
           {/* LibreWolf Specific Message */}
           {capabilities.type === BrowserType.LIBREWOLF && (
-            <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
               <div className="flex items-start gap-2">
-                <Shield className="h-4 w-4 text-blue-600 mt-0.5" />
+                <Shield className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
                     LibreWolf Detected
@@ -209,11 +221,11 @@ export function BrowserCompatibilityModal({
           {/* Recommendations */}
           {recommendations.length > 0 && (
             <div className="space-y-2">
-              <h4 className="text-sm font-medium">Optimizations Applied:</h4>
+              <h4 className="text-sm font-medium text-foreground">Optimizations Applied:</h4>
               <ul className="space-y-1">
                 {recommendations.slice(0, 3).map((rec) => (
-                  <li key={rec} className="flex items-start gap-2 text-xs">
-                    <CheckCircle className="h-3 w-3 text-green-600 mt-0.5 flex-shrink-0" />
+                  <li key={rec} className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <CheckCircle className="h-3 w-3 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
                     <span>{rec}</span>
                   </li>
                 ))}
@@ -222,36 +234,49 @@ export function BrowserCompatibilityModal({
           )}
 
           {/* Capabilities Summary */}
-          <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
               {capabilities.supportsCanvas ? (
-                <CheckCircle className="h-3 w-3 text-green-600" />
+                <CheckCircle className="h-3 w-3 text-green-600 dark:text-green-400" />
               ) : (
-                <X className="h-3 w-3 text-red-600" />
+                <X className="h-3 w-3 text-red-600 dark:text-red-400" />
               )}
               <span>Canvas</span>
             </div>
             <div className="flex items-center gap-1">
               {capabilities.features.localStorageEnabled ? (
-                <CheckCircle className="h-3 w-3 text-green-600" />
+                <CheckCircle className="h-3 w-3 text-green-600 dark:text-green-400" />
               ) : (
-                <X className="h-3 w-3 text-red-600" />
+                <X className="h-3 w-3 text-red-600 dark:text-red-400" />
               )}
               <span>Storage</span>
             </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-2 pt-4">
-          <Button variant="outline" onClick={onClose} className="flex-1">
-            Cancel
-          </Button>
-          <Button onClick={onContinue} className="flex-1">
-            <Download className="h-4 w-4 mr-2" />
-            Continue Download
-          </Button>
-        </div>
+        {/* Action Buttons - Only show for browsers that can actually generate good PDFs */}
+        {capabilities.supportsCanvas && !capabilities.isPrivacyBrowser && (
+          <div className="flex gap-2 pt-4">
+            <Button variant="outline" onClick={onClose} className="flex-1">
+              Cancel
+            </Button>
+            <Button onClick={onContinue} className="flex-1">
+              <Download className="h-4 w-4 mr-2" />
+              Continue Download
+            </Button>
+          </div>
+        )}
+
+        {(!capabilities.supportsCanvas || capabilities.isPrivacyBrowser) && (
+          <div className="pt-4 text-center">
+            <p className="text-sm text-muted-foreground mb-3">
+              {capabilities.type === BrowserType.LIBREWOLF
+                ? "LibreWolf's privacy settings prevent optimal PDF generation. Please use image download instead."
+                : "Your browser's privacy settings may prevent optimal PDF generation. Please try image download instead."
+              }
+            </p>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

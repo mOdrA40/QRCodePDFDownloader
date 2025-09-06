@@ -33,7 +33,6 @@ export function QRExportSettings() {
     "png",
     "jpeg",
     "webp",
-    "svg",
   ]);
 
   // Detect browser capabilities and adjust available formats
@@ -54,8 +53,13 @@ export function QRExportSettings() {
           updateOption("format", "svg");
         }
       } else {
-        // For compatible browsers, offer all formats
-        formats = ["png", "jpeg", "webp", "svg"];
+        // For compatible browsers, offer PNG, JPEG, WebP (remove SVG)
+        formats = ["png", "jpeg", "webp"];
+
+        // Auto-switch from SVG to PNG if current format is SVG for normal browsers
+        if (options.format === "svg") {
+          updateOption("format", "png");
+        }
       }
 
       setAvailableFormats(formats);
@@ -127,7 +131,7 @@ export function QRExportSettings() {
         <p className="text-xs text-muted-foreground mt-1">
           {browserCapabilities?.isPrivacyBrowser
             ? "SVG format automatically selected for optimal compatibility with your privacy browser."
-            : "PNG provides the best quality. SVG is recommended for LibreWolf and privacy browsers."}
+            : "PNG provides the best quality for most use cases."}
         </p>
 
         {/* Browser-specific notice */}
@@ -190,18 +194,28 @@ export function QRExportSettings() {
       <div className="pt-4 border-t border-border">
         <h4 className="text-sm font-medium mb-2">Export Quality</h4>
         <div className="space-y-2 text-xs text-muted-foreground">
-          <div className="flex justify-between">
-            <span>PNG:</span>
-            <span>Lossless, best quality</span>
-          </div>
-          <div className="flex justify-between">
-            <span>JPEG:</span>
-            <span>Smaller file, slight compression</span>
-          </div>
-          <div className="flex justify-between">
-            <span>WebP:</span>
-            <span>Modern format, good compression</span>
-          </div>
+          {!browserCapabilities?.isPrivacyBrowser && (
+            <>
+              <div className="flex justify-between">
+                <span>PNG:</span>
+                <span>Lossless, best quality</span>
+              </div>
+              <div className="flex justify-between">
+                <span>JPEG:</span>
+                <span>Smaller file, slight compression</span>
+              </div>
+              <div className="flex justify-between">
+                <span>WebP:</span>
+                <span>Modern format, good compression</span>
+              </div>
+            </>
+          )}
+          {browserCapabilities?.isPrivacyBrowser && (
+            <div className="flex justify-between">
+              <span>SVG:</span>
+              <span>Vector format, privacy-optimized</span>
+            </div>
+          )}
         </div>
       </div>
     </>

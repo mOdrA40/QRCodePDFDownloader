@@ -5,19 +5,20 @@
 
 "use client";
 
+import { Star } from "lucide-react";
+import { useEffect, useId, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useQRContext } from "@/contexts";
 import type { QRPreset } from "@/types";
-import { Star } from "lucide-react";
-import React, { useState, useEffect } from "react";
-import { toast } from "sonner";
 
 export function QRPresetSettings() {
   const { savePreset, loadPreset, deletePreset, getPresets } = useQRContext();
   const [presetName, setPresetName] = useState("");
   const [savedPresets, setSavedPresets] = useState<QRPreset[]>([]);
+  const presetNameId = useId();
 
   // Load presets on mount and when presets change
   useEffect(() => {
@@ -62,12 +63,12 @@ export function QRPresetSettings() {
   return (
     <>
       <div>
-        <Label htmlFor="preset-name" className="text-sm font-medium">
+        <Label htmlFor={presetNameId} className="text-sm font-medium">
           Save Current Configuration
         </Label>
         <div className="flex gap-2 mt-2">
           <Input
-            id="preset-name"
+            id={presetNameId}
             placeholder="Enter preset name..."
             value={presetName}
             onChange={(e) => setPresetName(e.target.value)}

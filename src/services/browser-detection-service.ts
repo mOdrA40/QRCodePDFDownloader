@@ -172,7 +172,7 @@ export class BrowserDetectionService {
     }
 
     const match = userAgent.match(versionRegex);
-    return match ? match[1] : "unknown";
+    return match ? (match[1] ?? "unknown") : "unknown";
   }
 
   /**
@@ -180,7 +180,7 @@ export class BrowserDetectionService {
    */
   private detectPrivacyLevel(
     browserType: BrowserType,
-    userAgent: string,
+    _userAgent: string,
   ): PrivacyLevel {
     switch (browserType) {
       case BrowserType.LIBREWOLF:

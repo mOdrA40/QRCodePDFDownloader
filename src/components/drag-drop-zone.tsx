@@ -1,9 +1,8 @@
 "use client";
 
-import { useFileHandler } from "@/hooks";
 import { FileText, Image as ImageIcon, Link, Upload } from "lucide-react";
-import type React from "react";
 import { memo } from "react";
+import { useFileHandler } from "@/hooks";
 
 interface DragDropZoneProps {
   onTextExtracted: (text: string) => void;
@@ -25,12 +24,13 @@ export const DragDropZone = memo(function DragDropZone({
   const { isDragOver } = dragDropState;
 
   return (
-    <div
+    <button
+      type="button"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className={`
-        border-2 border-dashed rounded-lg p-6 text-center transition-colors
+        border-2 border-dashed rounded-lg p-6 text-center transition-colors w-full
         ${
           isDragOver
             ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20"
@@ -87,6 +87,6 @@ export const DragDropZone = memo(function DragDropZone({
           </div>
         </div>
       </div>
-    </div>
+    </button>
   );
 });

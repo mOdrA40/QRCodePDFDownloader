@@ -5,6 +5,9 @@
 
 "use client";
 
+import { Image, QrCode } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import { memo, type RefObject, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -15,9 +18,6 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { useQRContext } from "@/contexts";
 import { useIntersectionObserver } from "@/lib/performance";
-import { Image, QrCode } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
-import { type RefObject, memo, useMemo } from "react";
 
 interface QRPreviewProps {
   className?: string;

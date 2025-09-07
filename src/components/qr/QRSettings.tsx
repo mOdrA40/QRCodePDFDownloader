@@ -5,10 +5,9 @@
 
 "use client";
 
+import { Download, Palette, Settings, Star } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Download, Palette, Settings, Star } from "lucide-react";
-import React from "react";
 import { QRAppearanceSettings } from "./settings/QRAppearanceSettings";
 import { QRExportSettings } from "./settings/QRExportSettings";
 import { QRPresetSettings } from "./settings/QRPresetSettings";

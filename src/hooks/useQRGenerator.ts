@@ -3,6 +3,8 @@
  * Manages QR code generation state and operations
  */
 
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { qrService } from "@/services";
 import type {
   ComponentState,
@@ -10,8 +12,6 @@ import type {
   QROptions,
   QRValidationResult,
 } from "@/types";
-import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
 
 interface UseQRGeneratorReturn {
   // State
@@ -175,6 +175,7 @@ export function useQRGenerator(
     }
     setQrDataUrl("");
     setState("idle");
+    return undefined;
   }, [qrOptions.text, generateQRCode]);
 
   // Validate input when options change

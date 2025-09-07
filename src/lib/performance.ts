@@ -47,9 +47,9 @@ export function useLazyLoad<T>(
  */
 export function useIntersectionObserver(
   options: IntersectionObserverInit = {},
-): [React.RefObject<HTMLElement>, boolean] {
+): [React.RefObject<HTMLElement | null>, boolean] {
   const [isIntersecting, setIsIntersecting] = useState(false);
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     // Check if we're in a browser environment
@@ -67,7 +67,7 @@ export function useIntersectionObserver(
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsIntersecting(entry.isIntersecting);
+        setIsIntersecting(entry?.isIntersecting ?? false);
       },
       {
         threshold: 0.1,
@@ -132,11 +132,14 @@ export function useThrottle<T>(value: T, limit: number): T {
 
 /**
  * Custom hook for memoized expensive calculations
+ * Note: This is intentionally designed to accept dependencies as a parameter
+ * for reusable expensive calculation logic
  */
 export function useExpensiveCalculation<T>(
   calculation: () => T,
   dependencies: React.DependencyList,
 ): T {
+  // biome-ignore lint/correctness/useExhaustiveDependencies: This is a utility function that intentionally accepts dependencies as parameter
   return useMemo(calculation, dependencies);
 }
 
@@ -144,7 +147,7 @@ export function useExpensiveCalculation<T>(
  * Custom hook for performance monitoring
  */
 export function usePerformanceMonitor(name: string) {
-  const startTime = useRef<number>();
+  const startTime = useRef<number | undefined>(undefined);
 
   const start = useCallback(() => {
     startTime.current = performance.now();

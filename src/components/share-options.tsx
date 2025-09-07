@@ -1,5 +1,8 @@
 "use client";
 
+import { Copy, ExternalLink, Mail, MessageCircle, Share2 } from "lucide-react";
+import { memo, useCallback } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,9 +12,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Copy, ExternalLink, Mail, MessageCircle, Share2 } from "lucide-react";
-import React, { memo, useCallback } from "react";
-import { toast } from "sonner";
 
 interface ShareOptionsProps {
   qrDataUrl: string;

@@ -3,15 +3,14 @@
  * Manages usage tracking and analytics
  */
 
+import { useCallback, useEffect, useState } from "react";
 import { storageService } from "@/services";
 import type {
   QRErrorCorrectionLevel,
   QRImageFormat,
   UsageAnalytics,
-  UsageEvent,
   UsageStats,
 } from "@/types";
-import { useCallback, useEffect, useState } from "react";
 
 interface UseUsageStatsReturn {
   stats: UsageStats;
@@ -217,7 +216,7 @@ export function useUsageStats(): UseUsageStatsReturn {
 
         storageService.recordUsageEvent({
           type: type === "pdf" ? "pdf_downloaded" : "image_downloaded",
-          metadata: { format },
+          metadata: { format: format ?? "unknown" },
         });
 
         setAnalytics(calculateAnalytics());

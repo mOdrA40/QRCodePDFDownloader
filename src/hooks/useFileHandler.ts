@@ -3,6 +3,8 @@
  * Manages file operations including drag & drop, validation, and processing
  */
 
+import { useCallback, useRef, useState } from "react";
+import { toast } from "sonner";
 import { fileService } from "@/services";
 import type {
   DownloadOptions,
@@ -11,8 +13,6 @@ import type {
   FileProcessingResult,
   FileValidationResult,
 } from "@/types";
-import { useCallback, useRef, useState } from "react";
-import { toast } from "sonner";
 
 interface UseFileHandlerReturn {
   // State
@@ -80,6 +80,95 @@ export function useFileHandler(
   }, []);
 
   /**
+   * Validates a single file
+   */
+  const validateFile = useCallback((file: File): FileValidationResult => {
+    return fileService.validateFile(file);
+  }, []);
+
+  /**
+   * Processes multiple files
+   */
+  const processFiles = useCallback(
+    async (files: FileList | File[]): Promise<FileProcessingResult[]> => {
+      setIsProcessing(true);
+      setError(null);
+
+      const fileArray = Array.from(files);
+      const results: FileProcessingResult[] = [];
+
+      for (const file of fileArray) {
+        try {
+          const validation = validateFile(file);
+
+          if (!validation.isValid) {
+            results.push({
+              file,
+              success: false,
+              error: validation.errors.join(", "),
+              validation,
+              fileInfo: {
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                lastModified: new Date(file.lastModified),
+              },
+            });
+            continue;
+          }
+
+          // Process file based on type
+          const result = await fileService.processFile(file);
+          results.push({
+            file,
+            success: result.success,
+            data: result.data,
+            error: result.error,
+            validation,
+            fileInfo: {
+              name: file.name,
+              size: file.size,
+              type: file.type,
+              lastModified: new Date(file.lastModified),
+            },
+          });
+
+          // Extract text if callback provided
+          if (result.success && result.data && onTextExtracted) {
+            if (typeof result.data === "string") {
+              onTextExtracted(result.data);
+            } else if (result.data.text) {
+              onTextExtracted(result.data.text);
+            }
+          }
+        } catch (error) {
+          results.push({
+            file,
+            success: false,
+            error: error instanceof Error ? error.message : "Unknown error",
+            validation: {
+              isValid: false,
+              errors: ["Processing failed"],
+              warnings: [],
+              fileInfo: { name: file.name, size: file.size, type: file.type },
+            },
+            fileInfo: {
+              name: file.name,
+              size: file.size,
+              type: file.type,
+              lastModified: new Date(file.lastModified),
+            },
+          });
+        }
+      }
+
+      setIsProcessing(false);
+      return results;
+    },
+    [onTextExtracted, validateFile],
+  );
+
+  /**
    * Handles file drop event
    */
   const handleDrop = useCallback(
@@ -124,64 +213,7 @@ export function useFileHandler(
         draggedFiles: [],
       }));
     },
-    [maxFiles, onTextExtracted],
-  );
-
-  /**
-   * Validates a single file
-   */
-  const validateFile = useCallback((file: File): FileValidationResult => {
-    return fileService.validateFile(file);
-  }, []);
-
-  /**
-   * Processes multiple files
-   */
-  const processFiles = useCallback(
-    async (files: FileList | File[]): Promise<FileProcessingResult[]> => {
-      setIsProcessing(true);
-      setError(null);
-
-      const fileArray = Array.from(files);
-      const results: FileProcessingResult[] = [];
-
-      try {
-        for (const file of fileArray) {
-          // Validate file first
-          const validation = validateFile(file);
-          if (!validation.isValid) {
-            const errorMsg = `File "${file.name}": ${validation.errors.join(", ")}`;
-            setError(errorMsg);
-            toast.error(errorMsg);
-            continue;
-          }
-
-          // Process file
-          const result = await fileService.processFile(file);
-          results.push(result);
-          setLastProcessedFile(result);
-
-          if (result.success && result.extractedText && onTextExtracted) {
-            onTextExtracted(result.extractedText);
-            toast.success(`Text extracted from ${file.name}`);
-          } else if (!result.success) {
-            const errorMsg = result.error || "Failed to process file";
-            setError(errorMsg);
-            toast.error(`Failed to process ${file.name}: ${errorMsg}`);
-          }
-        }
-      } catch (err) {
-        const errorMsg =
-          err instanceof Error ? err.message : "File processing failed";
-        setError(errorMsg);
-        toast.error(errorMsg);
-      } finally {
-        setIsProcessing(false);
-      }
-
-      return results;
-    },
-    [validateFile, onTextExtracted],
+    [maxFiles, onTextExtracted, processFiles],
   );
 
   /**

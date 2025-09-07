@@ -105,7 +105,10 @@ export class SVGQRService {
       for (let row = 0; row < moduleCount; row++) {
         modules[row] = [];
         for (let col = 0; col < moduleCount; col++) {
-          modules[row][col] = qr.isDark(row, col);
+          const moduleRow = modules[row];
+          if (moduleRow) {
+            moduleRow[col] = qr.isDark(row, col);
+          }
         }
       }
 
@@ -139,7 +142,7 @@ export class SVGQRService {
     // QR modules
     for (let row = 0; row < matrix.size; row++) {
       for (let col = 0; col < matrix.size; col++) {
-        if (matrix.modules[row][col]) {
+        if (matrix.modules[row]?.[col]) {
           const x = actualMargin + col * cellSize;
           const y = actualMargin + row * cellSize;
           svgContent += `<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" fill="${darkColor}"/>`;
@@ -166,7 +169,7 @@ export class SVGQRService {
   /**
    * Enhance SVG with better styling and accessibility
    */
-  private enhanceSVG(svgString: string, options: SVGQROptions): string {
+  private enhanceSVG(svgString: string, _options: SVGQROptions): string {
     // Add accessibility attributes and better styling
     return svgString
       .replace("<svg", `<svg role="img" aria-label="QR Code"`)

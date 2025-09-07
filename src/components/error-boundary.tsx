@@ -1,5 +1,8 @@
 "use client";
 
+import { AlertTriangle, Bug, Home, RefreshCw } from "lucide-react";
+import type React from "react";
+import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,9 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { AlertTriangle, Bug, Home, RefreshCw } from "lucide-react";
-import type React from "react";
-import { Component, type ErrorInfo, type ReactNode } from "react";
 
 interface Props {
   children: ReactNode;

@@ -5,6 +5,9 @@
 
 "use client";
 
+import { Download, FileText, Image, Palette, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { BrowserCompatibilityModal } from "@/components/browser-compatibility-modal";
 import { ShareOptions } from "@/components/share-options";
 import { Button } from "@/components/ui/button";
@@ -24,9 +27,6 @@ import {
 } from "@/components/ui/select";
 import { useQRContext, useSettingsContext } from "@/contexts";
 import { browserDetectionService, fileService, pdfService } from "@/services";
-import { Download, FileText, Image, Palette, Zap } from "lucide-react";
-import React, { useState, useEffect } from "react";
-import { toast } from "sonner";
 
 interface QRExportProps {
   className?: string;
@@ -100,13 +100,28 @@ export function QRExport({ className }: QRExportProps) {
     theme: "modern" | "elegant" | "professional",
   ) => {
     try {
-      const result = await pdfService.generatePDF(qrDataUrl, options.text, {
+      const pdfOptions: {
+        title: string;
+        author: string;
+        subject: string;
+        theme: "modern" | "elegant" | "professional";
+        password?: string;
+      } = {
         title: "QR Code Document",
         author: "QR PDF Generator Pro",
         subject: "Generated QR Code with Enhanced Design",
         theme,
-        password: options.enablePdfPassword ? options.pdfPassword : undefined,
-      });
+      };
+
+      if (options.enablePdfPassword && options.pdfPassword) {
+        pdfOptions.password = options.pdfPassword;
+      }
+
+      const result = await pdfService.generatePDF(
+        qrDataUrl,
+        options.text,
+        pdfOptions,
+      );
 
       if (!result.success) {
         toast.error(result.error || "Failed to generate PDF");

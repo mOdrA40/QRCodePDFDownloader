@@ -5,28 +5,33 @@
 
 "use client";
 
+import Image from "next/image";
+import { memo, type RefObject, useState } from "react";
 import { useIntersectionObserver } from "@/lib/performance";
 import { cn } from "@/lib/utils";
-import type React from "react";
-import { type RefObject, memo, useState } from "react";
 
-interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+interface LazyImageProps {
   src: string;
   alt: string;
+  width?: number;
+  height?: number;
   fallback?: string;
   placeholder?: React.ReactNode;
   className?: string;
   containerClassName?: string;
+  priority?: boolean;
 }
 
 export const LazyImage = memo(function LazyImage({
   src,
   alt,
+  width = 500,
+  height = 300,
   fallback = "/placeholder.svg",
   placeholder,
   className,
   containerClassName,
-  ...props
+  priority = false,
 }: LazyImageProps) {
   const [ref, isIntersecting] = useIntersectionObserver({
     threshold: 0.1,
@@ -51,9 +56,12 @@ export const LazyImage = memo(function LazyImage({
       className={cn("relative overflow-hidden bg-muted", containerClassName)}
     >
       {isIntersecting && (
-        <img
+        <Image
           src={hasError ? fallback : src}
           alt={alt}
+          width={width}
+          height={height}
+          priority={priority}
           onLoad={handleLoad}
           onError={handleError}
           className={cn(
@@ -61,7 +69,6 @@ export const LazyImage = memo(function LazyImage({
             isLoaded ? "opacity-100" : "opacity-0",
             className,
           )}
-          {...props}
         />
       )}
 

@@ -3,17 +3,17 @@
  * Central export point for all service modules
  */
 
-export { QRService, qrService } from "./qr-service";
-export { PDFService, pdfService } from "./pdf-service";
-export { FileService, fileService } from "./file-service";
-export { StorageService, storageService } from "./storage-service";
-export { geolocationService } from "./geolocation-service";
-export { SVGQRService, svgQRService } from "./svg-qr-service";
 export {
   BrowserDetectionService,
   browserDetectionService,
 } from "./browser-detection-service";
+export { FileService, fileService } from "./file-service";
+export { geolocationService } from "./geolocation-service";
+export { PDFService, pdfService } from "./pdf-service";
 export { QRDataValidator, qrDataValidator } from "./qr-data-validator";
+export { QRService, qrService } from "./qr-service";
+export { StorageService, storageService } from "./storage-service";
+export { SVGQRService, svgQRService } from "./svg-qr-service";
 
 // Service registry for dependency injection (if needed in the future)
 const services = new Map<string, unknown>();

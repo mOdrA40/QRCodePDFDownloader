@@ -5,6 +5,7 @@
 
 "use client";
 
+import { useId } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -18,11 +19,11 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { useQRContext } from "@/contexts";
 import type { QRErrorCorrectionLevel } from "@/types";
-import React from "react";
 
 export function QRTechnicalSettings() {
   const { state, updateOption } = useQRContext();
   const { options } = state;
+  const logoBackgroundId = useId();
 
   const handleSizePresetClick = (size: number) => {
     updateOption("size", size);
@@ -46,7 +47,7 @@ export function QRTechnicalSettings() {
         </Label>
         <Slider
           value={[options.size]}
-          onValueChange={(value) => updateOption("size", value[0])}
+          onValueChange={(value) => updateOption("size", value[0] ?? 256)}
           max={1024}
           min={128}
           step={16}
@@ -115,7 +116,7 @@ export function QRTechnicalSettings() {
         </Label>
         <Slider
           value={[options.margin]}
-          onValueChange={(value) => updateOption("margin", value[0])}
+          onValueChange={(value) => updateOption("margin", value[0] ?? 4)}
           max={10}
           min={0}
           step={1}
@@ -161,11 +162,11 @@ export function QRTechnicalSettings() {
 
       <div className="flex items-center space-x-2">
         <Switch
-          id="logo-background"
-          checked={options.logoBackground}
+          id={logoBackgroundId}
+          checked={options.logoBackground ?? false}
           onCheckedChange={(checked) => updateOption("logoBackground", checked)}
         />
-        <Label htmlFor="logo-background" className="text-sm font-medium">
+        <Label htmlFor={logoBackgroundId} className="text-sm font-medium">
           White Background for Logo
         </Label>
       </div>

@@ -6,7 +6,7 @@
 "use client";
 
 import { AlertTriangle, RefreshCw } from "lucide-react";
-import React, { Component, type ErrorInfo, type ReactNode } from "react";
+import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Button } from "./button";
 import {
   Card,
@@ -24,8 +24,8 @@ interface Props {
 
 interface State {
   hasError: boolean;
-  error?: Error;
-  errorInfo?: ErrorInfo;
+  error?: Error | undefined;
+  errorInfo?: ErrorInfo | undefined;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -51,7 +51,11 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   handleReset = () => {
-    this.setState({ hasError: false, error: undefined, errorInfo: undefined });
+    this.setState({
+      hasError: false,
+      error: undefined as Error | undefined,
+      errorInfo: undefined as ErrorInfo | undefined,
+    });
   };
 
   render() {

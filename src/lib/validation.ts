@@ -257,12 +257,14 @@ export function validatePDFOptions(
   }
 
   const sanitizedOptions: PDFGenerationOptions = {
-    title: options.title ? sanitizeText(options.title) : undefined,
-    author: options.author ? sanitizeText(options.author) : undefined,
-    subject: options.subject ? sanitizeText(options.subject) : undefined,
-    keywords: options.keywords?.map((k) => sanitizeText(k)) || undefined,
-    password: options.password || undefined,
-    permissions: options.permissions || undefined,
+    ...(options.title && { title: sanitizeText(options.title) }),
+    ...(options.author && { author: sanitizeText(options.author) }),
+    ...(options.subject && { subject: sanitizeText(options.subject) }),
+    ...(options.keywords && {
+      keywords: options.keywords.map((k) => sanitizeText(k)),
+    }),
+    ...(options.password && { password: options.password }),
+    ...(options.permissions && { permissions: options.permissions }),
     pageSize: options.pageSize || "a4",
     orientation: options.orientation || "portrait",
     margins: options.margins || { top: 20, right: 20, bottom: 20, left: 20 },

@@ -3,14 +3,14 @@
  * Central export point for all custom hooks
  */
 
-export { useQRGenerator } from "./useQRGenerator";
+export { useFileHandler } from "./useFileHandler";
 export {
+  useAppSettings,
   useLocalStorage,
   useQRPresets,
-  useAppSettings,
 } from "./useLocalStorage";
+export { useQRGenerator } from "./useQRGenerator";
 export { useUsageStats } from "./useUsageStats";
-export { useFileHandler } from "./useFileHandler";
 
 // Re-export commonly used hook types
 // export type { UseLocalStorageReturn } from "./useLocalStorage";
@@ -40,7 +40,7 @@ export const hookUtils = {
    * Previous value hook for comparison
    */
   usePrevious: <T>(value: T): T | undefined => {
-    const ref = React.useRef<T>();
+    const ref = React.useRef<T | undefined>(undefined);
     React.useEffect(() => {
       ref.current = value;
     });

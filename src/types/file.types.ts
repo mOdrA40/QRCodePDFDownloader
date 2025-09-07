@@ -18,8 +18,11 @@ export type SupportedFileType =
 // File processing result
 export interface FileProcessingResult {
   success: boolean;
-  extractedText?: string;
-  error?: string;
+  extractedText?: string | undefined;
+  error?: string | undefined;
+  file?: File | undefined;
+  data?: string | { text: string } | undefined;
+  validation?: FileValidationResult | undefined;
   fileInfo: {
     name: string;
     size: number;

@@ -108,7 +108,7 @@ export class QRDataValidator {
       );
     }
 
-    const mimeType = mimeMatch[1];
+    const mimeType = mimeMatch[1] ?? "application/octet-stream";
     const format = this.extractFormatFromMimeType(mimeType);
 
     // Validate base64 data
@@ -117,7 +117,7 @@ export class QRDataValidator {
       return this.createValidationResult(
         false,
         format,
-        mimeType,
+        mimeType ?? "application/octet-stream",
         0,
         true,
         errors,
@@ -148,7 +148,7 @@ export class QRDataValidator {
     return this.createValidationResult(
       errors.length === 0,
       format,
-      mimeType,
+      mimeType ?? "application/octet-stream",
       size,
       isCorrupted,
       errors,
@@ -235,7 +235,7 @@ export class QRDataValidator {
   private async convertToPNG(
     dataUrl: string,
     validation: DataURLValidationResult,
-    options: ConversionOptions,
+    _options: ConversionOptions,
   ): Promise<ConversionResult> {
     if (typeof window === "undefined") {
       // Server-side conversion not available, fallback to SVG
@@ -365,7 +365,7 @@ export class QRDataValidator {
    * Ultimate fallback to SVG
    */
   private async convertToSVGFallback(
-    dataUrl: string,
+    _dataUrl: string,
   ): Promise<ConversionResult> {
     try {
       // Create a simple SVG with error message
@@ -441,7 +441,7 @@ export class QRDataValidator {
   }
 
   private validateFormatSpecific(
-    base64Data: string,
+    _base64Data: string,
     format: string,
   ): { errors: string[]; warnings: string[] } {
     const errors: string[] = [];

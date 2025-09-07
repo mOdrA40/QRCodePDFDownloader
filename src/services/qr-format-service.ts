@@ -193,7 +193,7 @@ export class QRFormatService {
     }
 
     // Generate optimized format (clean phone number)
-    const cleanPhone = phoneNumber.replace(/[\s\-\(\)]/g, "");
+    const cleanPhone = phoneNumber.replace(/[\s\-()]/g, "");
     const optimizedFormat = `tel:${cleanPhone}`;
 
     return {
@@ -402,7 +402,7 @@ export class QRFormatService {
   }
 
   private isValidPhoneNumber(phone: string): boolean {
-    const phoneRegex = /^[\+]?[\d\s\-\(\)]{7,}$/;
+    const phoneRegex = /^[+]?[\d\s\-()]{7,}$/;
     return phoneRegex.test(phone);
   }
 }

@@ -22,7 +22,7 @@ const DANGEROUS_PATTERNS = [
   /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)\b)/gi,
 
   // Command injection patterns
-  /(\||&|;|\$\(|\`)/g,
+  /(\||&|;|\$\(|`)/g,
 
   // Path traversal
   /\.\.\//g,

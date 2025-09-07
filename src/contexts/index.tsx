@@ -8,8 +8,8 @@
 import type React from "react";
 import { QRProvider, useQRContext } from "./QRContext";
 import {
-  SettingsProvider,
   getColorThemes,
+  SettingsProvider,
   useSettingsContext,
 } from "./SettingsContext";
 

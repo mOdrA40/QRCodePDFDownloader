@@ -5,6 +5,7 @@
 
 "use client";
 
+import { useId } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,14 +14,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useQRContext } from "@/contexts";
-import { getColorThemes } from "@/contexts";
-import React from "react";
+import { getColorThemes, useQRContext } from "@/contexts";
 
 export function QRAppearanceSettings() {
   const { state, updateOption } = useQRContext();
   const { options } = state;
   const presetColors = getColorThemes();
+  const foregroundId = useId();
+  const backgroundId = useId();
 
   const handleColorPresetClick = (foreground: string, background: string) => {
     updateOption("foreground", foreground);
@@ -65,12 +66,12 @@ export function QRAppearanceSettings() {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="foreground" className="text-sm font-medium">
+          <Label htmlFor={foregroundId} className="text-sm font-medium">
             Foreground Color
           </Label>
           <div className="flex gap-2 mt-2">
             <Input
-              id="foreground"
+              id={foregroundId}
               type="color"
               value={options.foreground}
               onChange={(e) => updateOption("foreground", e.target.value)}
@@ -88,12 +89,12 @@ export function QRAppearanceSettings() {
         </div>
 
         <div>
-          <Label htmlFor="background" className="text-sm font-medium">
+          <Label htmlFor={backgroundId} className="text-sm font-medium">
             Background Color
           </Label>
           <div className="flex gap-2 mt-2">
             <Input
-              id="background"
+              id={backgroundId}
               type="color"
               value={options.background}
               onChange={(e) => updateOption("background", e.target.value)}

@@ -6,6 +6,15 @@
 
 "use client";
 
+import {
+  AlertTriangle,
+  CheckCircle,
+  Download,
+  Monitor,
+  Shield,
+  X,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,21 +25,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  BrowserType,
-  PrivacyLevel,
-  browserDetectionService,
-} from "@/services/browser-detection-service";
 import type { BrowserCapabilities } from "@/services/browser-detection-service";
 import {
-  AlertTriangle,
-  CheckCircle,
-  Download,
-  Monitor,
-  Shield,
-  X,
-} from "lucide-react";
-import { useEffect, useState } from "react";
+  BrowserType,
+  browserDetectionService,
+  PrivacyLevel,
+} from "@/services/browser-detection-service";
 
 interface BrowserCompatibilityModalProps {
   isOpen: boolean;
@@ -69,15 +69,23 @@ export function BrowserCompatibilityModal({
       case BrowserType.LIBREWOLF:
         return <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />;
       case BrowserType.FIREFOX:
-        return <Monitor className="h-5 w-5 text-orange-600 dark:text-orange-400" />;
+        return (
+          <Monitor className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+        );
       case BrowserType.CHROME:
-        return <Monitor className="h-5 w-5 text-green-600 dark:text-green-400" />;
+        return (
+          <Monitor className="h-5 w-5 text-green-600 dark:text-green-400" />
+        );
       case BrowserType.SAFARI:
         return <Monitor className="h-5 w-5 text-blue-500 dark:text-blue-400" />;
       case BrowserType.BRAVE:
-        return <Shield className="h-5 w-5 text-orange-500 dark:text-orange-400" />;
+        return (
+          <Shield className="h-5 w-5 text-orange-500 dark:text-orange-400" />
+        );
       case BrowserType.TOR:
-        return <Shield className="h-5 w-5 text-purple-600 dark:text-purple-400" />;
+        return (
+          <Shield className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+        );
       default:
         return <Monitor className="h-5 w-5 text-gray-600 dark:text-gray-400" />;
     }
@@ -99,7 +107,9 @@ export function BrowserCompatibilityModal({
   const getCompatibilityStatus = () => {
     if (capabilities.type === BrowserType.LIBREWOLF) {
       return {
-        icon: <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />,
+        icon: (
+          <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+        ),
         text: "LibreWolf Optimized",
         description:
           "This application is fully optimized for LibreWolf browser",
@@ -119,7 +129,9 @@ export function BrowserCompatibilityModal({
 
     if (!capabilities.supportsCanvas) {
       return {
-        icon: <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />,
+        icon: (
+          <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+        ),
         text: "Limited Canvas Support",
         description:
           "Canvas operations are blocked. SVG fallback will be used.",
@@ -128,7 +140,9 @@ export function BrowserCompatibilityModal({
     }
 
     return {
-      icon: <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />,
+      icon: (
+        <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+      ),
       text: "Fully Compatible",
       description: "All features are available and working optimally",
       severity: "success" as const,
@@ -195,7 +209,9 @@ export function BrowserCompatibilityModal({
             <AlertDescription>
               <div>
                 <p className="font-medium text-foreground">{status.text}</p>
-                <p className="text-sm text-muted-foreground">{status.description}</p>
+                <p className="text-sm text-muted-foreground">
+                  {status.description}
+                </p>
               </div>
             </AlertDescription>
           </Alert>
@@ -221,10 +237,15 @@ export function BrowserCompatibilityModal({
           {/* Recommendations */}
           {recommendations.length > 0 && (
             <div className="space-y-2">
-              <h4 className="text-sm font-medium text-foreground">Optimizations Applied:</h4>
+              <h4 className="text-sm font-medium text-foreground">
+                Optimizations Applied:
+              </h4>
               <ul className="space-y-1">
                 {recommendations.slice(0, 3).map((rec) => (
-                  <li key={rec} className="flex items-start gap-2 text-xs text-muted-foreground">
+                  <li
+                    key={rec}
+                    className="flex items-start gap-2 text-xs text-muted-foreground"
+                  >
                     <CheckCircle className="h-3 w-3 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
                     <span>{rec}</span>
                   </li>
@@ -272,8 +293,7 @@ export function BrowserCompatibilityModal({
             <p className="text-sm text-muted-foreground mb-3">
               {capabilities.type === BrowserType.LIBREWOLF
                 ? "LibreWolf's privacy settings prevent optimal PDF generation. Please use image download instead."
-                : "Your browser's privacy settings may prevent optimal PDF generation. Please try image download instead."
-              }
+                : "Your browser's privacy settings may prevent optimal PDF generation. Please try image download instead."}
             </p>
           </div>
         )}

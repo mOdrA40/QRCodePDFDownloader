@@ -5,6 +5,7 @@
 
 "use client";
 
+import { useEffect, useId, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,15 +18,17 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useQRContext, useSettingsContext } from "@/contexts";
-import { browserDetectionService } from "@/services/browser-detection-service";
 import type { BrowserCapabilities } from "@/services/browser-detection-service";
+import { browserDetectionService } from "@/services/browser-detection-service";
 import type { QRImageFormat } from "@/types";
-import { useEffect, useState } from "react";
 
 export function QRExportSettings() {
   const { state, updateOption } = useQRContext();
   const { state: settingsState, setPreviewMode } = useSettingsContext();
   const { options } = state;
+  const previewModeId = useId();
+  const enablePdfPasswordId = useId();
+  const pdfPasswordId = useId();
 
   const [browserCapabilities, setBrowserCapabilities] =
     useState<BrowserCapabilities | null>(null);
@@ -147,11 +150,11 @@ export function QRExportSettings() {
 
       <div className="flex items-center space-x-2">
         <Switch
-          id="preview-mode"
+          id={previewModeId}
           checked={settingsState.previewMode}
           onCheckedChange={setPreviewMode}
         />
-        <Label htmlFor="preview-mode" className="text-sm font-medium">
+        <Label htmlFor={previewModeId} className="text-sm font-medium">
           Live Preview Mode
         </Label>
       </div>
@@ -161,24 +164,24 @@ export function QRExportSettings() {
 
       <div className="flex items-center space-x-2">
         <Switch
-          id="enable-pdf-password"
-          checked={options.enablePdfPassword}
+          id={enablePdfPasswordId}
+          checked={options.enablePdfPassword ?? false}
           onCheckedChange={(checked) =>
             updateOption("enablePdfPassword", checked)
           }
         />
-        <Label htmlFor="enable-pdf-password" className="text-sm font-medium">
+        <Label htmlFor={enablePdfPasswordId} className="text-sm font-medium">
           Password Protect PDF
         </Label>
       </div>
 
       {options.enablePdfPassword && (
         <div>
-          <Label htmlFor="pdf-password" className="text-sm font-medium">
+          <Label htmlFor={pdfPasswordId} className="text-sm font-medium">
             PDF Password
           </Label>
           <Input
-            id="pdf-password"
+            id={pdfPasswordId}
             type="password"
             placeholder="Enter password for PDF..."
             value={options.pdfPassword}

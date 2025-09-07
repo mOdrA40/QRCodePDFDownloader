@@ -5,14 +5,13 @@
 
 "use client";
 
+import { Heart, QrCode, Sparkles, Star, Zap } from "lucide-react";
 import { QuickActions } from "@/components/quick-actions";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Badge } from "@/components/ui/badge";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { UsageStats } from "@/components/usage-stats";
 import { useQRContext } from "@/contexts";
-import { Heart, QrCode, Sparkles, Star, Zap } from "lucide-react";
-import React from "react";
 import { QRControls } from "./QRControls";
 import { QRExport } from "./QRExport";
 import { QRPreview } from "./QRPreview";

@@ -1,27 +1,26 @@
 "use client";
 
-import React, { forwardRef, useEffect, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import PhoneInputComponent, {
   type Country,
-  type Value as PhoneValue,
-  getCountryCallingCode,
-  parsePhoneNumber,
   isValidPhoneNumber,
+  type Value as PhoneValue,
+  parsePhoneNumber,
 } from "react-phone-number-input";
 import "react-phone-number-input/style.css";
+import { AlertCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { geolocationService } from "@/services/geolocation-service";
-import { AlertCircle } from "lucide-react";
 
 interface PhoneInputProps {
-  value?: PhoneValue;
+  value?: PhoneValue | undefined;
   onChange?: (value?: PhoneValue) => void;
   placeholder?: string;
   defaultCountry?: Country;
   disabled?: boolean;
   className?: string;
-  error?: string;
+  error?: string | undefined;
   label?: string;
   required?: boolean;
   id?: string;
@@ -44,7 +43,7 @@ const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
       enableIPDetection = true,
       ...props
     },
-    ref,
+    _ref,
   ) => {
     const [detectedCountry, setDetectedCountry] =
       useState<Country>(defaultCountry);
@@ -89,7 +88,7 @@ const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
         <div className="relative">
           <PhoneInputComponent
             id={id}
-            value={value}
+            value={value ?? ""}
             onChange={onChange || (() => {})}
             defaultCountry={currentDefaultCountry}
             placeholder={placeholder}

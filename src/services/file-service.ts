@@ -220,8 +220,9 @@ export class FileService {
    */
   private dataURLtoBlob(dataURL: string): Blob {
     const arr = dataURL.split(",");
-    const mime = arr[0].match(/:(.*?);/)?.[1] || "application/octet-stream";
-    const bstr = atob(arr[1]);
+    const mimeMatch = arr[0]?.match(/:(.*?);/);
+    const mime = mimeMatch?.[1] || "application/octet-stream";
+    const bstr = atob(arr[1] ?? "");
     let n = bstr.length;
     const u8arr = new Uint8Array(n);
 
@@ -237,7 +238,7 @@ export class FileService {
    */
   private sanitizeFilename(filename: string): string {
     return filename
-      .replace(/[^a-zA-Z0-9\-_\.\s]/g, "") // Remove special characters
+      .replace(/[^a-zA-Z0-9\-_.\s]/g, "") // Remove special characters
       .replace(/\s+/g, "-") // Replace spaces with hyphens
       .replace(/\.+/g, ".") // Remove multiple dots
       .slice(0, 100); // Limit length

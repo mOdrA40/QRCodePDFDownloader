@@ -139,8 +139,13 @@ export class StorageService {
       return false;
     }
 
+    const existingPreset = presets[index];
+    if (!existingPreset) {
+      return false;
+    }
+
     presets[index] = {
-      ...presets[index],
+      ...existingPreset,
       ...updates,
       updatedAt: new Date(),
     };

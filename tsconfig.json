@@ -16,7 +16,6 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "jsxImportSource": "bippy/dist",
     "incremental": true,
 
     // Enhanced type checking for Next.js 15.5

@@ -1,5 +1,7 @@
 "use client";
 
+import { BarChart3, Clock, TrendingUp, Zap } from "lucide-react";
+import { memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -9,8 +11,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useUsageStats } from "@/hooks";
-import { BarChart3, Clock, TrendingUp, Zap } from "lucide-react";
-import React, { memo } from "react";
 
 interface UsageStatsProps {
   className?: string;

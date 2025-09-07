@@ -5,14 +5,6 @@
 
 "use client";
 
-import { qrService, storageService } from "@/services";
-import type {
-  ComponentState,
-  QRGenerationResult,
-  QROptions,
-  QRPreset,
-  QRValidationResult,
-} from "@/types";
 import type React from "react";
 import {
   createContext,
@@ -22,6 +14,14 @@ import {
   useReducer,
 } from "react";
 import { toast } from "sonner";
+import { qrService, storageService } from "@/services";
+import type {
+  ComponentState,
+  QRGenerationResult,
+  QROptions,
+  QRPreset,
+  QRValidationResult,
+} from "@/types";
 
 // Action types
 type QRAction =
@@ -313,6 +313,7 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
     }
     dispatch({ type: "SET_QR_DATA", payload: "" });
     dispatch({ type: "SET_STATE", payload: "idle" });
+    return undefined;
   }, [state.options.text, generateQRCode]);
 
   // Validate input when options change

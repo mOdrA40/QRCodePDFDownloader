@@ -1,5 +1,5 @@
-import type { ExportResult, PDFGenerationOptions, QRMetadata } from "@/types";
 import jsPDF from "jspdf";
+import type { ExportResult, PDFGenerationOptions } from "@/types";
 import { qrDataValidator } from "./qr-data-validator";
 import { securityService } from "./security-service";
 
@@ -145,9 +145,28 @@ export class PDFService {
 
       // Parse QR content to determine type and extract structured data
       const contentType = this.parseQRContent(sanitizedText);
-      const theme =
-        this.themes[options.theme as keyof typeof this.themes] ||
-        this.themes.modern;
+      const themeKey = options.theme ?? "modern";
+
+      // Get theme with fallback to modern theme
+      const defaultTheme: PDFTheme = {
+        primary: "#2563eb",
+        secondary: "#64748b",
+        accent: "#f59e0b",
+        background: "#f8fafc",
+        text: "#1e293b",
+        muted: "#e2e8f0"
+      };
+
+      let theme: PDFTheme;
+      if (themeKey === "modern") {
+        theme = this.themes.modern ?? defaultTheme;
+      } else if (themeKey === "elegant") {
+        theme = this.themes.elegant ?? defaultTheme;
+      } else if (themeKey === "professional") {
+        theme = this.themes.professional ?? defaultTheme;
+      } else {
+        theme = this.themes.modern ?? defaultTheme;
+      }
 
       // Validate PDF options
       this.validatePDFOptions(options);
@@ -280,7 +299,7 @@ export class PDFService {
     qrDataUrl: string,
     contentType: QRContentType,
     theme: PDFTheme,
-    options: PDFGenerationOptions,
+    _options: PDFGenerationOptions,
   ): Promise<void> {
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();

@@ -1,32 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  PhoneInput,
-  type PhoneValue,
-  getCleanPhoneNumber,
-  validatePhoneNumber,
-} from "@/components/ui/phone-input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { qrFormatService } from "@/services/qr-format-service";
-import { securityService } from "@/services/security-service";
 import {
   AlertCircle,
   AlertTriangle,
@@ -40,9 +13,35 @@ import {
   Phone,
   Wifi,
 } from "lucide-react";
-import type React from "react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  getCleanPhoneNumber,
+  PhoneInput,
+  type PhoneValue,
+  validatePhoneNumber,
+} from "@/components/ui/phone-input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { qrFormatService } from "@/services/qr-format-service";
+import { securityService } from "@/services/security-service";
 
 interface BaseModalProps {
   open: boolean;
@@ -57,6 +56,8 @@ export function WiFiModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
   const [security, setSecurity] = useState("WPA");
   const [hidden, setHidden] = useState(false);
   const [loading, setLoading] = useState(false);
+  const ssidId = useId();
+  const passwordId = useId();
   const [errors, setErrors] = useState<{ ssid?: string }>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -159,9 +160,9 @@ export function WiFiModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="ssid">Network Name (SSID) *</Label>
+            <Label htmlFor={ssidId}>Network Name (SSID) *</Label>
             <Input
-              id="ssid"
+              id={ssidId}
               value={ssid}
               onChange={(e) => setSsid(e.target.value)}
               placeholder="Enter WiFi network name"
@@ -176,9 +177,9 @@ export function WiFiModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor={passwordId}>Password</Label>
             <Input
-              id="password"
+              id={passwordId}
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -225,6 +226,7 @@ export function PhoneModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
   const [phone, setPhone] = useState<PhoneValue>();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ phone?: string }>({});
+  const phoneId = useId();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -275,7 +277,7 @@ export function PhoneModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <PhoneInput
-            id="phone"
+            id={phoneId}
             label="Phone Number"
             value={phone}
             onChange={setPhone}
@@ -313,6 +315,9 @@ export function EmailModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
   const [body, setBody] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string }>({});
+  const emailId = useId();
+  const subjectId = useId();
+  const bodyId = useId();
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -425,9 +430,9 @@ export function EmailModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email Address *</Label>
+            <Label htmlFor={emailId}>Email Address *</Label>
             <Input
-              id="email"
+              id={emailId}
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -443,9 +448,9 @@ export function EmailModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="subject">Subject</Label>
+            <Label htmlFor={subjectId}>Subject</Label>
             <Input
-              id="subject"
+              id={subjectId}
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="Email subject (optional)"
@@ -453,9 +458,9 @@ export function EmailModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="body">Message</Label>
+            <Label htmlFor={bodyId}>Message</Label>
             <Textarea
-              id="body"
+              id={bodyId}
               value={body}
               onChange={(e) => setBody(e.target.value)}
               placeholder="Email message (optional)"
@@ -492,6 +497,7 @@ export function LocationModal({
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ address?: string }>({});
+  const addressId = useId();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -535,9 +541,9 @@ export function LocationModal({
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="address">Address or Location *</Label>
+            <Label htmlFor={addressId}>Address or Location *</Label>
             <Textarea
-              id="address"
+              id={addressId}
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder="Enter address, landmark, or coordinates..."
@@ -584,6 +590,11 @@ export function EventModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ title?: string; date?: string }>({});
+  const titleId = useId();
+  const dateId = useId();
+  const timeId = useId();
+  const locationId = useId();
+  const descriptionId = useId();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -643,9 +654,9 @@ export function EventModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Event Title *</Label>
+            <Label htmlFor={titleId}>Event Title *</Label>
             <Input
-              id="title"
+              id={titleId}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Meeting, Conference, etc."
@@ -661,9 +672,9 @@ export function EventModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="date">Date *</Label>
+              <Label htmlFor={dateId}>Date *</Label>
               <Input
-                id="date"
+                id={dateId}
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
@@ -678,9 +689,9 @@ export function EventModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="time">Time</Label>
+              <Label htmlFor={timeId}>Time</Label>
               <Input
-                id="time"
+                id={timeId}
                 type="time"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
@@ -689,9 +700,9 @@ export function EventModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
+            <Label htmlFor={locationId}>Location</Label>
             <Input
-              id="location"
+              id={locationId}
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="Event location (optional)"
@@ -699,9 +710,9 @@ export function EventModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor={descriptionId}>Description</Label>
             <Textarea
-              id="description"
+              id={descriptionId}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Event description (optional)"
@@ -738,6 +749,7 @@ export function WebsiteModal({
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ url?: string }>({});
+  const urlId = useId();
 
   const validateUrl = (url: string) => {
     try {
@@ -797,9 +809,9 @@ export function WebsiteModal({
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="url">Website URL *</Label>
+            <Label htmlFor={urlId}>Website URL *</Label>
             <Input
-              id="url"
+              id={urlId}
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="example.com or https://example.com"
@@ -850,6 +862,12 @@ export function VCardModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
     email?: string;
     phone?: string;
   }>({});
+  const nameId = useId();
+  const phoneId2 = useId();
+  const emailId2 = useId();
+  const companyId = useId();
+  const titleId2 = useId();
+  const websiteId = useId();
 
   const validateEmail = (email: string) => {
     if (!email) return true; // Optional field
@@ -924,9 +942,9 @@ export function VCardModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Full Name *</Label>
+            <Label htmlFor={nameId}>Full Name *</Label>
             <Input
-              id="name"
+              id={nameId}
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="John Doe"
@@ -941,7 +959,7 @@ export function VCardModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
           </div>
 
           <PhoneInput
-            id="phone"
+            id={phoneId2}
             label="Phone Number"
             value={phone}
             onChange={setPhone}
@@ -952,9 +970,9 @@ export function VCardModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
           />
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
+            <Label htmlFor={emailId2}>Email Address</Label>
             <Input
-              id="email"
+              id={emailId2}
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -970,9 +988,9 @@ export function VCardModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="company">Company</Label>
+            <Label htmlFor={companyId}>Company</Label>
             <Input
-              id="company"
+              id={companyId}
               value={company}
               onChange={(e) => setCompany(e.target.value)}
               placeholder="Company Name"
@@ -980,9 +998,9 @@ export function VCardModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="title">Job Title</Label>
+            <Label htmlFor={titleId2}>Job Title</Label>
             <Input
-              id="title"
+              id={titleId2}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Software Engineer"
@@ -990,9 +1008,9 @@ export function VCardModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="website">Website</Label>
+            <Label htmlFor={websiteId}>Website</Label>
             <Input
-              id="website"
+              id={websiteId}
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
               placeholder="example.com"
@@ -1031,6 +1049,8 @@ export function SMSModal({ open, onOpenChange, onGenerate }: SMSModalProps) {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const phoneInputId = useId();
+  const messageInputId = useId();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1109,7 +1129,7 @@ export function SMSModal({ open, onOpenChange, onGenerate }: SMSModalProps) {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <PhoneInput
-            id="sms-phone"
+            id={phoneInputId}
             label="Phone Number"
             value={phone}
             onChange={setPhone}
@@ -1121,9 +1141,9 @@ export function SMSModal({ open, onOpenChange, onGenerate }: SMSModalProps) {
           />
 
           <div className="space-y-2">
-            <Label htmlFor="sms-message">Message</Label>
+            <Label htmlFor={messageInputId}>Message</Label>
             <Textarea
-              id="sms-message"
+              id={messageInputId}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Your message here (optional)"

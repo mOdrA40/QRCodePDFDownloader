@@ -3,9 +3,9 @@
  * Provides type-safe localStorage operations with error handling
  */
 
+import { useCallback, useEffect, useState } from "react";
 import { storageService } from "@/services";
 import type { AppConfig, QROptions, QRPreset } from "@/types";
-import { useCallback, useEffect, useState } from "react";
 
 type SetValue<T> = T | ((val: T) => T);
 

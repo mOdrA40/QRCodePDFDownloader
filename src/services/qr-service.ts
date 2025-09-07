@@ -4,6 +4,7 @@
  * and proper error handling for LibreWolf and other privacy-focused browsers
  */
 
+import QRCode from "qrcode";
 import type {
   QRGenerationConfig,
   QRGenerationResult,
@@ -11,10 +12,9 @@ import type {
   QROptions,
   QRValidationResult,
 } from "@/types";
-import QRCode from "qrcode";
 import {
-  RecommendedMethod,
   browserDetectionService,
+  RecommendedMethod,
 } from "./browser-detection-service";
 import { svgQRService } from "./svg-qr-service";
 
@@ -38,49 +38,12 @@ interface BrowserCapabilities {
 export class QRService {
   private static instance: QRService;
   private browserCapabilities: BrowserCapabilities | null = null;
-  private preferredMethod: QRGenerationMethod = QRGenerationMethod.SERVER_SIDE;
 
   public static getInstance(): QRService {
     if (!QRService.instance) {
       QRService.instance = new QRService();
     }
     return QRService.instance;
-  }
-
-  /**
-   * Initialize browser capabilities detection
-   */
-  private initializeBrowserCapabilities(): BrowserCapabilities {
-    if (typeof window === "undefined") {
-      return {
-        supportsCanvas: false,
-        supportsWebGL: false,
-        isPrivacyBrowser: false,
-        devicePixelRatio: 1,
-        userAgent: "server",
-      };
-    }
-
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    const webglCtx =
-      canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-
-    // Detect privacy-focused browsers
-    const userAgent = navigator.userAgent.toLowerCase();
-    const isPrivacyBrowser =
-      userAgent.includes("librewolf") ||
-      userAgent.includes("tor") ||
-      userAgent.includes("brave") ||
-      (userAgent.includes("firefox") && navigator.doNotTrack === "1");
-
-    return {
-      supportsCanvas: !!ctx,
-      supportsWebGL: !!webglCtx,
-      isPrivacyBrowser,
-      devicePixelRatio: window.devicePixelRatio || 1,
-      userAgent: navigator.userAgent,
-    };
   }
 
   /**
@@ -459,7 +422,7 @@ export class QRService {
    */
   private estimateFileSize(dataUrl: string): number {
     const base64 = dataUrl.split(",")[1];
-    return Math.round((base64.length * 3) / 4);
+    return Math.round(((base64?.length ?? 0) * 3) / 4);
   }
 
   /**

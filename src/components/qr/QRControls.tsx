@@ -5,6 +5,8 @@
 
 "use client";
 
+import { FileText } from "lucide-react";
+import { useId } from "react";
 import { DragDropZone } from "@/components/drag-drop-zone";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,8 +20,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useQRContext } from "@/contexts";
-import { FileText } from "lucide-react";
-import React from "react";
 
 interface QRControlsProps {
   className?: string;
@@ -35,6 +35,8 @@ const sampleTexts = [
 
 export function QRControls({ className }: QRControlsProps) {
   const { state, updateOption } = useQRContext();
+  const textId = useId();
+  const logoUrlId = useId();
 
   const handleTextChange = (text: string) => {
     updateOption("text", text);
@@ -59,11 +61,11 @@ export function QRControls({ className }: QRControlsProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <Label htmlFor="qr-text" className="text-sm font-medium">
+          <Label htmlFor={textId} className="text-sm font-medium">
             Text to Encode
           </Label>
           <Textarea
-            id="qr-text"
+            id={textId}
             placeholder="Enter text, URL, or any content..."
             value={state.options.text}
             onChange={(e) => handleTextChange(e.target.value)}
@@ -92,11 +94,11 @@ export function QRControls({ className }: QRControlsProps) {
         </div>
 
         <div>
-          <Label htmlFor="logo-url" className="text-sm font-medium">
+          <Label htmlFor={logoUrlId} className="text-sm font-medium">
             Logo URL (Optional)
           </Label>
           <Input
-            id="logo-url"
+            id={logoUrlId}
             type="url"
             placeholder="https://example.com/logo.png"
             value={state.options.logoUrl}

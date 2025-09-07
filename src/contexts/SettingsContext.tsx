@@ -5,8 +5,6 @@
 
 "use client";
 
-import { storageService } from "@/services";
-import type { AppConfig, QRColorTheme, Theme, UsageStats } from "@/types";
 import { useTheme } from "next-themes";
 import type React from "react";
 import {
@@ -16,6 +14,8 @@ import {
   useEffect,
   useReducer,
 } from "react";
+import { storageService } from "@/services";
+import type { AppConfig, QRColorTheme, Theme, UsageStats } from "@/types";
 
 // Action types
 type SettingsAction =

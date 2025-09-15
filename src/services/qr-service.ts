@@ -16,7 +16,6 @@ import {
   browserDetectionService,
   RecommendedMethod,
 } from "./browser-detection-service";
-import { svgQRService } from "./svg-qr-service";
 
 // Enhanced generation methods enum
 enum QRGenerationMethod {
@@ -55,7 +54,7 @@ export class QRService {
 
     console.log(
       "Browser capabilities:",
-      browserDetectionService.getCapabilitySummary(),
+      browserDetectionService.getCapabilitySummary()
     );
 
     // Map recommended method to our internal enum
@@ -63,7 +62,7 @@ export class QRService {
       case RecommendedMethod.SERVER_SIDE:
         return QRGenerationMethod.SERVER_SIDE;
       case RecommendedMethod.SVG_PURE:
-        return QRGenerationMethod.CLIENT_SVG;
+        return QRGenerationMethod.SERVER_SIDE;
       case RecommendedMethod.CANVAS_ENHANCED:
       case RecommendedMethod.CANVAS_BASIC:
         return QRGenerationMethod.CLIENT_CANVAS;
@@ -77,7 +76,7 @@ export class QRService {
    */
   public validateQRInput(
     text: string,
-    options?: Partial<QROptions>,
+    options?: Partial<QROptions>
   ): QRValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
@@ -134,7 +133,7 @@ export class QRService {
    */
   public async generateQRCode(
     text: string,
-    options: QRGenerationConfig = {},
+    options: QRGenerationConfig = {}
   ): Promise<QRGenerationResult> {
     try {
       // Validate input
@@ -153,9 +152,6 @@ export class QRService {
       switch (method) {
         case QRGenerationMethod.SERVER_SIDE:
           result = await this.generateServerSide(text, config);
-          break;
-        case QRGenerationMethod.CLIENT_SVG:
-          result = await this.generateWithSVG(text, config);
           break;
         case QRGenerationMethod.CLIENT_CANVAS:
           result = await this.generateWithCanvas(text, config);
@@ -177,7 +173,7 @@ export class QRService {
       try {
         const fallbackResult = await this.generateFallback(
           text,
-          this.buildQRConfig(options),
+          this.buildQRConfig(options)
         );
         return {
           ...fallbackResult,
@@ -187,39 +183,44 @@ export class QRService {
         };
       } catch (fallbackError) {
         throw new Error(
-          `QR generation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+          `QR generation failed: ${error instanceof Error ? error.message : "Unknown error"}`
         );
       }
     }
   }
 
   /**
-   * Server-side QR generation via API endpoint
+   * Server-side QR generation using Next.js API route
    * Most reliable method for privacy browsers like LibreWolf
    */
   private async generateServerSide(
     text: string,
-    config: QRGenerationConfig,
+    config: QRGenerationConfig
   ): Promise<QRGenerationResult> {
     try {
-      const response = await fetch("/api/qr/generate", {
+      const response = await fetch("/api/qr/server-generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           text,
-          size: config.size,
-          margin: config.margin,
-          errorCorrectionLevel: config.errorCorrectionLevel,
-          format: config.format,
-          color: config.color,
+          options: {
+            size: config.size,
+            margin: config.margin,
+            errorCorrectionLevel: config.errorCorrectionLevel,
+            foreground: config.color?.dark,
+            background: config.color?.light,
+            format: config.format,
+          },
         }),
       });
 
       if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(
-          `Server responded with ${response.status}: ${response.statusText}`,
+          errorData.error ||
+            `Server responded with ${response.status}: ${response.statusText}`
         );
       }
 
@@ -230,58 +231,18 @@ export class QRService {
       }
 
       return {
-        dataUrl: result.dataUrl || result.svgString,
-        format: result.format,
-        size: result.size,
-        timestamp: result.timestamp,
+        dataUrl: result.dataUrl,
+        // biome-ignore lint/suspicious/noExplicitAny: QRImageFormat type compatibility
+        format: (config.format || "png") as any,
+        size: result.size || config.size || 512,
+        timestamp: result.timestamp || Date.now(),
+        method: result.method || "server-side-api",
+        browserInfo: "server-generated",
       };
     } catch (error) {
       throw new Error(
-        `Server-side generation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Server-side generation failed: ${error instanceof Error ? error.message : "Unknown error"}`
       );
-    }
-  }
-
-  /**
-   * Client-side SVG generation (browser-independent)
-   * Uses dedicated SVG service for maximum compatibility with privacy browsers
-   */
-  private async generateWithSVG(
-    text: string,
-    config: QRGenerationConfig,
-  ): Promise<QRGenerationResult> {
-    try {
-      // Use dedicated SVG service for better compatibility
-      return await svgQRService.generateSVGQR(text, config);
-    } catch (error) {
-      // Fallback to basic SVG generation if dedicated service fails
-      try {
-        const svgString = await QRCode.toString(text, {
-          type: "svg",
-          width: config.size || 512,
-          margin: config.margin || 4,
-          errorCorrectionLevel: config.errorCorrectionLevel || "M",
-          color: {
-            dark: config.color?.dark || "#000000",
-            light: config.color?.light || "#ffffff",
-          },
-        });
-
-        // Convert SVG to data URL with proper encoding
-        const dataUrl = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgString)))}`;
-
-        return {
-          dataUrl,
-          format: "svg",
-          size: config.size || 512,
-          timestamp: Date.now(),
-          method: "basic-svg-fallback",
-        };
-      } catch (fallbackError) {
-        throw new Error(
-          `SVG generation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
-        );
-      }
     }
   }
 
@@ -290,7 +251,7 @@ export class QRService {
    */
   private async generateFallback(
     text: string,
-    config: QRGenerationConfig,
+    config: QRGenerationConfig
   ): Promise<QRGenerationResult> {
     try {
       const dataUrl = await QRCode.toDataURL(text, {
@@ -311,7 +272,7 @@ export class QRService {
       };
     } catch (error) {
       throw new Error(
-        `Fallback generation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Fallback generation failed: ${error instanceof Error ? error.message : "Unknown error"}`
       );
     }
   }
@@ -321,7 +282,7 @@ export class QRService {
    */
   private async generateWithCanvas(
     text: string,
-    config: QRGenerationConfig,
+    config: QRGenerationConfig
   ): Promise<QRGenerationResult> {
     return new Promise((resolve, reject) => {
       try {

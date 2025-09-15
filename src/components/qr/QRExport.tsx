@@ -8,7 +8,6 @@
 import { Download, FileText, Image, Palette, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { BrowserCompatibilityModal } from "@/components/browser-compatibility-modal";
 import { ShareOptions } from "@/components/share-options";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useQRContext, useSettingsContext } from "@/contexts";
-import { browserDetectionService, fileService, pdfService } from "@/services";
+import { fileService, pdfService } from "@/services";
 
 interface QRExportProps {
   className?: string;
@@ -42,11 +41,6 @@ export function QRExport({ className }: QRExportProps) {
     "modern" | "elegant" | "professional" | null
   >(null);
   const [isMounted, setIsMounted] = useState(false);
-  const [showCompatibilityModal, setShowCompatibilityModal] = useState(false);
-  const [pendingPDFDownload, setPendingPDFDownload] = useState<
-    "modern" | "elegant" | "professional" | null
-  >(null);
-
   const themes = [
     {
       value: "modern",
@@ -75,29 +69,19 @@ export function QRExport({ className }: QRExportProps) {
   }, []);
 
   const downloadPDF = async (
-    theme: "modern" | "elegant" | "professional" = "modern",
+    theme: "modern" | "elegant" | "professional" = "modern"
   ) => {
     if (!qrDataUrl) {
       toast.error("Please generate a QR code first");
       return;
     }
 
-    // Check browser compatibility for PDF generation
-    const capabilities = browserDetectionService.detectCapabilities();
-
-    // Show modal for problematic browsers
-    if (capabilities.isPrivacyBrowser || !capabilities.supportsCanvas) {
-      setPendingPDFDownload(theme);
-      setShowCompatibilityModal(true);
-      return;
-    }
-
-    // Proceed with direct download for compatible browsers
+    // Always proceed with PDF download - no browser restrictions
     await performPDFDownload(theme);
   };
 
   const performPDFDownload = async (
-    theme: "modern" | "elegant" | "professional",
+    theme: "modern" | "elegant" | "professional"
   ) => {
     try {
       const pdfOptions: {
@@ -120,7 +104,7 @@ export function QRExport({ className }: QRExportProps) {
       const result = await pdfService.generatePDF(
         qrDataUrl,
         options.text,
-        pdfOptions,
+        pdfOptions
       );
 
       if (!result.success) {
@@ -150,20 +134,6 @@ export function QRExport({ className }: QRExportProps) {
     if (!result.success) {
       toast.error(result.error || "Failed to download image");
     }
-  };
-
-  // Modal handlers
-  const handleModalContinue = async () => {
-    setShowCompatibilityModal(false);
-    if (pendingPDFDownload) {
-      await performPDFDownload(pendingPDFDownload);
-      setPendingPDFDownload(null);
-    }
-  };
-
-  const handleModalClose = () => {
-    setShowCompatibilityModal(false);
-    setPendingPDFDownload(null);
   };
 
   return (
@@ -303,15 +273,6 @@ export function QRExport({ className }: QRExportProps) {
           </div>
         </div>
       </CardContent>
-
-      {/* Browser Compatibility Modal */}
-      <BrowserCompatibilityModal
-        isOpen={showCompatibilityModal}
-        onClose={handleModalClose}
-        onContinue={handleModalContinue}
-        title="PDF Download - Browser Compatibility"
-        description="We've detected your browser may need special handling for optimal PDF generation."
-      />
     </Card>
   );
 }

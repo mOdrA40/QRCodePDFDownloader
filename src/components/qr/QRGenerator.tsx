@@ -8,6 +8,7 @@
 import { Heart, QrCode, Sparkles, Star, Zap } from "lucide-react";
 import { QuickActions } from "@/components/quick-actions";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AuthButton } from "@/components/auth/AuthButton";
 import { Badge } from "@/components/ui/badge";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { UsageStats } from "@/components/usage-stats";
@@ -34,8 +35,9 @@ export function QRGenerator({ className }: QRGeneratorProps) {
         className={`bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 min-h-screen py-4 px-4 ${className}`}
       >
         <div className="max-w-7xl mx-auto space-y-8 pb-8">
-          {/* Theme Toggle */}
-          <div className="fixed right-4 top-4 z-50">
+          {/* Theme Toggle and Auth Button */}
+          <div className="fixed right-4 top-4 z-50 flex items-center gap-3">
+            <AuthButton />
             <ThemeToggle />
           </div>
 

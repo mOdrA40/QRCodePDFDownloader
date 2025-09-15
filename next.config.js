@@ -1,40 +1,27 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  distDir: 'out',
-
   // Enhanced performance settings for Next.js 15.5
   experimental: {
     // Enable optimized package imports for better tree shaking
     optimizePackageImports: [
-      '@radix-ui/react-dialog',
-      '@radix-ui/react-dropdown-menu',
-      '@radix-ui/react-select',
-      '@radix-ui/react-tabs',
-      '@radix-ui/react-tooltip',
-      'lucide-react',
-      'sonner'
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-select",
+      "@radix-ui/react-tabs",
+      "@radix-ui/react-tooltip",
+      "@radix-ui/react-avatar",
+      "lucide-react",
+      "sonner",
     ],
   },
 
-  // Turbopack configuration (moved from experimental.turbo)
-  turbopack: {
-    rules: {
-      '*.svg': {
-        loaders: ['@svgr/webpack'],
-        as: '*.js',
-      },
-    },
-  },
+  turbopack: {},
 
   // Image optimization settings
   images: {
     unoptimized: true,
-    formats: ['image/webp', 'image/avif'],
-    domains: [
-      "source.unsplash.com",
-      "images.unsplash.com",
-    ],
+    formats: ["image/webp", "image/avif"],
+    domains: ["source.unsplash.com", "images.unsplash.com"],
     remotePatterns: [
       {
         protocol: "https",
@@ -52,11 +39,11 @@ const nextConfig = {
   // Compiler optimizations
   compiler: {
     // Remove console logs in production
-    removeConsole: process.env.NODE_ENV === 'production',
+    removeConsole: process.env.NODE_ENV === "production",
   },
 
   // Bundle analyzer support
-  ...(process.env.ANALYZE === 'true' && {
+  ...(process.env.ANALYZE === "true" && {
     bundlePagesRouterDependencies: true,
   }),
 };

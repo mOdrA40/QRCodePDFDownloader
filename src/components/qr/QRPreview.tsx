@@ -5,9 +5,9 @@
 
 "use client";
 
-import { Image, QrCode } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
-import { memo, type RefObject, useMemo } from "react";
+import { Image as ImageIcon, QrCode } from "lucide-react";
+import Image from "next/image";
+import { memo, type RefObject, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -18,6 +18,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { useQRContext } from "@/contexts";
 import { useIntersectionObserver } from "@/lib/performance";
+import { qrService } from "@/services";
 
 interface QRPreviewProps {
   className?: string;
@@ -28,30 +29,53 @@ export const QRPreview = memo(function QRPreview({
 }: QRPreviewProps) {
   const { state } = useQRContext();
   const { options, isGenerating, progress } = state;
+  const [qrDataUrl, setQrDataUrl] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+
   const [ref, isIntersecting] = useIntersectionObserver({ threshold: 0.1 }) as [
     RefObject<HTMLDivElement>,
     boolean,
   ];
 
-  // Memoize QR code props to prevent unnecessary re-renders
-  const qrProps = useMemo(
-    () => ({
-      value: options.text,
-      size: options.size,
-      bgColor: options.background,
-      fgColor: options.foreground,
-      level: options.errorCorrectionLevel,
-      marginSize: options.margin,
-    }),
-    [
-      options.text,
-      options.size,
-      options.background,
-      options.foreground,
-      options.errorCorrectionLevel,
-      options.margin,
-    ],
-  );
+  // Generate QR code when options change
+  useEffect(() => {
+    if (!options.text.trim() || !isIntersecting) {
+      setQrDataUrl("");
+      return;
+    }
+
+    const generateQR = async () => {
+      setIsLoading(true);
+      try {
+        const result = await qrService.generateQRCode(options.text, {
+          size: options.size,
+          margin: options.margin,
+          errorCorrectionLevel: options.errorCorrectionLevel,
+          color: {
+            dark: options.foreground,
+            light: options.background,
+          },
+          format: "png",
+        });
+        setQrDataUrl(result.dataUrl);
+      } catch (error) {
+        console.error("QR generation failed:", error);
+        setQrDataUrl("");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    generateQR();
+  }, [
+    options.text,
+    options.size,
+    options.background,
+    options.foreground,
+    options.errorCorrectionLevel,
+    options.margin,
+    isIntersecting,
+  ]);
 
   return (
     <Card
@@ -60,7 +84,7 @@ export const QRPreview = memo(function QRPreview({
     >
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2">
-          <Image className="h-5 w-5 text-green-600" />
+          <ImageIcon className="h-5 w-5 text-green-600" />
           QR Code Preview
           {options.text.trim() && (
             <span className="text-sm font-normal text-muted-foreground">
@@ -91,9 +115,17 @@ export const QRPreview = memo(function QRPreview({
               minHeight: options.size <= 600 ? "auto" : "600px",
             }}
           >
-            {options.text.trim() && isIntersecting ? (
+            {qrDataUrl && !isLoading ? (
               <div className="flex items-center justify-center" data-qr-preview>
-                <QRCodeSVG {...qrProps} className="block" />
+                <Image
+                  src={qrDataUrl}
+                  alt="QR Code"
+                  width={options.size}
+                  height={options.size}
+                  className="block max-w-full h-auto"
+                  priority
+                  unoptimized
+                />
               </div>
             ) : options.text.trim() ? (
               <div className="text-center text-slate-400">

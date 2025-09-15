@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { ConvexClientProvider } from "./ConvexClientProvider";
 import ClientBody from "./ClientBody";
 
 export const metadata: Metadata = {
@@ -34,17 +35,19 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body className="antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ClientBody>
-            {children}
-            <Toaster />
-          </ClientBody>
-        </ThemeProvider>
+        <ConvexClientProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <ClientBody>
+              {children}
+              <Toaster />
+            </ClientBody>
+          </ThemeProvider>
+        </ConvexClientProvider>
       </body>
     </html>
   );

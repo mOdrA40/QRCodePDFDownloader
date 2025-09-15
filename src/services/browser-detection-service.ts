@@ -341,14 +341,14 @@ export class BrowserDetectionService {
       hasStrictCSP,
     } = params;
 
-    // For LibreWolf and high-privacy browsers, always prefer server-side or SVG
+    // For LibreWolf and high-privacy browsers, always prefer server-side
     if (type === BrowserType.LIBREWOLF || privacyLevel === PrivacyLevel.HIGH) {
       return RecommendedMethod.SERVER_SIDE;
     }
 
-    // If canvas is blocked or unreliable, use SVG
+    // If canvas is blocked or unreliable, use server-side
     if (!supportsCanvas || isPrivacyBrowser) {
-      return RecommendedMethod.SVG_PURE;
+      return RecommendedMethod.SERVER_SIDE;
     }
 
     // For strict CSP environments, prefer server-side
@@ -414,7 +414,6 @@ export class BrowserDetectionService {
     const recommendations: string[] = [];
 
     if (caps.type === BrowserType.LIBREWOLF) {
-      recommendations.push("Use SVG format for best compatibility");
       recommendations.push("Server-side generation recommended");
       recommendations.push("Avoid canvas-based operations");
     }
@@ -426,7 +425,7 @@ export class BrowserDetectionService {
     }
 
     if (!caps.supportsCanvas) {
-      recommendations.push("Canvas not available - using SVG fallback");
+      recommendations.push("Canvas not available - using server-side fallback");
     }
 
     return recommendations;

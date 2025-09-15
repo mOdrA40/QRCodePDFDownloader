@@ -18,8 +18,6 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useQRContext, useSettingsContext } from "@/contexts";
-import type { BrowserCapabilities } from "@/services/browser-detection-service";
-import { browserDetectionService } from "@/services/browser-detection-service";
 import type { QRImageFormat } from "@/types";
 
 export function QRExportSettings() {
@@ -30,43 +28,22 @@ export function QRExportSettings() {
   const enablePdfPasswordId = useId();
   const pdfPasswordId = useId();
 
-  const [browserCapabilities, setBrowserCapabilities] =
-    useState<BrowserCapabilities | null>(null);
   const [availableFormats, setAvailableFormats] = useState<QRImageFormat[]>([
     "png",
     "jpeg",
     "webp",
   ]);
 
-  // Detect browser capabilities and adjust available formats
+  // Set available formats - always PNG, JPEG, WebP for all browsers
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const capabilities = browserDetectionService.detectCapabilities();
-      setBrowserCapabilities(capabilities);
+    const formats: QRImageFormat[] = ["png", "jpeg", "webp"];
 
-      // Determine available formats based on browser capabilities
-      let formats: QRImageFormat[] = [];
-
-      if (capabilities.isPrivacyBrowser || !capabilities.supportsCanvas) {
-        // For privacy browsers or when canvas is blocked, only offer SVG
-        formats = ["svg"];
-
-        // Auto-switch to SVG if current format is not supported
-        if (options.format !== "svg") {
-          updateOption("format", "svg");
-        }
-      } else {
-        // For compatible browsers, offer PNG, JPEG, WebP (remove SVG)
-        formats = ["png", "jpeg", "webp"];
-
-        // Auto-switch from SVG to PNG if current format is SVG for normal browsers
-        if (options.format === "svg") {
-          updateOption("format", "png");
-        }
-      }
-
-      setAvailableFormats(formats);
+    // Auto-switch to PNG if current format is not supported
+    if (!formats.includes(options.format)) {
+      updateOption("format", "png");
     }
+
+    setAvailableFormats(formats);
   }, [options.format, updateOption]);
 
   // Get format display info
@@ -75,17 +52,10 @@ export function QRExportSettings() {
       png: {
         label: "PNG",
         description: "Recommended for quality",
-        badge: null,
+        badge: "Recommended",
       },
       jpeg: { label: "JPEG", description: "Smaller file size", badge: null },
       webp: { label: "WebP", description: "Modern format", badge: null },
-      svg: {
-        label: "SVG",
-        description: browserCapabilities?.isPrivacyBrowser
-          ? "Optimized for your browser"
-          : "Vector format",
-        badge: browserCapabilities?.isPrivacyBrowser ? "Recommended" : null,
-      },
     };
 
     return info[format];
@@ -98,11 +68,6 @@ export function QRExportSettings() {
           <Label htmlFor="format" className="text-sm font-medium">
             Image Format
           </Label>
-          {browserCapabilities?.isPrivacyBrowser && (
-            <Badge variant="secondary" className="text-xs">
-              Auto-optimized
-            </Badge>
-          )}
         </div>
         <Select
           value={options.format}
@@ -132,20 +97,10 @@ export function QRExportSettings() {
           </SelectContent>
         </Select>
         <p className="text-xs text-muted-foreground mt-1">
-          {browserCapabilities?.isPrivacyBrowser
-            ? "SVG format automatically selected for optimal compatibility with your privacy browser."
-            : "PNG provides the best quality for most use cases."}
+          PNG provides the best quality for most use cases.
         </p>
 
-        {/* Browser-specific notice */}
-        {browserCapabilities?.isPrivacyBrowser && (
-          <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-950 rounded-md border border-blue-200 dark:border-blue-800">
-            <p className="text-xs text-blue-800 dark:text-blue-200">
-              🛡️ Privacy browser detected: Only compatible formats are shown for
-              optimal performance.
-            </p>
-          </div>
-        )}
+
       </div>
 
       <div className="flex items-center space-x-2">
@@ -197,28 +152,18 @@ export function QRExportSettings() {
       <div className="pt-4 border-t border-border">
         <h4 className="text-sm font-medium mb-2">Export Quality</h4>
         <div className="space-y-2 text-xs text-muted-foreground">
-          {!browserCapabilities?.isPrivacyBrowser && (
-            <>
-              <div className="flex justify-between">
-                <span>PNG:</span>
-                <span>Lossless, best quality</span>
-              </div>
-              <div className="flex justify-between">
-                <span>JPEG:</span>
-                <span>Smaller file, slight compression</span>
-              </div>
-              <div className="flex justify-between">
-                <span>WebP:</span>
-                <span>Modern format, good compression</span>
-              </div>
-            </>
-          )}
-          {browserCapabilities?.isPrivacyBrowser && (
-            <div className="flex justify-between">
-              <span>SVG:</span>
-              <span>Vector format, privacy-optimized</span>
-            </div>
-          )}
+          <div className="flex justify-between">
+            <span>PNG:</span>
+            <span>Lossless, best quality</span>
+          </div>
+          <div className="flex justify-between">
+            <span>JPEG:</span>
+            <span>Smaller file, slight compression</span>
+          </div>
+          <div className="flex justify-between">
+            <span>WebP:</span>
+            <span>Modern format, good compression</span>
+          </div>
         </div>
       </div>
     </>

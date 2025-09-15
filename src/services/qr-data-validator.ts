@@ -168,9 +168,9 @@ export class QRDataValidator {
       const validation = this.validateDataURL(dataUrl);
 
       if (!validation.isValid || validation.isCorrupted) {
-        // If corrupted or invalid, try to regenerate as SVG
+        // If corrupted or invalid, try to regenerate as PNG
         if (options.fallbackToSVG !== false) {
-          return await this.convertToSVGFallback(dataUrl);
+          return await this.convertToPNGFallback(dataUrl);
         }
 
         return {
@@ -201,8 +201,6 @@ export class QRDataValidator {
 
       // Convert based on target format
       switch (targetFormat) {
-        case "svg":
-          return await this.convertToSVG(dataUrl, validation);
         case "png":
           return await this.convertToPNG(dataUrl, validation, options);
         case "jpeg":
@@ -211,9 +209,9 @@ export class QRDataValidator {
           throw new Error(`Unsupported target format: ${targetFormat}`);
       }
     } catch (error) {
-      // Ultimate fallback to SVG
+      // Ultimate fallback to PNG
       if (options.fallbackToSVG !== false) {
-        return await this.convertToSVGFallback(dataUrl);
+        return await this.convertToPNGFallback(dataUrl);
       }
 
       return {
@@ -238,8 +236,8 @@ export class QRDataValidator {
     _options: ConversionOptions,
   ): Promise<ConversionResult> {
     if (typeof window === "undefined") {
-      // Server-side conversion not available, fallback to SVG
-      return await this.convertToSVGFallback(dataUrl);
+      // Server-side conversion not available, fallback to PNG
+      return await this.convertToPNGFallback(dataUrl);
     }
 
     return new Promise((resolve) => {
@@ -322,73 +320,109 @@ export class QRDataValidator {
   }
 
   /**
-   * Convert to SVG (most reliable for PDF)
+   * Convert to JPEG format
    */
-  private async convertToSVG(
+  private async convertToJPEG(
     dataUrl: string,
     validation: DataURLValidationResult,
+    _options: ConversionOptions,
   ): Promise<ConversionResult> {
-    try {
-      // If already SVG, return as-is
-      if (validation.format === "svg") {
-        return {
-          success: true,
-          dataUrl,
-          format: "svg",
-          originalFormat: "svg",
-          size: validation.size,
-          conversionMethod: "no-conversion-needed",
-        };
-      }
-
-      // For non-SVG, embed in SVG wrapper
-      const svgWrapper = this.createSVGWrapper(dataUrl, 512, 512);
-      const svgDataUrl = `data:image/svg+xml;base64,${btoa(svgWrapper)}`;
-
-      return {
-        success: true,
-        dataUrl: svgDataUrl,
-        format: "svg",
-        originalFormat: validation.format,
-        size: svgDataUrl.length,
-        conversionMethod: "svg-wrapper",
-      };
-    } catch (error) {
-      return this.createFailedResult(
-        `SVG conversion failed: ${error}`,
-        validation.format,
-      );
+    if (typeof window === "undefined") {
+      return await this.convertToPNGFallback(dataUrl);
     }
+
+    return new Promise((resolve) => {
+      try {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        if (!ctx) {
+          resolve(this.createFailedResult("Canvas context not available", validation.format));
+          return;
+        }
+
+        const img = new Image();
+        img.onload = () => {
+          try {
+            canvas.width = img.width;
+            canvas.height = img.height;
+
+            // Fill white background for JPEG
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+
+            const jpegDataUrl = canvas.toDataURL("image/jpeg", 0.9);
+            resolve({
+              success: true,
+              dataUrl: jpegDataUrl,
+              format: "jpeg",
+              originalFormat: validation.format,
+              size: jpegDataUrl.length,
+              conversionMethod: "canvas-jpeg-conversion",
+            });
+          } catch (error) {
+            resolve(this.createFailedResult(`JPEG conversion failed: ${error}`, validation.format));
+          }
+        };
+
+        img.onerror = () => {
+          resolve(this.createFailedResult("Image load failed", validation.format));
+        };
+
+        img.src = dataUrl;
+      } catch (error) {
+        resolve(this.createFailedResult(`JPEG conversion failed: ${error}`, validation.format));
+      }
+    });
   }
 
+
+
   /**
-   * Ultimate fallback to SVG
+   * Ultimate fallback to PNG
    */
-  private async convertToSVGFallback(
+  private async convertToPNGFallback(
     _dataUrl: string,
   ): Promise<ConversionResult> {
     try {
-      // Create a simple SVG with error message
-      const errorSvg = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-          <rect width="512" height="512" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2"/>
-          <text x="256" y="240" text-anchor="middle" font-family="Arial" font-size="16" fill="#6c757d">
-            QR Code Generation Error
-          </text>
-          <text x="256" y="260" text-anchor="middle" font-family="Arial" font-size="12" fill="#6c757d">
-            Please try regenerating
-          </text>
-        </svg>
-      `;
+      // Create a simple canvas with error message
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        throw new Error("Canvas context not available");
+      }
 
-      const svgDataUrl = `data:image/svg+xml;base64,${btoa(errorSvg)}`;
+      canvas.width = 512;
+      canvas.height = 512;
+
+      // Fill background
+      ctx.fillStyle = "#f8f9fa";
+      ctx.fillRect(0, 0, 512, 512);
+
+      // Add border
+      ctx.strokeStyle = "#dee2e6";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(1, 1, 510, 510);
+
+      // Add error text
+      ctx.fillStyle = "#6c757d";
+      ctx.font = "16px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("QR Code Generation Error", 256, 240);
+
+      ctx.font = "12px Arial";
+      ctx.fillText("Please try regenerating", 256, 260);
+
+      const pngDataUrl = canvas.toDataURL("image/png");
 
       return {
         success: true,
-        dataUrl: svgDataUrl,
-        format: "svg",
+        dataUrl: pngDataUrl,
+        format: "png",
         originalFormat: "unknown",
-        size: svgDataUrl.length,
+        size: pngDataUrl.length,
         conversionMethod: "error-fallback",
       };
     } catch (error) {
@@ -401,7 +435,6 @@ export class QRDataValidator {
 
   // Helper methods
   private extractFormatFromMimeType(mimeType: string): string {
-    if (mimeType.includes("svg")) return "svg";
     if (mimeType.includes("jpeg") || mimeType.includes("jpg")) return "jpeg";
     if (mimeType.includes("webp")) return "webp";
     if (mimeType.includes("png")) return "png";
@@ -455,17 +488,7 @@ export class QRDataValidator {
     return { errors, warnings };
   }
 
-  private createSVGWrapper(
-    dataUrl: string,
-    width: number,
-    height: number,
-  ): string {
-    return `
-      <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-        <image href="${dataUrl}" width="${width}" height="${height}"/>
-      </svg>
-    `;
-  }
+
 
   private createValidationResult(
     isValid: boolean,
@@ -494,15 +517,7 @@ export class QRDataValidator {
     };
   }
 
-  private async convertToJPEG(
-    dataUrl: string,
-    validation: DataURLValidationResult,
-    options: ConversionOptions,
-  ): Promise<ConversionResult> {
-    // Similar to PNG conversion but with JPEG output
-    // Implementation would be similar to convertToPNG but with 'image/jpeg'
-    return await this.convertToPNG(dataUrl, validation, options);
-  }
+
 }
 
 // Export singleton instance

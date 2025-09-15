@@ -14,6 +14,9 @@ import {
   useReducer,
 } from "react";
 import { toast } from "sonner";
+import { useMutation } from "convex/react";
+import { useUser } from "@auth0/nextjs-auth0";
+import { api } from "@/convex/_generated/api";
 import { qrService, storageService } from "@/services";
 import type {
   ComponentState,
@@ -136,6 +139,8 @@ const QRContext = createContext<QRContextType | undefined>(undefined);
 // Provider component
 export function QRProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(qrReducer, initialState);
+  const { user } = useUser();
+  const saveToHistory = useMutation(api.qrHistory.saveQRToHistory);
 
   /**
    * Sets QR options
@@ -214,6 +219,40 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: "SET_QR_DATA", payload: result.dataUrl });
       dispatch({ type: "SET_STATE", payload: "success" });
 
+      // Save to history if user is authenticated
+      if (user) {
+        try {
+          // biome-ignore lint/suspicious/noExplicitAny: Convex mutation requires flexible object structure
+          const historyData: any = {
+            textContent: state.options.text,
+            qrSettings: {
+              size: state.options.size,
+              margin: state.options.margin,
+              errorCorrectionLevel: state.options.errorCorrectionLevel,
+              foreground: state.options.foreground,
+              background: state.options.background,
+              format: state.options.format,
+              logoUrl: state.options.logoUrl,
+              logoSize: state.options.logoSize,
+              logoBackground: state.options.logoBackground,
+            },
+          };
+
+          if (result.method) {
+            historyData.generationMethod = result.method;
+          }
+
+          if (result.browserInfo) {
+            historyData.browserInfo = result.browserInfo;
+          }
+
+          await saveToHistory(historyData);
+        } catch (historyError) {
+          console.warn("Failed to save to history:", historyError);
+          // Don't show error to user as QR generation was successful
+        }
+      }
+
       toast.success("QR code generated successfully!");
     } catch (error) {
       dispatch({ type: "SET_STATE", payload: "error" });
@@ -228,7 +267,7 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
         dispatch({ type: "SET_STATE", payload: "idle" });
       }, 1000);
     }
-  }, [state.options, validateInput]);
+  }, [state.options, validateInput, user, saveToHistory]);
 
   /**
    * Resets QR state

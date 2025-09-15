@@ -13,7 +13,6 @@ export { PDFService, pdfService } from "./pdf-service";
 export { QRDataValidator, qrDataValidator } from "./qr-data-validator";
 export { QRService, qrService } from "./qr-service";
 export { StorageService, storageService } from "./storage-service";
-export { SVGQRService, svgQRService } from "./svg-qr-service";
 
 // Service registry for dependency injection (if needed in the future)
 const services = new Map<string, unknown>();
@@ -40,7 +39,6 @@ import { qrDataValidator } from "./qr-data-validator";
 // Import services for registration
 import { qrService } from "./qr-service";
 import { storageService } from "./storage-service";
-import { svgQRService } from "./svg-qr-service";
 
 // Register default services
 ServiceRegistry.register("qr", qrService);
@@ -48,6 +46,5 @@ ServiceRegistry.register("pdf", pdfService);
 ServiceRegistry.register("file", fileService);
 ServiceRegistry.register("storage", storageService);
 ServiceRegistry.register("geolocation", geolocationService);
-ServiceRegistry.register("svgQR", svgQRService);
 ServiceRegistry.register("browserDetection", browserDetectionService);
 ServiceRegistry.register("qrDataValidator", qrDataValidator);

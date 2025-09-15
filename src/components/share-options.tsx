@@ -60,7 +60,7 @@ export const ShareOptions = memo(function ShareOptions({
   }, [qrText]);
 
   const shareViaWebAPI = useCallback(async () => {
-    if (typeof navigator !== "undefined" && navigator.share) {
+    if (navigator?.share) {
       try {
         await navigator.share({
           title: "QR Code Generated",

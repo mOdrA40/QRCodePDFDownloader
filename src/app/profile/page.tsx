@@ -3,27 +3,48 @@
  * Displays user profile information and settings
  */
 
-import { auth0 } from "@/lib/auth0";
-import { redirect } from "next/navigation";
-import { ArrowLeft, User, Mail, Calendar, Shield } from "lucide-react";
+"use client";
+
+import { useAuth0 } from "@auth0/auth0-react";
+import { ArrowLeft, User, Mail, Calendar, Shield, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 
-export const metadata = {
-  title: "Profile - QR PDF Generator",
-  description: "View and manage your profile information",
-};
+export default function ProfilePage() {
+  const { user, isLoading, loginWithRedirect } = useAuth0();
 
-export default async function ProfilePage() {
-  const session = await auth0.getSession();
-  
-  if (!session) {
-    redirect("/auth/login?returnTo=/profile");
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-muted rounded w-32 mb-6"></div>
+          <div className="h-64 bg-muted rounded"></div>
+        </div>
+      </div>
+    );
   }
 
-  const { user } = session;
+  // Not authenticated
+  if (!user) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center py-12">
+          <User className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+          <h1 className="text-2xl font-bold mb-2">Sign In Required</h1>
+          <p className="text-muted-foreground mb-6">
+            Please sign in to view your profile
+          </p>
+          <Button onClick={() => loginWithRedirect()}>
+            <LogIn className="h-4 w-4 mr-2" />
+            Sign In
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const userInitials = user.name
     ?.split(' ')

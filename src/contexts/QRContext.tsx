@@ -15,7 +15,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { useMutation } from "convex/react";
-import { useUser } from "@auth0/nextjs-auth0";
+import { useAuth0 } from "@auth0/auth0-react";
 import { api } from "@/convex/_generated/api";
 import { qrService, storageService } from "@/services";
 import type {
@@ -139,7 +139,7 @@ const QRContext = createContext<QRContextType | undefined>(undefined);
 // Provider component
 export function QRProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(qrReducer, initialState);
-  const { user } = useUser();
+  const { user } = useAuth0();
   const saveToHistory = useMutation(api.qrHistory.saveQRToHistory);
 
   /**

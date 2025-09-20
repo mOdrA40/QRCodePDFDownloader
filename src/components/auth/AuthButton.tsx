@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useUser } from "@auth0/nextjs-auth0";
+import { useAuth0 } from "@auth0/auth0-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +21,7 @@ import Link from "next/link";
 import { useTheme } from "next-themes";
 
 export function AuthButton() {
-  const { user, isLoading } = useUser();
+  const { user, isLoading, loginWithRedirect, logout } = useAuth0();
   const { theme } = useTheme();
 
   // Loading state
@@ -38,15 +38,12 @@ export function AuthButton() {
   if (!user) {
     return (
       <Button
-        asChild
         size="sm"
-        variant="default"
-        className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
+        variant="inverted"
+        onClick={() => loginWithRedirect()}
       >
-        <a href="/auth/login">
-          <LogIn className="h-4 w-4" />
-          Sign In
-        </a>
+        <LogIn className="h-4 w-4" />
+        Sign In
       </Button>
     );
   }
@@ -126,14 +123,12 @@ export function AuthButton() {
         
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem asChild>
-          <a 
-            href="/auth/logout" 
-            className="flex items-center gap-2 cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
-          >
-            <LogOut className="h-4 w-4" />
-            Sign Out
-          </a>
+        <DropdownMenuItem
+          className="flex items-center gap-2 cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
+          onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+        >
+          <LogOut className="h-4 w-4" />
+          Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -3,24 +3,52 @@
  * Displays user's QR code history with search and management features
  */
 
-import { auth0 } from "@/lib/auth0";
-import { redirect } from "next/navigation";
+"use client";
+
+import { useAuth0 } from "@auth0/auth0-react";
 import { QRHistoryList } from "@/components/qr/QRHistoryList";
 import { QRHistoryStats } from "@/components/qr/QRHistoryStats";
-import { ArrowLeft, QrCode } from "lucide-react";
+import { ArrowLeft, QrCode, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-export const metadata = {
-  title: "My QR Codes - QR PDF Generator",
-  description: "Manage your QR code history and download previous creations",
-};
+export default function FilesPage() {
+  const { user, isLoading, loginWithRedirect } = useAuth0();
 
-export default async function FilesPage() {
-  const session = await auth0.getSession();
-  
-  if (!session) {
-    redirect("/auth/login?returnTo=/files");
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-muted rounded w-48 mb-6"></div>
+          <div className="h-32 bg-muted rounded mb-6"></div>
+          <div className="space-y-4">
+            <div className="h-20 bg-muted rounded"></div>
+            <div className="h-20 bg-muted rounded"></div>
+            <div className="h-20 bg-muted rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Not authenticated
+  if (!user) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center py-12">
+          <QrCode className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+          <h1 className="text-2xl font-bold mb-2">Sign In Required</h1>
+          <p className="text-muted-foreground mb-6">
+            Please sign in to view your QR code history
+          </p>
+          <Button onClick={() => loginWithRedirect()}>
+            <LogIn className="h-4 w-4 mr-2" />
+            Sign In
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (

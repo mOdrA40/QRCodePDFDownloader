@@ -30,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import styles from "../../app/files/files.module.css";
 
 // const ITEMS_PER_PAGE = 10; // Removed for simple query
 
@@ -121,70 +122,79 @@ export function QRHistoryList() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3 xs:space-y-4">
           {qrHistory.map((qr) => (
-            <Card key={qr._id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-4">
+            <Card key={qr._id} className={`hover:shadow-md transition-shadow ${styles.qrCard}`}>
+              <CardContent className="p-3 xs:p-4">
+                <div className={styles.qrCardContent}>
                   {/* QR Preview Placeholder */}
-                  <div className="h-16 w-16 bg-muted rounded-lg flex items-center justify-center">
-                    <QrCode className="h-8 w-8 text-muted-foreground" />
+                  <div className={`bg-muted rounded-lg flex items-center justify-center ${styles.qrPreview}`}>
+                    <QrCode className="h-6 w-6 xs:h-8 xs:w-8 text-muted-foreground" />
                   </div>
 
                   {/* QR Details */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-medium truncate">
-                        {qr.textContent.length > 50 
-                          ? `${qr.textContent.substring(0, 50)}...` 
+                  <div className={styles.qrDetails}>
+                    <div className="flex items-start gap-2 mb-2">
+                      <h3 className={`font-medium ${styles.qrTitle} ${styles.safeText}`}>
+                        {qr.textContent.length > 40
+                          ? `${qr.textContent.substring(0, 40)}...`
                           : qr.textContent}
                       </h3>
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="secondary" className="text-xs shrink-0">
                         {qr.qrSettings.format.toUpperCase()}
                       </Badge>
                     </div>
-                    
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {new Date(qr.createdAt).toLocaleDateString()}
-                      </span>
-                      <span>{qr.qrSettings.size}px</span>
-                      <span>{qr.qrSettings.errorCorrectionLevel} Error Correction</span>
+
+                    <div className={styles.qrMeta}>
+                      <div className={styles.qrMetaRow}>
+                        <span className={styles.qrMetaItem}>
+                          <Calendar className="h-3 w-3" />
+                          {new Date(qr.createdAt).toLocaleDateString()}
+                        </span>
+                        <span className={styles.qrMetaItem}>
+                          {qr.qrSettings.size}px
+                        </span>
+                      </div>
+                      <div className={styles.qrMetaRow}>
+                        <span className={styles.qrMetaItem}>
+                          {qr.qrSettings.errorCorrectionLevel} Error Correction
+                        </span>
+                      </div>
                     </div>
                   </div>
 
                   {/* Actions */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleCopyText(qr.textContent)}>
-                        <Copy className="h-4 w-4 mr-2" />
-                        Copy Text
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleDownloadQR("", qr.textContent)}>
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => handleDelete(qr._id)}
-                        className="text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <div className={styles.qrActions}>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 xs:h-9 xs:w-9">
+                          <MoreHorizontal className="h-3 w-3 xs:h-4 xs:w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleCopyText(qr.textContent)}>
+                          <Copy className="h-4 w-4 mr-2" />
+                          Copy Text
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDownloadQR("", qr.textContent)}>
+                          <Download className="h-4 w-4 mr-2" />
+                          Download
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDelete(qr._id)}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           ))}
 
-          {/* Load More Button - Removed for simple query */}
         </div>
       )}
     </div>

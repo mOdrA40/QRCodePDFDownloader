@@ -6,22 +6,38 @@
 "use client";
 
 import { useAuth0 } from "@auth0/auth0-react";
-import { ArrowLeft, User, Mail, Calendar, Shield, LogIn } from "lucide-react";
+import { ArrowLeft, User, Mail, Calendar, Shield, LogIn, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useState } from "react";
 import Link from "next/link";
+import styles from "./profile.module.css";
 
 export default function ProfilePage() {
   const { user, isLoading, loginWithRedirect } = useAuth0();
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const copyToClipboard = async (text: string, field: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedField(field);
+      setTimeout(() => setCopiedField(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
 
   // Loading state
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-muted rounded w-32 mb-6"></div>
-          <div className="h-64 bg-muted rounded"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 overflow-x-hidden">
+        <div className="w-full max-w-[calc(100vw-1.5rem)] mx-auto py-4 xs:py-6 sm:py-8 px-3 xs:px-4 sm:px-6">
+          <div className="animate-pulse">
+            <div className="h-6 xs:h-8 bg-muted rounded w-24 xs:w-32 mb-4 xs:mb-6"></div>
+            <div className="h-48 xs:h-64 bg-muted rounded"></div>
+          </div>
         </div>
       </div>
     );
@@ -30,17 +46,19 @@ export default function ProfilePage() {
   // Not authenticated
   if (!user) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center py-12">
-          <User className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-          <h1 className="text-2xl font-bold mb-2">Sign In Required</h1>
-          <p className="text-muted-foreground mb-6">
-            Please sign in to view your profile
-          </p>
-          <Button onClick={() => loginWithRedirect()}>
-            <LogIn className="h-4 w-4 mr-2" />
-            Sign In
-          </Button>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 overflow-x-hidden">
+        <div className="w-full max-w-[calc(100vw-1.5rem)] mx-auto py-4 xs:py-6 sm:py-8 px-3 xs:px-4 sm:px-6">
+          <div className="text-center py-8 xs:py-12">
+            <User className="h-12 xs:h-16 w-12 xs:w-16 mx-auto mb-3 xs:mb-4 text-muted-foreground" />
+            <h1 className="text-lg xs:text-xl sm:text-2xl font-bold mb-2">Sign In Required</h1>
+            <p className="text-sm xs:text-base text-muted-foreground mb-4 xs:mb-6 px-2">
+              Please sign in to view your profile
+            </p>
+            <Button onClick={() => loginWithRedirect()} className="w-full xs:w-auto">
+              <LogIn className="h-4 w-4 mr-2" />
+              Sign In
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -54,92 +72,158 @@ export default function ProfilePage() {
     .slice(0, 2) || 'U';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      <div className="container mx-auto py-8 px-4">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Generator
-            </Link>
-          </Button>
-          <div className="h-6 w-px bg-border" />
-          <h1 className="text-3xl font-bold">Profile</h1>
-        </div>
+    <TooltipProvider>
+      <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 overflow-x-hidden ${styles.forceContain}`}>
+        <div className={`w-full max-w-[calc(100vw-1.5rem)] mx-auto py-4 xs:py-6 sm:py-8 px-3 xs:px-4 sm:px-6 ${styles.profileContainer}`}>
+          {/* Header */}
+          <div className="flex flex-col xs:flex-row items-start xs:items-center gap-2 xs:gap-3 mb-4 xs:mb-6 sm:mb-8">
+            <Button variant="ghost" size="sm" asChild className="shrink-0 h-8 px-2">
+              <Link href="/" className="flex items-center gap-1.5">
+                <ArrowLeft className="h-3.5 w-3.5" />
+                <span className="text-sm">Back</span>
+              </Link>
+            </Button>
+            <div className="hidden xs:block h-4 w-px bg-border" />
+            <h1 className="text-xl xs:text-2xl sm:text-3xl font-bold">Profile</h1>
+          </div>
 
-        {/* Profile Card */}
-        <div className="max-w-2xl mx-auto">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3">
-                <User className="h-5 w-5" />
-                User Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Avatar and Basic Info */}
-              <div className="flex items-center gap-4">
-                <Avatar className="h-20 w-20">
-                  <AvatarImage 
-                    src={user.picture || ""} 
-                    alt={user.name || "User avatar"}
-                    className="object-cover"
-                  />
-                  <AvatarFallback className="text-lg font-medium bg-primary text-primary-foreground">
-                    {userInitials}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h2 className="text-2xl font-semibold">{user.name || "User"}</h2>
-                  <p className="text-muted-foreground">{user.email}</p>
-                </div>
-              </div>
-
-              {/* Profile Details */}
-              <div className="grid gap-4">
-                <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium">Email</p>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
+          {/* Profile Card */}
+          <div className={`w-full max-w-full ${styles.profileCard}`}>
+            <Card className={`overflow-hidden ${styles.profileCard}`}>
+              <CardHeader className="pb-3 xs:pb-4">
+                <CardTitle className="flex items-center gap-2 xs:gap-3 text-base xs:text-lg sm:text-xl">
+                  <User className="h-4 w-4 xs:h-5 xs:w-5 shrink-0" />
+                  <span className="truncate">User Information</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 xs:space-y-6">
+                {/* Avatar and Basic Info */}
+                <div className="flex flex-col xs:flex-row items-center xs:items-start gap-3 xs:gap-4">
+                  <Avatar className="h-12 w-12 xs:h-16 xs:w-16 sm:h-20 sm:w-20 shrink-0">
+                    <AvatarImage
+                      src={user.picture || ""}
+                      alt={user.name || "User avatar"}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="text-sm xs:text-base sm:text-lg font-medium bg-primary text-primary-foreground">
+                      {userInitials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className={`text-center xs:text-left min-w-0 flex-1 w-full ${styles.textContainer}`}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <h2 className={`text-lg xs:text-xl sm:text-2xl font-semibold cursor-help ${styles.truncateText}`}>
+                          {user.name || "User"}
+                        </h2>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs break-words">{user.name || "User"}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className={`text-muted-foreground text-xs xs:text-sm sm:text-base cursor-help mt-1 ${styles.emailText}`}>
+                          {user.email}
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs break-all">{user.email}</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                  <Shield className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium">User ID</p>
-                    <p className="text-sm text-muted-foreground font-mono">{user.sub}</p>
-                  </div>
-                </div>
-
-                {user.updated_at && (
-                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Last Updated</p>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(user.updated_at).toLocaleDateString()}
-                      </p>
+                {/* Profile Details */}
+                <div className="grid gap-3 xs:gap-4">
+                  <div className={`flex items-start gap-2 xs:gap-3 p-2 xs:p-3 bg-muted/50 rounded-lg ${styles.subCard}`}>
+                    <Mail className="h-3.5 w-3.5 xs:h-4 xs:w-4 text-muted-foreground shrink-0 mt-0.5" />
+                    <div className={`min-w-0 flex-1 ${styles.textContainer}`}>
+                      <p className="text-xs xs:text-sm font-medium">Email</p>
+                      <div className="flex items-center gap-1 xs:gap-2">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className={`text-xs xs:text-sm text-muted-foreground cursor-help break-anywhere ${styles.emailText} ${styles.safeText}`}>
+                              {user.email}
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs break-all">{user.email}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-5 w-5 xs:h-6 xs:w-6 p-0 shrink-0"
+                          onClick={() => copyToClipboard(user.email || '', 'email')}
+                        >
+                          {copiedField === 'email' ? (
+                            <Check className="h-2.5 w-2.5 xs:h-3 xs:w-3 text-green-600" />
+                          ) : (
+                            <Copy className="h-2.5 w-2.5 xs:h-3 xs:w-3" />
+                          )}
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                )}
-              </div>
 
-              {/* Actions */}
-              <div className="flex gap-3 pt-4">
-                <Button asChild>
-                  <Link href="/files">View My QR Codes</Link>
-                </Button>
-                <Button variant="outline" asChild>
-                  <a href="/auth/logout">Logout</a>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                  <div className={`flex items-start gap-2 xs:gap-3 p-2 xs:p-3 bg-muted/50 rounded-lg ${styles.subCard}`}>
+                    <Shield className="h-3.5 w-3.5 xs:h-4 xs:w-4 text-muted-foreground shrink-0 mt-0.5" />
+                    <div className={`min-w-0 flex-1 ${styles.textContainer}`}>
+                      <p className="text-xs xs:text-sm font-medium">User ID</p>
+                      <div className="flex items-center gap-1 xs:gap-2">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className={`text-xs xs:text-sm text-muted-foreground cursor-help break-anywhere ${styles.userIdText} ${styles.safeText}`}>
+                              {user.sub}
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs break-all font-mono">{user.sub}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-5 w-5 xs:h-6 xs:w-6 p-0 shrink-0"
+                          onClick={() => copyToClipboard(user.sub || '', 'userId')}
+                        >
+                          {copiedField === 'userId' ? (
+                            <Check className="h-2.5 w-2.5 xs:h-3 xs:w-3 text-green-600" />
+                          ) : (
+                            <Copy className="h-2.5 w-2.5 xs:h-3 xs:w-3" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {user.updated_at && (
+                    <div className="flex items-start gap-2 xs:gap-3 p-2 xs:p-3 bg-muted/50 rounded-lg">
+                      <Calendar className="h-3.5 w-3.5 xs:h-4 xs:w-4 text-muted-foreground shrink-0 mt-0.5" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs xs:text-sm font-medium">Last Updated</p>
+                        <p className="text-xs xs:text-sm text-muted-foreground">
+                          {new Date(user.updated_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex flex-col xs:flex-row gap-2 xs:gap-3 pt-3 xs:pt-4">
+                  <Button asChild className="w-full xs:w-auto text-sm">
+                    <Link href="/files">View My QR Codes</Link>
+                  </Button>
+                  <Button variant="outline" asChild className="w-full xs:w-auto text-sm">
+                    <a href="/auth/logout">Logout</a>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }

@@ -76,7 +76,7 @@ function CallbackPageContent() {
               const originalConsoleError = console.error;
 
               // Suppress specific Auth0 errors
-              console.error = (...args: any[]) => {
+              console.error = (...args: unknown[]) => {
                 const message = args.join(' ');
                 if (message.includes('Invalid state') ||
                     message.includes('state mismatch') ||
@@ -102,14 +102,17 @@ function CallbackPageContent() {
                       console.error = originalConsoleError;
                       resolve();
                     })
-                    .catch((error: any) => {
+                    .catch((error: unknown) => {
                       console.error = originalConsoleError;
                       // Check if it's a known Auth0 error
-                      if (error?.message?.includes('Invalid state') ||
-                          error?.message?.includes('state mismatch') ||
-                          error?.error === 'invalid_request') {
+                      const errorMessage = error instanceof Error ? error.message : String(error);
+                      const errorObj = error as { error?: string; message?: string };
+
+                      if (errorMessage.includes('Invalid state') ||
+                          errorMessage.includes('state mismatch') ||
+                          errorObj?.error === 'invalid_request') {
                         // Silently resolve instead of rejecting
-                        console.log("Auth0 error silently handled:", error.message);
+                        console.log("Auth0 error silently handled:", errorMessage);
                         resolve();
                       } else {
                         reject(error);
@@ -118,14 +121,17 @@ function CallbackPageContent() {
                 } else {
                   resolve();
                 }
-              } catch (error: any) {
+              } catch (error: unknown) {
                 console.error = originalConsoleError;
                 // Check if it's a known Auth0 error
-                if (error?.message?.includes('Invalid state') ||
-                    error?.message?.includes('state mismatch') ||
-                    error?.error === 'invalid_request') {
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                const errorObj = error as { error?: string; message?: string };
+
+                if (errorMessage.includes('Invalid state') ||
+                    errorMessage.includes('state mismatch') ||
+                    errorObj?.error === 'invalid_request') {
                   // Silently resolve instead of rejecting
-                  console.log("Auth0 error silently handled:", error.message);
+                  console.log("Auth0 error silently handled:", errorMessage);
                   resolve();
                 } else {
                   reject(error);

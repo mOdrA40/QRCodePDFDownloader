@@ -12,7 +12,7 @@ export function suppressAuth0Errors() {
   originalConsoleError = console.error;
   isSuppressionActive = true;
   
-  console.error = (...args: any[]) => {
+  console.error = (...args: unknown[]) => {
     const message = args.join(' ');
     
     // Suppress specific Auth0 errors

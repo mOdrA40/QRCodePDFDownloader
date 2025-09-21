@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+@media (max-width: 320px) {
+  .break-anywhere {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    hyphens: auto;
+  }
+}
+
 /* Authentication Progress Bar Animations */
 @keyframes progressComplete {
   0% { width: 60%; }
@@ -128,11 +146,8 @@
 }
 
 .phone-input-container .PhoneInputCountry:focus-within {
-  outline: none;
-  ring: 2px;
-  ring-color: hsl(var(--ring));
-  ring-offset: 2px;
-  ring-offset-color: hsl(var(--background));
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
 }
 
 .phone-input-container .PhoneInputCountrySelect {
@@ -181,7 +196,7 @@
 }
 
 .phone-input-error .PhoneInputCountry:focus-within {
-  ring-color: hsl(var(--destructive));
+  outline-color: hsl(var(--destructive));
 }
 
 @media (prefers-color-scheme: dark) {

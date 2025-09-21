@@ -66,11 +66,12 @@ export default {
         '2xl': '6rem',
       },
       screens: {
-        sm: '640px',
-        md: '768px',
-        lg: '1024px',
-        xl: '1280px',
-        '2xl': '1536px',
+        xs: '480px',  // Small mobile landscape
+        sm: '640px',  // Large mobile
+        md: '768px',  // Tablet
+        lg: '1024px', // Desktop
+        xl: '1280px', // Large desktop
+        '2xl': '1536px', // Extra large
       },
       },
     }

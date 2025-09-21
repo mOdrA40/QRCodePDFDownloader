@@ -9,6 +9,9 @@ import { Auth0Provider } from "@auth0/auth0-react";
 import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithAuth0 } from "convex/react-auth0";
 import type { ReactNode } from "react";
+import { AuthRecovery } from "@/components/auth/AuthRecovery";
+import "@/utils/authDebug"; 
+import "@/utils/auth0-error-suppressor"; 
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL || "");
 
@@ -18,12 +21,10 @@ interface ConvexClientProviderProps {
 
 // Handle Auth0 redirect callback
 const onRedirectCallback = (appState?: { returnTo?: string }) => {
-  window.history.replaceState(
-    {},
-    document.title,
-    appState?.returnTo || window.location.pathname
-  );
+  // Let the callback page handle navigation to avoid double redirect
+  console.log("Auth0 onRedirectCallback called", { appState });
 };
+
 
 export function ConvexClientProvider({ children }: ConvexClientProviderProps) {
   return (
@@ -37,10 +38,11 @@ export function ConvexClientProvider({ children }: ConvexClientProviderProps) {
       useRefreshTokens={true}
       cacheLocation="localstorage"
       onRedirectCallback={onRedirectCallback}
-      skipRedirectCallback={typeof window !== "undefined" && window.location.pathname === "/auth/callback"}
     >
       <ConvexProviderWithAuth0 client={convex}>
-        {children}
+        <AuthRecovery>
+          {children}
+        </AuthRecovery>
       </ConvexProviderWithAuth0>
     </Auth0Provider>
   );

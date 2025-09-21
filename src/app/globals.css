@@ -2,6 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Authentication Progress Bar Animations */
+@keyframes progressComplete {
+  0% { width: 60%; }
+  25% { width: 75%; }
+  50% { width: 85%; }
+  75% { width: 92%; }
+  100% { width: 95%; }
+}
+
+@keyframes loginProgress {
+  0% { width: 60%; }
+  25% { width: 70%; }
+  50% { width: 80%; }
+  75% { width: 85%; }
+  100% { width: 90%; }
+}
+
+@keyframes progressPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+.auth-progress-complete {
+  animation: progressComplete 2s ease-out forwards;
+}
+
+.auth-progress-login {
+  animation: loginProgress 1.5s ease-out forwards;
+}
+
+.auth-progress-pulse {
+  animation: progressPulse 2s ease-in-out infinite;
+}
+
+/* Smooth progress bar base styles */
+.progress-bar-smooth {
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

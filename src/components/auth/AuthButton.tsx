@@ -18,11 +18,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogIn, LogOut, User, Settings, FileText } from "lucide-react";
 import Link from "next/link";
-import { useTheme } from "next-themes";
 
 export function AuthButton() {
   const { user, isLoading, loginWithRedirect, logout } = useAuth0();
-  const { theme } = useTheme();
 
   // Loading state
   if (isLoading) {
@@ -116,9 +114,11 @@ export function AuthButton() {
           </Link>
         </DropdownMenuItem>
         
-        <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
-          <Settings className="h-4 w-4" />
-          Settings
+        <DropdownMenuItem asChild>
+          <Link href="/settings" className="flex items-center gap-2 cursor-pointer">
+            <Settings className="h-4 w-4" />
+            Settings
+          </Link>
         </DropdownMenuItem>
         
         <DropdownMenuSeparator />

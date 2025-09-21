@@ -14,6 +14,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as qrHistory from "../qrHistory.js";
+import type * as userPreferences from "../userPreferences.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -25,6 +26,7 @@ import type * as qrHistory from "../qrHistory.js";
  */
 declare const fullApi: ApiFromModules<{
   qrHistory: typeof qrHistory;
+  userPreferences: typeof userPreferences;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

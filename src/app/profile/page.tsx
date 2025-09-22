@@ -76,15 +76,32 @@ export default function ProfilePage() {
       <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 overflow-x-hidden ${styles.forceContain}`}>
         <div className={`w-full max-w-[calc(100vw-1.5rem)] mx-auto py-4 xs:py-6 sm:py-8 px-3 xs:px-4 sm:px-6 ${styles.profileContainer}`}>
           {/* Header */}
-          <div className="flex flex-col xs:flex-row items-start xs:items-center gap-2 xs:gap-3 mb-4 xs:mb-6 sm:mb-8">
-            <Button variant="ghost" size="sm" asChild className="shrink-0 h-8 px-2">
-              <Link href="/" className="flex items-center gap-1.5">
-                <ArrowLeft className="h-3.5 w-3.5" />
-                <span className="text-sm">Back</span>
-              </Link>
-            </Button>
-            <div className="hidden xs:block h-4 w-px bg-border" />
-            <h1 className="text-xl xs:text-2xl sm:text-3xl font-bold">Profile</h1>
+          <div className={`mb-6 xs:mb-8 ${styles.headerContainer}`}>
+            <div className={styles.headerContent}>
+              <div className={styles.headerTop}>
+                <Button variant="ghost" size="sm" asChild className="shrink-0 h-8 px-2">
+                  <Link href="/" className="flex items-center gap-1.5">
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    <span className="text-sm hidden xs:inline">Back to Generator</span>
+                    <span className="text-sm xs:hidden">Back</span>
+                  </Link>
+                </Button>
+                <div className="hidden sm:block h-4 w-px bg-border" />
+                <div className="flex items-center gap-2 xs:gap-3 min-w-0 flex-1">
+                  <div className="p-1.5 xs:p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg shadow-lg shrink-0">
+                    <User className="h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6 text-white" />
+                  </div>
+                  <div className={`min-w-0 flex-1 ${styles.headerMain}`}>
+                    <h1 className={`${styles.headerTitle} ${styles.safeText}`}>
+                      Profile
+                    </h1>
+                    <p className={`${styles.headerSubtitle} ${styles.safeText}`}>
+                      View and manage your account information
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Profile Card */}

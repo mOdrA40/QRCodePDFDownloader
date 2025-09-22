@@ -23,6 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useTheme } from "next-themes";
+import styles from "./settings.module.css";
 
 export default function SettingsPage() {
   const { user, isLoading, loginWithRedirect } = useAuth0();
@@ -65,17 +66,19 @@ export default function SettingsPage() {
   // Not authenticated
   if (!user) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center py-12">
-          <Settings className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-          <h1 className="text-2xl font-bold mb-2">Sign In Required</h1>
-          <p className="text-muted-foreground mb-6">
-            Please sign in to access your settings
-          </p>
-          <Button onClick={() => loginWithRedirect()}>
-            <LogIn className="h-4 w-4 mr-2" />
-            Sign In
-          </Button>
+      <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 overflow-x-hidden ${styles.forceContain}`}>
+        <div className={`container mx-auto py-4 xs:py-6 sm:py-8 px-3 xs:px-4 sm:px-6 ${styles.settingsContainer}`}>
+          <div className="text-center py-8 xs:py-12">
+            <Settings className="h-12 xs:h-16 w-12 xs:w-16 mx-auto mb-3 xs:mb-4 text-muted-foreground" />
+            <h1 className="text-lg xs:text-xl sm:text-2xl font-bold mb-2">Sign In Required</h1>
+            <p className="text-sm xs:text-base text-muted-foreground mb-4 xs:mb-6 px-2">
+              Please sign in to access your settings
+            </p>
+            <Button onClick={() => loginWithRedirect()} className="w-full xs:w-auto">
+              <LogIn className="h-4 w-4 mr-2" />
+              Sign In
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -107,53 +110,82 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold">Settings</h1>
-          <p className="text-muted-foreground">Manage your account and application preferences</p>
+    <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 overflow-x-hidden ${styles.forceContain}`}>
+      <div className={`container mx-auto py-4 xs:py-6 sm:py-8 px-3 xs:px-4 sm:px-6 max-w-4xl ${styles.settingsContainer}`}>
+        {/* Header */}
+        <div className={`mb-6 xs:mb-8 ${styles.headerContainer}`}>
+          <div className={styles.headerContent}>
+            <div className={styles.headerTop}>
+              <Button variant="ghost" size="sm" asChild className="shrink-0 h-8 px-2">
+                <Link href="/" className="flex items-center gap-1.5">
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  <span className="text-sm hidden xs:inline">Back to Generator</span>
+                  <span className="text-sm xs:hidden">Back</span>
+                </Link>
+              </Button>
+              <div className="hidden sm:block h-4 w-px bg-border" />
+              <div className="flex items-center gap-2 xs:gap-3 min-w-0 flex-1">
+                <div className="p-1.5 xs:p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg shadow-lg shrink-0">
+                  <Settings className="h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6 text-white" />
+                </div>
+                <div className={`min-w-0 flex-1 ${styles.headerMain}`}>
+                  <h1 className={`${styles.headerTitle} ${styles.safeText}`}>
+                    Settings
+                  </h1>
+                  <p className={`${styles.headerSubtitle} ${styles.safeText}`}>
+                    Manage your account and application preferences
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Settings Tabs */}
-      <Tabs defaultValue="preferences" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
-          <TabsTrigger value="preferences" className="flex items-center gap-1 md:gap-2">
-            <Settings className="h-4 w-4" />
-            <span className="hidden sm:inline">Preferences</span>
-            <span className="sm:hidden">Prefs</span>
-          </TabsTrigger>
-          <TabsTrigger value="appearance" className="flex items-center gap-1 md:gap-2">
-            <Palette className="h-4 w-4" />
-            <span className="hidden sm:inline">Appearance</span>
-            <span className="sm:hidden">Theme</span>
-          </TabsTrigger>
-          <TabsTrigger value="data" className="flex items-center gap-1 md:gap-2">
-            <Database className="h-4 w-4" />
-            <span>Data</span>
-          </TabsTrigger>
-          <TabsTrigger value="account" className="flex items-center gap-1 md:gap-2">
-            <Shield className="h-4 w-4" />
-            <span>Account</span>
-          </TabsTrigger>
-        </TabsList>
+        {/* Settings Tabs */}
+        <Tabs defaultValue="preferences" className="space-y-4 xs:space-y-6">
+          <TabsList className={styles.segmentedControl}>
+            <TabsTrigger
+              value="preferences"
+              className={styles.segmentedControlItem}
+            >
+              <Settings className="h-3 w-3 xs:h-4 xs:w-4" />
+              <span className="hidden xs:inline">Preferences</span>
+              <span className="xs:hidden">Prefs</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="appearance"
+              className={styles.segmentedControlItem}
+            >
+              <Palette className="h-3 w-3 xs:h-4 xs:w-4" />
+              <span className="hidden xs:inline">Appearance</span>
+              <span className="xs:hidden">Theme</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="data"
+              className={styles.segmentedControlItem}
+            >
+              <Database className="h-3 w-3 xs:h-4 xs:w-4" />
+              <span>Data</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="account"
+              className={styles.segmentedControlItem}
+            >
+              <Shield className="h-3 w-3 xs:h-4 xs:w-4" />
+              <span>Account</span>
+            </TabsTrigger>
+          </TabsList>
 
-        {/* QR Preferences Tab */}
-        <TabsContent value="preferences" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>QR Code Defaults</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Set your default preferences for QR code generation
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-6">
+          {/* QR Preferences Tab */}
+          <TabsContent value="preferences" className="space-y-4 xs:space-y-6">
+            <Card className={styles.settingsCard}>
+              <CardHeader>
+                <CardTitle>QR Code Defaults</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Set your default preferences for QR code generation
+                </p>
+              </CardHeader>
+              <CardContent className={`space-y-4 xs:space-y-6 ${styles.cardContent}`}>
               {/* Default QR Size */}
               <div className="space-y-2">
                 <Label>Default QR Size: {preferences.defaultQRSize}px</Label>
@@ -217,16 +249,16 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        {/* Appearance Tab */}
-        <TabsContent value="appearance" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Theme & Appearance</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Customize the look and feel of the application
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-6">
+          {/* Appearance Tab */}
+          <TabsContent value="appearance" className="space-y-4 xs:space-y-6">
+            <Card className={styles.settingsCard}>
+              <CardHeader>
+                <CardTitle>Theme & Appearance</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Customize the look and feel of the application
+                </p>
+              </CardHeader>
+              <CardContent className={`space-y-4 xs:space-y-6 ${styles.cardContent}`}>
               {/* Theme Selection */}
               <div className="space-y-2">
                 <Label>Theme</Label>
@@ -264,16 +296,16 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        {/* Data Tab */}
-        <TabsContent value="data" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Data Management</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Manage your QR code history and data
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-6">
+          {/* Data Tab */}
+          <TabsContent value="data" className="space-y-4 xs:space-y-6">
+            <Card className={styles.settingsCard}>
+              <CardHeader>
+                <CardTitle>Data Management</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Manage your QR code history and data
+                </p>
+              </CardHeader>
+              <CardContent className={`space-y-4 xs:space-y-6 ${styles.cardContent}`}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 border rounded-lg">
                   <h3 className="font-medium mb-2">QR History</h3>
@@ -299,16 +331,16 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        {/* Account Tab */}
-        <TabsContent value="account" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Information</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Your account details and security settings
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-6">
+          {/* Account Tab */}
+          <TabsContent value="account" className="space-y-4 xs:space-y-6">
+            <Card className={styles.settingsCard}>
+              <CardHeader>
+                <CardTitle>Account Information</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Your account details and security settings
+                </p>
+              </CardHeader>
+              <CardContent className={`space-y-4 xs:space-y-6 ${styles.cardContent}`}>
               <div className="flex items-center gap-4">
                 {user.picture ? (
                   <Image
@@ -344,17 +376,18 @@ export default function SettingsPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Action Buttons */}
-      <div className="flex justify-between pt-6">
-        <Button variant="outline" onClick={handleReset}>
-          <RotateCcw className="h-4 w-4 mr-2" />
-          Reset to Defaults
-        </Button>
-        
-        <Button onClick={handleSave} disabled={isSaving}>
-          <Save className="h-4 w-4 mr-2" />
-          {isSaving ? "Saving..." : "Save Changes"}
-        </Button>
+        {/* Action Buttons */}
+        <div className={styles.actionButtons}>
+          <Button variant="outline" onClick={handleReset} className={styles.resetButton}>
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Reset to Defaults
+          </Button>
+
+          <Button onClick={handleSave} disabled={isSaving} className={styles.saveButton}>
+            <Save className="h-4 w-4 mr-2" />
+            {isSaving ? "Saving..." : "Save Changes"}
+          </Button>
+        </div>
       </div>
     </div>
   );

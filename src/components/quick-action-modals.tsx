@@ -40,6 +40,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { DatePicker } from "@/components/ui/date-picker";
+import { CustomTimePicker } from "@/components/ui/time-picker";
 import { qrFormatService } from "@/services/qr-format-service";
 import { securityService } from "@/services/security-service";
 
@@ -584,7 +586,7 @@ export function LocationModal({
 // Event Modal Component
 export function EventModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
   const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState("12:00");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
@@ -612,7 +614,20 @@ export function EventModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
     }
 
     try {
-      const eventDate = new Date(`${date}T${time}:00`);
+      if (!date) {
+        throw new Error("Date is required");
+      }
+
+      // Combine date and time
+      const [hours, minutes] = time.split(':');
+      const eventDate = new Date(date);
+      eventDate.setHours(
+        parseInt(hours || '0', 10),
+        parseInt(minutes || '0', 10),
+        0,
+        0
+      );
+
       const formattedDate = `${eventDate.toISOString().replace(/[-:]/g, "").split(".")[0]}Z`;
 
       let eventString = `BEGIN:VEVENT\nSUMMARY:${title}\nDTSTART:${formattedDate}`;
@@ -627,7 +642,7 @@ export function EventModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
       });
       onOpenChange(false);
       setTitle("");
-      setDate("");
+      setDate(undefined);
       setTime("12:00");
       setLocation("");
       setDescription("");
@@ -670,14 +685,21 @@ export function EventModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
+            {/* Date Field - Full Width */}
             <div className="space-y-2">
               <Label htmlFor={dateId}>Date *</Label>
-              <Input
+              <DatePicker
                 id={dateId}
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
+                date={date}
+                onDateChange={(selectedDate) => {
+                  setDate(selectedDate);
+                  if (selectedDate && errors.date) {
+                    const { date: _, ...restErrors } = errors;
+                    setErrors(restErrors);
+                  }
+                }}
+                placeholder="Select event date"
                 className={errors.date ? "border-red-500" : ""}
               />
               {errors.date && (
@@ -688,13 +710,15 @@ export function EventModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
               )}
             </div>
 
+            {/* Time Field - Full Width */}
             <div className="space-y-2">
               <Label htmlFor={timeId}>Time</Label>
-              <Input
+              <CustomTimePicker
                 id={timeId}
-                type="time"
                 value={time}
-                onChange={(e) => setTime(e.target.value)}
+                onChange={setTime}
+                placeholder="Select event time"
+                className="w-full"
               />
             </div>
           </div>

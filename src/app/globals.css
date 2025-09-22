@@ -125,6 +125,318 @@ html, body {
   }
 }
 
+/* Material UI TimePicker z-index fixes for dialog modals */
+.MuiPickersPopper-root {
+  z-index: 9999 !important;
+}
+
+.MuiPickersPopper-paper {
+  z-index: 9999 !important;
+}
+
+.MuiPopper-root {
+  z-index: 9999 !important;
+}
+
+.MuiPickersPopper-root .MuiPaper-root {
+  background-color: inherit !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+.dark .MuiPickersPopper-root .MuiPaper-root {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
+}
+
+.MuiClock-root,
+.MuiClock-clock,
+.MuiClockPointer-root,
+.MuiClockPointer-thumb,
+.MuiPickersArrowSwitcher-root,
+.MuiPickersArrowSwitcher-button,
+.MuiTimePicker-root,
+.MuiMultiSectionDigitalClockSection-item,
+.MuiToggleButton-root {
+  pointer-events: auto !important;
+  user-select: none;
+  cursor: pointer !important;
+}
+
+.MuiMultiSectionDigitalClockSection-item {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+.MuiMultiSectionDigitalClockSection-item:hover {
+  cursor: pointer !important;
+}
+
+.MuiMultiSectionDigitalClock-root {
+  pointer-events: auto !important;
+}
+
+.MuiMultiSectionDigitalClockSection-root {
+  pointer-events: auto !important;
+  scroll-behavior: smooth;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.MuiMultiSectionDigitalClockSection-item {
+  pointer-events: auto !important;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  border-radius: 4px !important;
+  margin: 1px 0 !important;
+}
+
+.MuiMultiSectionDigitalClockSection-item:hover {
+  background-color: rgba(0, 0, 0, 0.02) !important;
+  color: inherit !important;
+}
+
+.dark .MuiMultiSectionDigitalClockSection-item:hover {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+  color: inherit !important;
+}
+
+.MuiMultiSectionDigitalClockSection-root::-webkit-scrollbar {
+  width: 6px;
+}
+
+.MuiMultiSectionDigitalClockSection-root::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+}
+
+.MuiMultiSectionDigitalClockSection-root::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.MuiMultiSectionDigitalClockSection-root::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.dark .MuiMultiSectionDigitalClockSection-root::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark .MuiMultiSectionDigitalClockSection-root::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dark .MuiMultiSectionDigitalClockSection-root::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.MuiMultiSectionDigitalClockSection-root {
+  position: relative;
+  border: 1px solid transparent !important;
+  border-radius: 4px !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+  background-color: transparent !important;
+}
+
+.MuiMultiSectionDigitalClockSection-root:hover {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  background-color: transparent !important;
+}
+
+.dark .MuiMultiSectionDigitalClockSection-root:hover {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  background-color: transparent !important;
+}
+
+.MuiMultiSectionDigitalClockSection-root::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.05), transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.MuiMultiSectionDigitalClockSection-root::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.05), transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.dark .MuiMultiSectionDigitalClockSection-root::before,
+.dark .MuiMultiSectionDigitalClockSection-root::after {
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.05), transparent);
+}
+
+.MuiMultiSectionDigitalClockSection-root:hover::before,
+.MuiMultiSectionDigitalClockSection-root:hover::after {
+  opacity: 1;
+}
+
+/* Active scroll state */
+.MuiMultiSectionDigitalClockSection-root:focus-within {
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+.dark .MuiMultiSectionDigitalClockSection-root:focus-within {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+
+.MuiMultiSectionDigitalClockSection-root,
+.MuiMultiSectionDigitalClockSection-root *,
+.MuiPickersPopper-root,
+.MuiPickersPopper-root * {
+  title: none !important;
+}
+
+.MuiMultiSectionDigitalClockSection-root[title],
+.MuiMultiSectionDigitalClockSection-root *[title] {
+  position: relative;
+}
+
+.MuiMultiSectionDigitalClockSection-root[title]::before,
+.MuiMultiSectionDigitalClockSection-root[title]::after,
+.MuiMultiSectionDigitalClockSection-root *[title]::before,
+.MuiMultiSectionDigitalClockSection-root *[title]::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Enhanced selection feedback */
+.MuiMultiSectionDigitalClockSection-item[aria-selected="true"] {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  position: relative;
+  border-radius: 4px !important;
+}
+
+.dark .MuiMultiSectionDigitalClockSection-item[aria-selected="true"] {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  font-weight: 600 !important;
+}
+
+/* Ensure selected items are clearly visible */
+.MuiMultiSectionDigitalClockSection-item[aria-selected="true"]:hover {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.dark .MuiMultiSectionDigitalClockSection-item[aria-selected="true"]:hover {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Fix for AM/PM toggle */
+.MuiToggleButtonGroup-root {
+  pointer-events: auto !important;
+}
+
+.MuiToggleButton-root {
+  pointer-events: auto !important;
+  cursor: pointer;
+  color: inherit !important;
+  border-color: rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.15s ease !important;
+}
+
+.MuiToggleButton-root:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+  color: inherit !important;
+}
+
+.dark .MuiToggleButton-root {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.dark .MuiToggleButton-root:hover {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Selected AM/PM button styling */
+.MuiToggleButton-root.Mui-selected {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+}
+
+.dark .MuiToggleButton-root.Mui-selected {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border-color: #ffffff !important;
+}
+
+.MuiToggleButton-root.Mui-selected:hover {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.dark .MuiToggleButton-root.Mui-selected:hover {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+.MuiPickersActionBar-root {
+  pointer-events: auto !important;
+  z-index: 10000 !important;
+  position: relative;
+}
+
+.MuiPickersActionBar-root .MuiButton-root {
+  pointer-events: auto !important;
+  z-index: 10001 !important;
+  cursor: pointer !important;
+  position: relative;
+  isolation: isolate;
+}
+
+.MuiPickersActionBar-root .MuiButton-root:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.dark .MuiPickersActionBar-root .MuiButton-root:hover {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+.MuiPickersPopper-root .MuiPickersActionBar-root {
+  background-color: inherit;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 8px 16px;
+  margin: 0;
+}
+
+.dark .MuiPickersPopper-root .MuiPickersActionBar-root {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.MuiPickersActionBar-root::before,
+.MuiPickersActionBar-root::after {
+  display: none !important;
+}
+
+.MuiPickersActionBar-root .MuiButton-root::before,
+.MuiPickersActionBar-root .MuiButton-root::after {
+  display: none !important;
+}
+
 .phone-input-container {
   display: flex;
   align-items: stretch;

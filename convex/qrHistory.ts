@@ -14,21 +14,45 @@ async function getAuthUserId(ctx: any): Promise<string | null> {
 }
 
 /**
- * Get user's QR code history with pagination
+ * Get user's QR code history with optimization
  */
 export const getUserQRHistory = query({
-  args: {},
+  args: {
+    limit: v.optional(v.number()),
+  },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
       throw new Error("Not authenticated");
     }
 
+    const limit = args.limit || 50; 
+
     return await ctx.db
       .query("qrHistory")
       .withIndex("by_user_created", (q) => q.eq("userId", userId))
       .order("desc")
-      .collect();
+      .take(limit);
+  },
+});
+
+/**
+ * Get user's QR code history (simple version for backward compatibility)
+ */
+export const getUserQRHistorySimple = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    // Return recent 20 items for performance
+    return await ctx.db
+      .query("qrHistory")
+      .withIndex("by_user_created", (q) => q.eq("userId", userId))
+      .order("desc")
+      .take(20);
   },
 });
 
@@ -55,7 +79,35 @@ export const searchQRHistory = query({
 });
 
 /**
- * Save QR code to history
+ * Check for duplicate QR code in user's history
+ */
+export const checkDuplicateQR = query({
+  args: {
+    textContent: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return { isDuplicate: false, existingQR: null };
+    }
+
+    // Use optimized index for duplicate checking
+    const existingQR = await ctx.db
+      .query("qrHistory")
+      .withIndex("by_user_text", (q) =>
+        q.eq("userId", userId).eq("textContent", args.textContent)
+      )
+      .first();
+
+    return {
+      isDuplicate: !!existingQR,
+      existingQR: existingQR || null,
+    };
+  },
+});
+
+/**
+ * Save QR code to history with duplicate checking
  */
 export const saveQRToHistory = mutation({
   args: {
@@ -73,11 +125,31 @@ export const saveQRToHistory = mutation({
     }),
     generationMethod: v.optional(v.string()),
     browserInfo: v.optional(v.string()),
+    skipDuplicateCheck: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
-      throw new Error("Not authenticated");
+      return { success: false, error: "Not authenticated", isDuplicate: false };
+    }
+
+    // Check for duplicates unless explicitly skipped
+    if (!args.skipDuplicateCheck) {
+      const existingQR = await ctx.db
+        .query("qrHistory")
+        .withIndex("by_user_text", (q) =>
+          q.eq("userId", userId).eq("textContent", args.textContent)
+        )
+        .first();
+
+      if (existingQR) {
+        return {
+          success: false,
+          error: "DUPLICATE_QR_EXISTS",
+          isDuplicate: true,
+          existingQR
+        };
+      }
     }
 
     const now = Date.now();
@@ -97,7 +169,8 @@ export const saveQRToHistory = mutation({
       insertData.browserInfo = args.browserInfo;
     }
 
-    return await ctx.db.insert("qrHistory", insertData);
+    const qrId = await ctx.db.insert("qrHistory", insertData);
+    return { success: true, qrId, isDuplicate: false };
   },
 });
 
@@ -124,7 +197,7 @@ export const deleteQRFromHistory = mutation({
 });
 
 /**
- * Get QR code statistics for user
+ * Get QR code statistics for user (optimized)
  */
 export const getQRStatistics = query({
   args: {},
@@ -134,31 +207,39 @@ export const getQRStatistics = query({
       throw new Error("Not authenticated");
     }
 
-    const allQRs = await ctx.db
+    // Get recent QRs for statistics (limit for performance)
+    const recentQRs = await ctx.db
       .query("qrHistory")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .collect();
+      .withIndex("by_user_created", (q) => q.eq("userId", userId))
+      .order("desc")
+      .take(500); 
 
-    const totalGenerated = allQRs.length;
+    const totalGenerated = recentQRs.length;
     const todayStart = new Date().setHours(0, 0, 0, 0);
-    const todayGenerated = allQRs.filter(qr => qr.createdAt >= todayStart).length;
+    const todayGenerated = recentQRs.filter(qr => qr.createdAt >= todayStart).length;
 
-    // Calculate format usage
+    // Calculate format usage efficiently
     const formatUsage: Record<string, number> = {};
-    allQRs.forEach(qr => {
-      const format = qr.qrSettings.format;
-      formatUsage[format] = (formatUsage[format] || 0) + 1;
-    });
+    let favoriteFormat = 'png';
+    let maxCount = 0;
 
-    const favoriteFormat = Object.entries(formatUsage)
-      .sort(([, a], [, b]) => b - a)[0]?.[0] || "png";
+    for (const qr of recentQRs) {
+      const format = qr.qrSettings.format;
+      const count = (formatUsage[format] || 0) + 1;
+      formatUsage[format] = count;
+
+      if (count > maxCount) {
+        maxCount = count;
+        favoriteFormat = format;
+      }
+    }
 
     return {
       totalGenerated,
       todayGenerated,
       favoriteFormat,
       formatUsage,
-      lastUsed: allQRs[0]?.createdAt ? new Date(allQRs[0].createdAt).toLocaleDateString() : "Never",
+      lastUsed: recentQRs[0]?.createdAt ? new Date(recentQRs[0].createdAt).toLocaleDateString() : "Never",
     };
   },
 });

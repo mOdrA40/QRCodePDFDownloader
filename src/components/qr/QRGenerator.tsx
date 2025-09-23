@@ -35,8 +35,8 @@ export function QRGenerator({ className }: QRGeneratorProps) {
         className={`bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 min-h-screen py-4 px-4 ${className}`}
       >
         <div className="max-w-7xl mx-auto space-y-8 pb-8">
-          {/* Theme Toggle and Auth Button */}
-          <div className="fixed right-4 top-4 z-50 flex items-center gap-3">
+          {/* Header with Theme Toggle and Auth Button */}
+          <div className="flex justify-end items-center gap-3 mb-4">
             <AuthButton />
             <ThemeToggle />
           </div>

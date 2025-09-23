@@ -1,0 +1,14 @@
+/**
+ * Global Styles Index
+ * Central import point for all global styles
+ */
+
+/* Base styles, Tailwind, and Design Tokens */
+@import './base.css';
+
+/* Component-specific styles */
+@import '../components/authentication.css';
+@import '../components/phone-input.css';
+
+/* Vendor overrides */
+@import '../vendor/material-ui.css';

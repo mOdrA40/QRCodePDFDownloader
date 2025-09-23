@@ -11,9 +11,7 @@ export {
 } from "./useLocalStorage";
 export { useQRGenerator } from "./useQRGenerator";
 export { useUsageStats } from "./useUsageStats";
-
-// Re-export commonly used hook types
-// export type { UseLocalStorageReturn } from "./useLocalStorage";
+export { useDuplicateCheck, useDebouncedDuplicateCheck } from "./useDuplicateCheck";
 
 // Hook utilities
 export const hookUtils = {
@@ -62,5 +60,4 @@ export const hookUtils = {
   },
 };
 
-// Import React for hook utilities
 import * as React from "react";

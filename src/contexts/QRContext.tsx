@@ -21,6 +21,7 @@ import { qrService, storageService } from "@/services";
 import type {
   ComponentState,
   QRGenerationResult,
+  QRHistorySaveResult,
   QROptions,
   QRPreset,
   QRValidationResult,
@@ -246,10 +247,17 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
             historyData.browserInfo = result.browserInfo;
           }
 
-          await saveToHistory(historyData);
+          const saveResult = await saveToHistory(historyData) as QRHistorySaveResult;
+
+          // Handle duplicate QR response
+          if (saveResult && !saveResult.success && saveResult.isDuplicate) {
+            toast.info("QR code already exists in your history", {
+              description: "This QR code content has been generated before.",
+              duration: 4000,
+            });
+          }
         } catch (historyError) {
           console.warn("Failed to save to history:", historyError);
-          // Don't show error to user as QR generation was successful
         }
       }
 

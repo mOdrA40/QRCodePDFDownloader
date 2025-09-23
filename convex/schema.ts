@@ -38,6 +38,7 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_user_created", ["userId", "createdAt"])
+    .index("by_user_text", ["userId", "textContent"]) 
     .searchIndex("search_content", {
       searchField: "textContent",
       filterFields: ["userId"],

@@ -20,6 +20,7 @@ export type {
   QRGenerationConfig,
   QRGenerationProgress,
   QRGenerationResult,
+  QRHistorySaveResult,
   QRImageFormat,
   QRMetadata,
   QROptions,

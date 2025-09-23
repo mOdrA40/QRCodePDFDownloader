@@ -90,3 +90,17 @@ export interface QRMetadata {
   generatedAt: Date;
   fileSize?: number;
 }
+
+// QR History save result
+export interface QRHistorySaveResult {
+  success: boolean;
+  qrId?: string;
+  error?: string;
+  isDuplicate: boolean;
+  existingQR?: {
+    _id: string;
+    textContent: string;
+    createdAt: number;
+    qrSettings: QROptions;
+  };
+}

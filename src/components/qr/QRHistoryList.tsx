@@ -32,12 +32,11 @@ import {
 import { toast } from "sonner";
 import styles from "../../app/files/files.module.css";
 
-// const ITEMS_PER_PAGE = 10; // Removed for simple query
-
 export function QRHistoryList() {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const qrHistory = useQuery(api.qrHistory.getUserQRHistory) || [];
+  // Use optimized query with limit for better performance
+  const qrHistory = useQuery(api.qrHistory.getUserQRHistory, { limit: 50 }) || [];
   const deleteQR = useMutation(api.qrHistory.deleteQRFromHistory);
 
   const handleDelete = async (qrId: string) => {

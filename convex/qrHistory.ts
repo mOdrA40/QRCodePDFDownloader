@@ -14,11 +14,12 @@ async function getAuthUserId(ctx: any): Promise<string | null> {
 }
 
 /**
- * Get user's QR code history with optimization
+ * Get user's QR code history with optimization and pagination support
  */
 export const getUserQRHistory = query({
   args: {
     limit: v.optional(v.number()),
+    cursor: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -26,7 +27,7 @@ export const getUserQRHistory = query({
       throw new Error("Not authenticated");
     }
 
-    const limit = args.limit || 50; 
+    const limit = Math.min(args.limit || 100, 1000); 
 
     return await ctx.db
       .query("qrHistory")
@@ -37,7 +38,7 @@ export const getUserQRHistory = query({
 });
 
 /**
- * Get user's QR code history (simple version for backward compatibility)
+ * Get user's QR code history 
  */
 export const getUserQRHistorySimple = query({
   args: {},
@@ -57,11 +58,12 @@ export const getUserQRHistorySimple = query({
 });
 
 /**
- * Search user's QR code history
+ * Search user's QR code history with performance optimization
  */
 export const searchQRHistory = query({
   args: {
     searchTerm: v.string(),
+    limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -69,12 +71,20 @@ export const searchQRHistory = query({
       throw new Error("Not authenticated");
     }
 
+    // Trim and validate search term
+    const trimmedSearchTerm = args.searchTerm.trim();
+    if (trimmedSearchTerm.length === 0) {
+      return [];
+    }
+
+    const limit = Math.min(args.limit || 500, 1000); 
+
     return await ctx.db
       .query("qrHistory")
       .withSearchIndex("search_content", (q) =>
-        q.search("textContent", args.searchTerm).eq("userId", userId)
+        q.search("textContent", trimmedSearchTerm).eq("userId", userId)
       )
-      .collect();
+      .take(limit);
   },
 });
 

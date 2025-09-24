@@ -10,7 +10,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useReducer,
 } from "react";
 import { toast } from "sonner";
@@ -59,7 +58,7 @@ interface QRContextType {
     key: K,
     value: QROptions[K],
   ) => void;
-  generateQRCode: () => Promise<void>;
+  generateAndSaveQR: () => Promise<void>; 
   validateInput: (text: string) => QRValidationResult;
   resetQR: () => void;
 
@@ -173,9 +172,9 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
   );
 
   /**
-   * Generates QR code
+   * Generates QR code and saves to database (explicit user action)
    */
-  const generateQRCode = useCallback(async (): Promise<void> => {
+  const generateAndSaveQR = useCallback(async (): Promise<void> => {
     if (!state.options.text.trim()) {
       toast.error("Please enter text to generate QR code");
       return;
@@ -255,13 +254,16 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
               description: "This QR code content has been generated before.",
               duration: 4000,
             });
+          } else {
+            toast.success("QR code generated and saved successfully!");
           }
         } catch (historyError) {
           console.warn("Failed to save to history:", historyError);
+          toast.success("QR code generated successfully!");
         }
+      } else {
+        toast.success("QR code generated successfully!");
       }
-
-      toast.success("QR code generated successfully!");
     } catch (error) {
       dispatch({ type: "SET_STATE", payload: "error" });
       const errorMessage =
@@ -350,31 +352,11 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
     return storageService.getPresets();
   }, []);
 
-  // Auto-generate QR code when text changes (with debounce)
-  useEffect(() => {
-    if (state.options.text.trim()) {
-      const debounceTimer = setTimeout(() => {
-        generateQRCode();
-      }, 500);
-      return () => clearTimeout(debounceTimer);
-    }
-    dispatch({ type: "SET_QR_DATA", payload: "" });
-    dispatch({ type: "SET_STATE", payload: "idle" });
-    return undefined;
-  }, [state.options.text, generateQRCode]);
-
-  // Validate input when options change
-  useEffect(() => {
-    if (state.options.text.trim()) {
-      validateInput(state.options.text);
-    }
-  }, [state.options, validateInput]);
-
   const contextValue: QRContextType = {
     state,
     setOptions,
     updateOption,
-    generateQRCode,
+    generateAndSaveQR,
     validateInput,
     resetQR,
     savePreset,

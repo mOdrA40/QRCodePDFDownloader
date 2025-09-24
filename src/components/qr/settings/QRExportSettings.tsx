@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useId } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useQRContext, useSettingsContext } from "@/contexts";
+import { QR_FORMAT_INFO } from "@/utils/qr-content-utils";
 import type { QRImageFormat } from "@/types";
 
 export function QRExportSettings() {
@@ -28,38 +29,7 @@ export function QRExportSettings() {
   const enablePdfPasswordId = useId();
   const pdfPasswordId = useId();
 
-  const [availableFormats, setAvailableFormats] = useState<QRImageFormat[]>([
-    "png",
-    "jpeg",
-    "webp",
-  ]);
-
-  // Set available formats - always PNG, JPEG, WebP for all browsers
-  useEffect(() => {
-    const formats: QRImageFormat[] = ["png", "jpeg", "webp"];
-
-    // Auto-switch to PNG if current format is not supported
-    if (!formats.includes(options.format)) {
-      updateOption("format", "png");
-    }
-
-    setAvailableFormats(formats);
-  }, [options.format, updateOption]);
-
-  // Get format display info
-  const getFormatInfo = (format: QRImageFormat) => {
-    const info = {
-      png: {
-        label: "PNG",
-        description: "Recommended for quality",
-        badge: "Recommended",
-      },
-      jpeg: { label: "JPEG", description: "Smaller file size", badge: null },
-      webp: { label: "WebP", description: "Modern format", badge: null },
-    };
-
-    return info[format];
-  };
+  const availableFormats: QRImageFormat[] = ["png", "jpeg", "webp"];
 
   return (
     <>
@@ -80,14 +50,14 @@ export function QRExportSettings() {
           </SelectTrigger>
           <SelectContent>
             {availableFormats.map((format) => {
-              const formatInfo = getFormatInfo(format);
+              const info = QR_FORMAT_INFO[format];
               return (
                 <SelectItem key={format} value={format}>
                   <div className="flex items-center gap-2">
-                    <span>{formatInfo.label}</span>
-                    {formatInfo.badge && (
+                    <span>{info.label}</span>
+                    {info.badge && (
                       <Badge variant="outline" className="text-xs">
-                        {formatInfo.badge}
+                        {info.badge}
                       </Badge>
                     )}
                   </div>

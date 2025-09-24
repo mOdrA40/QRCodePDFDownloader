@@ -2,22 +2,9 @@ import jsPDF from "jspdf";
 import type { ExportResult, PDFGenerationOptions } from "@/types";
 import { qrDataValidator } from "./qr-data-validator";
 import { securityService } from "./security-service";
+import { parseQRContent, type ParsedQRContent } from "@/utils/qr-content-utils";
 
 // Enhanced interfaces for better type safety and extensibility
-interface QRContentType {
-  type:
-    | "email"
-    | "wifi"
-    | "phone"
-    | "url"
-    | "vcard"
-    | "event"
-    | "location"
-    | "sms"
-    | "text";
-  data: Record<string, unknown>;
-  displayName: string;
-}
 
 interface PDFTheme {
   primary: string;
@@ -238,57 +225,10 @@ export class PDFService {
   }
 
   /**
-   * Parses QR content to determine type and extract structured data
+   * Parses QR content using consolidated utility - simplified
    */
-  private parseQRContent(qrText: string): QRContentType {
-    const text = qrText.trim();
-
-    // Email detection
-    if (text.startsWith("mailto:")) {
-      return this.parseEmailContent(text);
-    }
-
-    // WiFi detection
-    if (text.startsWith("WIFI:")) {
-      return this.parseWiFiContent(text);
-    }
-
-    // Phone detection
-    if (text.startsWith("tel:")) {
-      return this.parsePhoneContent(text);
-    }
-
-    // SMS detection
-    if (text.startsWith("sms:")) {
-      return this.parseSMSContent(text);
-    }
-
-    // URL detection
-    if (text.match(/^https?:\/\//)) {
-      return this.parseUrlContent(text);
-    }
-
-    // vCard detection
-    if (text.startsWith("BEGIN:VCARD")) {
-      return this.parseVCardContent(text);
-    }
-
-    // Event detection
-    if (text.startsWith("BEGIN:VEVENT")) {
-      return this.parseEventContent(text);
-    }
-
-    // Location detection
-    if (text.startsWith("geo:")) {
-      return this.parseLocationContent(text);
-    }
-
-    // Default to text
-    return {
-      type: "text",
-      data: { content: text },
-      displayName: "Text Content",
-    };
+  private parseQRContent(qrText: string): ParsedQRContent {
+    return parseQRContent(qrText);
   }
 
   /**
@@ -297,7 +237,7 @@ export class PDFService {
   private async addEnhancedContent(
     pdf: jsPDF,
     qrDataUrl: string,
-    contentType: QRContentType,
+    contentType: ParsedQRContent,
     theme: PDFTheme,
     _options: PDFGenerationOptions,
   ): Promise<void> {
@@ -335,223 +275,6 @@ export class PDFService {
   }
 
   /**
-   * Parses email content from mailto URL
-   */
-  private parseEmailContent(text: string): QRContentType {
-    const url = new URL(text);
-    const email = url.pathname;
-    const subject = url.searchParams.get("subject") || "";
-    const body = url.searchParams.get("body") || "";
-
-    return {
-      type: "email",
-      data: { email, subject, body },
-      displayName: "Email",
-    };
-  }
-
-  /**
-   * Parses WiFi content from WIFI string
-   */
-  private parseWiFiContent(text: string): QRContentType {
-    const parts = text.split(";");
-    const data: Record<string, string> = {};
-
-    for (const part of parts) {
-      const [key, value] = part.split(":");
-      if (key && value) {
-        switch (key) {
-          case "T":
-            data.security = value;
-            break;
-          case "S":
-            data.ssid = value;
-            break;
-          case "P":
-            data.password = value;
-            break;
-          case "H":
-            data.hidden = value === "true" ? "Yes" : "No";
-            break;
-        }
-      }
-    }
-
-    return {
-      type: "wifi",
-      data,
-      displayName: "WiFi Network",
-    };
-  }
-
-  /**
-   * Parses phone content from tel URL
-   */
-  private parsePhoneContent(text: string): QRContentType {
-    const phone = text.replace("tel:", "");
-
-    return {
-      type: "phone",
-      data: { phone },
-      displayName: "Phone Number",
-    };
-  }
-
-  /**
-   * Parses SMS content from sms URL
-   */
-  private parseSMSContent(text: string): QRContentType {
-    try {
-      const url = new URL(text);
-      const phone = url.pathname;
-      const body = url.searchParams.get("body") || "";
-
-      return {
-        type: "sms",
-        data: { phone, message: body },
-        displayName: "SMS Message",
-      };
-    } catch {
-      // Fallback for simple sms:phone format
-      const phone = text.replace("sms:", "");
-      return {
-        type: "sms",
-        data: { phone, message: "" },
-        displayName: "SMS Message",
-      };
-    }
-  }
-
-  /**
-   * Parses URL content
-   */
-  private parseUrlContent(text: string): QRContentType {
-    try {
-      const url = new URL(text);
-      return {
-        type: "url",
-        data: {
-          url: text,
-          domain: url.hostname,
-          protocol: url.protocol,
-        },
-        displayName: "Website",
-      };
-    } catch {
-      return {
-        type: "url",
-        data: { url: text },
-        displayName: "Website",
-      };
-    }
-  }
-
-  /**
-   * Parses vCard content
-   */
-  private parseVCardContent(text: string): QRContentType {
-    const lines = text.split("\n");
-    const data: Record<string, string> = {};
-
-    for (const line of lines) {
-      const [key, value] = line.split(":");
-      if (key && value) {
-        switch (key) {
-          case "FN":
-            data.name = value;
-            break;
-          case "TEL":
-            data.phone = value;
-            break;
-          case "EMAIL":
-            data.email = value;
-            break;
-          case "ORG":
-            data.organization = value;
-            break;
-          case "TITLE":
-            data.title = value;
-            break;
-          case "URL":
-            data.website = value;
-            break;
-        }
-      }
-    }
-
-    return {
-      type: "vcard",
-      data,
-      displayName: "Contact Card",
-    };
-  }
-
-  /**
-   * Parses event content
-   */
-  private parseEventContent(text: string): QRContentType {
-    const lines = text.split("\n");
-    const data: Record<string, string> = {};
-
-    for (const line of lines) {
-      const [key, value] = line.split(":");
-      if (key && value) {
-        switch (key) {
-          case "SUMMARY":
-            data.title = value;
-            break;
-          case "DTSTART":
-            data.startDate = this.formatEventDate(value);
-            break;
-          case "LOCATION":
-            data.location = value;
-            break;
-          case "DESCRIPTION":
-            data.description = value;
-            break;
-        }
-      }
-    }
-
-    return {
-      type: "event",
-      data,
-      displayName: "Calendar Event",
-    };
-  }
-
-  /**
-   * Parses location content
-   */
-  private parseLocationContent(text: string): QRContentType {
-    const url = new URL(text);
-    const query = url.searchParams.get("q") || "";
-
-    return {
-      type: "location",
-      data: { address: query },
-      displayName: "Location",
-    };
-  }
-
-  /**
-   * Formats event date from ISO string
-   */
-  private formatEventDate(isoString: string): string {
-    try {
-      const date = new Date(
-        isoString.replace(
-          /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,
-          "$1-$2-$3T$4:$5:$6Z",
-        ),
-      );
-      return date.toLocaleString();
-    } catch {
-      return isoString;
-    }
-  }
-
-  /**
    * Downloads the PDF file
    */
   private downloadPDF(pdf: jsPDF, filename: string): void {
@@ -563,7 +286,7 @@ export class PDFService {
    */
   private addEnhancedHeader(
     pdf: jsPDF,
-    contentType: QRContentType,
+    contentType: ParsedQRContent,
     theme: PDFTheme,
     pageWidth: number,
     layout: PDFLayout,
@@ -704,7 +427,7 @@ export class PDFService {
    */
   private addContentSpecificInfo(
     pdf: jsPDF,
-    contentType: QRContentType,
+    contentType: ParsedQRContent,
     theme: PDFTheme,
     pageWidth: number,
     startY: number,

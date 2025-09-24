@@ -13,17 +13,10 @@ import type {
   QRValidationResult,
 } from "@/types";
 import {
-  browserDetectionService,
-  RecommendedMethod,
-} from "./browser-detection-service";
+  simpleBrowserDetectionService,
+  QRGenerationMethod,
+} from "./browser-detection-simple";
 
-// Enhanced generation methods enum
-enum QRGenerationMethod {
-  SERVER_SIDE = "server-side",
-  CLIENT_CANVAS = "client-canvas",
-  CLIENT_SVG = "client-svg",
-  FALLBACK = "fallback",
-}
 
 // Browser capability detection interface
 interface BrowserCapabilities {
@@ -46,29 +39,17 @@ export class QRService {
   }
 
   /**
-   * Determine the best QR generation method using advanced browser detection
+   * Determine the best QR generation method 
    */
   private determineBestMethod(): QRGenerationMethod {
-    // Use advanced browser detection service
-    const capabilities = browserDetectionService.detectCapabilities();
+    const capabilities = simpleBrowserDetectionService.detectCapabilities();
 
     console.log(
       "Browser capabilities:",
-      browserDetectionService.getCapabilitySummary()
+      simpleBrowserDetectionService.getCapabilitySummary()
     );
 
-    // Map recommended method to our internal enum
-    switch (capabilities.recommendedMethod) {
-      case RecommendedMethod.SERVER_SIDE:
-        return QRGenerationMethod.SERVER_SIDE;
-      case RecommendedMethod.SVG_PURE:
-        return QRGenerationMethod.SERVER_SIDE;
-      case RecommendedMethod.CANVAS_ENHANCED:
-      case RecommendedMethod.CANVAS_BASIC:
-        return QRGenerationMethod.CLIENT_CANVAS;
-      default:
-        return QRGenerationMethod.FALLBACK;
-    }
+    return capabilities.recommendedMethod;
   }
 
   /**

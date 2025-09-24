@@ -37,14 +37,14 @@ export const QRPreview = memo(function QRPreview({
     boolean,
   ];
 
-  // Generate QR code when options change
+  // Simple real-time QR preview (no database save)
   useEffect(() => {
     if (!options.text.trim() || !isIntersecting) {
       setQrDataUrl("");
       return;
     }
 
-    const generateQR = async () => {
+    const generatePreview = async () => {
       setIsLoading(true);
       try {
         const result = await qrService.generateQRCode(options.text, {
@@ -59,21 +59,23 @@ export const QRPreview = memo(function QRPreview({
         });
         setQrDataUrl(result.dataUrl);
       } catch (error) {
-        console.error("QR generation failed:", error);
+        console.error("QR preview generation failed:", error);
         setQrDataUrl("");
       } finally {
         setIsLoading(false);
       }
     };
 
-    generateQR();
+    // Debounce preview generation for better UX
+    const debounceTimer = setTimeout(generatePreview, 300);
+    return () => clearTimeout(debounceTimer);
   }, [
     options.text,
     options.size,
-    options.background,
-    options.foreground,
-    options.errorCorrectionLevel,
     options.margin,
+    options.errorCorrectionLevel,
+    options.foreground,
+    options.background,
     isIntersecting,
   ]);
 

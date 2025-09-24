@@ -20,18 +20,9 @@ export function QRPresetSettings() {
   const [savedPresets, setSavedPresets] = useState<QRPreset[]>([]);
   const presetNameId = useId();
 
-  // Load presets on mount and when presets change
   useEffect(() => {
-    const loadSavedPresets = () => {
-      const presets = getPresets();
-      setSavedPresets(presets);
-    };
-
-    loadSavedPresets();
-
-    // Set up interval to refresh presets (in case they're modified elsewhere)
-    const interval = setInterval(loadSavedPresets, 1000);
-    return () => clearInterval(interval);
+    const presets = getPresets();
+    setSavedPresets(presets);
   }, [getPresets]);
 
   const handleSavePreset = async () => {
@@ -43,7 +34,6 @@ export function QRPresetSettings() {
     const success = await savePreset(presetName.trim());
     if (success) {
       setPresetName("");
-      // Refresh presets list
       setSavedPresets(getPresets());
     }
   };
@@ -55,7 +45,6 @@ export function QRPresetSettings() {
   const handleDeletePreset = async (id: string) => {
     const success = await deletePreset(id);
     if (success) {
-      // Refresh presets list
       setSavedPresets(getPresets());
     }
   };

@@ -117,13 +117,13 @@ export function QRFilter({ onFilterChange, totalItems, filteredItems }: QRFilter
         </DropdownMenuTrigger>
         
         <DropdownMenuContent
-          className="w-[calc(100vw-2rem)] sm:w-80 md:w-96 max-h-[80vh] sm:max-h-[85vh] min-w-[280px] z-50 mx-4 sm:mx-0"
+          className="w-72 sm:w-80 md:w-96 max-h-[80vh] sm:max-h-[85vh] min-w-[280px] z-50"
           align="end"
           side="bottom"
           sideOffset={12}
           alignOffset={0}
           avoidCollisions={false}
-          collisionPadding={8}
+          collisionPadding={16}
           onCloseAutoFocus={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => {
             e.preventDefault();

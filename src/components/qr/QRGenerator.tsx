@@ -5,11 +5,10 @@
 
 "use client";
 
-import { Heart, QrCode, Sparkles, Star, Zap } from "lucide-react";
+import { QrCode } from "lucide-react";
 import { QuickActions } from "@/components/quick-actions";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AuthButton } from "@/components/auth/AuthButton";
-import { Badge } from "@/components/ui/badge";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { UsageStats } from "@/components/usage-stats";
 import { useQRContext } from "@/contexts";
@@ -44,32 +43,15 @@ export function QRGenerator({ className }: QRGeneratorProps) {
           {/* Header */}
           <div className="text-center mb-8 pt-8">
             <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="p-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-lg">
-                <QrCode className="h-8 w-8 text-white" />
-              </div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                QR PDF Generator
+              <QrCode className="h-12 w-12 text-blue-600 dark:text-blue-400" />
+              <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 dark:from-blue-400 dark:via-purple-400 dark:to-blue-300 bg-clip-text text-transparent">
+                QR PDF Downloader
               </h1>
-              <Sparkles className="h-8 w-8 text-yellow-500" />
             </div>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Create stunning QR codes and download them as beautiful PDFs with
               advanced customization options
             </p>
-            <div className="flex items-center justify-center gap-2 mt-4">
-              <Badge variant="secondary" className="gap-1">
-                <Zap className="h-3 w-3" />
-                Lightning Fast
-              </Badge>
-              <Badge variant="secondary" className="gap-1">
-                <Star className="h-3 w-3" />
-                Premium Quality
-              </Badge>
-              <Badge variant="secondary" className="gap-1">
-                <Heart className="h-3 w-3 text-red-500" />
-                Ultra Beautiful
-              </Badge>
-            </div>
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">

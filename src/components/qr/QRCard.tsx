@@ -39,16 +39,20 @@ interface QRCardProps {
   onCopyText: (text: string) => void;
   onDownload: (dataUrl: string, filename: string) => void;
   onDelete: (qrId: string) => void;
+  isDeleting?: boolean;
 }
 
-export const QRCard = memo(function QRCard({ 
-  qr, 
-  onCopyText, 
-  onDownload, 
-  onDelete 
+export const QRCard = memo(function QRCard({
+  qr,
+  onCopyText,
+  onDownload,
+  onDelete,
+  isDeleting = false
 }: QRCardProps) {
   return (
-    <Card className={`hover:shadow-md transition-shadow ${styles.qrCard} h-full`}>
+    <Card className={`hover:shadow-md transition-all duration-300 ${styles.qrCard} h-full ${
+      isDeleting ? 'opacity-50 pointer-events-none' : ''
+    }`}>
       <CardContent className="p-3 xs:p-4">
         <div className={styles.qrCardContent}>
           {/* QR Preview Placeholder */}

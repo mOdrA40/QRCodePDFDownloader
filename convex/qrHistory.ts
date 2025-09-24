@@ -185,7 +185,7 @@ export const saveQRToHistory = mutation({
 });
 
 /**
- * Delete QR code from history
+ * Delete QR code from history 
  */
 export const deleteQRFromHistory = mutation({
   args: {
@@ -198,16 +198,34 @@ export const deleteQRFromHistory = mutation({
     }
 
     const qrRecord = await ctx.db.get(args.qrId);
-    if (!qrRecord || qrRecord.userId !== userId) {
-      throw new Error("QR code not found or access denied");
+
+    // Graceful handling for already deleted records
+    if (!qrRecord) {
+      // Return success for idempotent behavior - already deleted is success
+      return {
+        success: true,
+        message: "QR code was already deleted",
+        alreadyDeleted: true
+      };
     }
 
+    // Check ownership
+    if (qrRecord.userId !== userId) {
+      throw new Error("Access denied - you can only delete your own QR codes");
+    }
+
+    // Perform deletion
     await ctx.db.delete(args.qrId);
+    return {
+      success: true,
+      message: "QR code deleted successfully",
+      alreadyDeleted: false
+    };
   },
 });
 
 /**
- * Get QR code statistics for user (optimized)
+ * Get QR code statistics for user 
  */
 export const getQRStatistics = query({
   args: {},

@@ -5,7 +5,7 @@
 
 "use client";
 
-import { FileText } from "lucide-react";
+import { FileText, Zap } from "lucide-react";
 import { useId } from "react";
 import { DragDropZone } from "@/components/drag-drop-zone";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ const sampleTexts = [
 ];
 
 export function QRControls({ className }: QRControlsProps) {
-  const { state, updateOption } = useQRContext();
+  const { state, updateOption, generateAndSaveQR } = useQRContext();
   const textId = useId();
   const logoUrlId = useId();
 
@@ -72,6 +72,22 @@ export function QRControls({ className }: QRControlsProps) {
             className="mt-2 min-h-[100px] resize-none"
             suppressHydrationWarning
           />
+
+          {/* Generate QR Button - Explicit user action */}
+          <div className="mt-3 flex justify-center">
+            <Button
+              onClick={generateAndSaveQR}
+              disabled={!state.options.text.trim() || state.isGenerating}
+              className="w-full sm:w-auto px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              <Zap className="h-4 w-4 mr-2" />
+              {state.isGenerating ? "Generating..." : "Generate QR Code"}
+            </Button>
+          </div>
+
+          <p className="text-xs text-muted-foreground mt-2 text-center">
+            Click to generate and save QR code to your history
+          </p>
         </div>
 
         <div>

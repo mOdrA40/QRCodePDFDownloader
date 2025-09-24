@@ -32,7 +32,7 @@ interface QRExportProps {
 }
 
 export function QRExport({ className }: QRExportProps) {
-  const { state, generateQRCode } = useQRContext();
+  const { state, generateAndSaveQR } = useQRContext();
   const { state: settingsState } = useSettingsContext();
   const { qrDataUrl, options, isGenerating } = state;
 
@@ -222,7 +222,7 @@ export function QRExport({ className }: QRExportProps) {
 
         {!settingsState.previewMode && (
           <Button
-            onClick={generateQRCode}
+            onClick={generateAndSaveQR}
             disabled={!options.text.trim() || isGenerating}
             className="w-full h-12"
             variant="secondary"

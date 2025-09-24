@@ -9,6 +9,7 @@ import { useState, useMemo, useCallback, useRef } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,12 +25,20 @@ import { QRCard } from "./QRCard";
 import { QRFilter, type QRFilterOptions } from "./QRFilter";
 import { applyQRFilters, type QRHistoryItem } from "@/utils/qr-filter-utils";
 
+// Type for delete response
+interface DeleteQRResponse {
+  success: boolean;
+  message: string;
+  alreadyDeleted: boolean;
+}
+
 export function QRHistoryList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<QRFilterOptions>({
     formats: [],
     dateRange: 'all',
   });
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const parentRef = useRef<HTMLDivElement>(null);
 
   // Debounce search term to prevent excessive API calls
@@ -52,9 +61,10 @@ export function QRHistoryList() {
       data = allQRHistory as QRHistoryItem[];
     }
 
-    // Apply filters to the data
-    return applyQRFilters(data, filters);
-  }, [debouncedSearchTerm, searchResults, allQRHistory, filters]);
+    // Apply filters and remove items being deleted (optimistic update)
+    const filteredData = applyQRFilters(data, filters);
+    return filteredData.filter(qr => !deletingIds.has(qr._id));
+  }, [debouncedSearchTerm, searchResults, allQRHistory, filters, deletingIds]);
 
   // Loading states
   const isLoadingAll = allQRHistory === undefined;
@@ -73,15 +83,66 @@ export function QRHistoryList() {
 
   // Memoized handlers to prevent unnecessary re-renders
   const handleDelete = useCallback(async (qrId: string) => {
-    try {
-      // biome-ignore lint/suspicious/noExplicitAny: Convex ID type conversion needed
-      await deleteQR({ qrId: qrId as any });
-      toast.success("QR code deleted successfully");
-    } catch (error) {
-      toast.error("Failed to delete QR code");
-      console.error("Delete error:", error);
+    // Prevent multiple delete operations on same item
+    if (deletingIds.has(qrId)) {
+      return;
     }
-  }, [deleteQR]);
+
+    try {
+      // Optimistic update - immediately hide from UI
+      setDeletingIds(prev => new Set(prev).add(qrId));
+
+      // Show loading toast
+      const loadingToast = toast.loading("Deleting QR code...");
+
+      // Proper type conversion for Convex ID
+      const result = await deleteQR({ qrId: qrId as Id<"qrHistory"> }) as DeleteQRResponse | null;
+
+      // Dismiss loading toast
+      toast.dismiss(loadingToast);
+
+      // Defensive programming - handle null/undefined result
+      if (!result) {
+        console.warn("Delete operation returned null result");
+        toast.success("QR code deleted successfully");
+        return;
+      }
+
+      // Handle different response types
+      if (result.alreadyDeleted) {
+        toast.success("QR code was already deleted");
+      } else {
+        toast.success(result.message || "QR code deleted successfully");
+      }
+    } catch (error) {
+      // Revert optimistic update on error
+      setDeletingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(qrId);
+        return newSet;
+      });
+
+      // Dismiss loading toast
+      toast.dismiss();
+
+      // Show specific error message
+      const errorMessage = error instanceof Error
+        ? error.message
+        : "Failed to delete QR code";
+
+      toast.error(errorMessage);
+      console.error("Delete error:", error);
+    } finally {
+      // Clean up deleting state after a delay to allow for UI updates
+      setTimeout(() => {
+        setDeletingIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(qrId);
+          return newSet;
+        });
+      }, 1000);
+    }
+  }, [deleteQR, deletingIds]);
 
   const handleCopyText = useCallback((text: string) => {
     navigator.clipboard.writeText(text);
@@ -220,6 +281,7 @@ export function QRHistoryList() {
                     onCopyText={handleCopyText}
                     onDownload={handleDownloadQR}
                     onDelete={handleDelete}
+                    isDeleting={deletingIds.has(qr._id)}
                   />
                 </div>
               );

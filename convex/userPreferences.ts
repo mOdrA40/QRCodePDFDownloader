@@ -3,12 +3,11 @@
  * Database operations for user settings and preferences
  */
 
-import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { mutation, query } from "./_generated/server";
 
 // Auth helper function
 async function getAuthUserId(ctx: any): Promise<string | null> {
-  // biome-ignore lint/suspicious/noExplicitAny: Convex context type is complex
   const identity = await ctx.auth.getUserIdentity();
   return identity?.subject || null;
 }
@@ -79,15 +78,14 @@ export const updateUserPreferences = mutation({
         preferences: args.preferences,
         updatedAt: now,
       });
-    } else {
-      // Create new preferences
-      return await ctx.db.insert("userPreferences", {
-        userId,
-        preferences: args.preferences,
-        createdAt: now,
-        updatedAt: now,
-      });
     }
+    // Create new preferences
+    return await ctx.db.insert("userPreferences", {
+      userId,
+      preferences: args.preferences,
+      createdAt: now,
+      updatedAt: now,
+    });
   },
 });
 
@@ -121,14 +119,13 @@ export const resetUserPreferences = mutation({
         preferences: defaultPreferences,
         updatedAt: now,
       });
-    } else {
-      return await ctx.db.insert("userPreferences", {
-        userId,
-        preferences: defaultPreferences,
-        createdAt: now,
-        updatedAt: now,
-      });
     }
+    return await ctx.db.insert("userPreferences", {
+      userId,
+      preferences: defaultPreferences,
+      createdAt: now,
+      updatedAt: now,
+    });
   },
 });
 

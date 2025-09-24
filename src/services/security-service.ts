@@ -48,7 +48,7 @@ export class SecurityService {
     // Input length validation
     if (input.length > this.defaultConfig.maxInputLength) {
       errors.push(
-        `Input exceeds maximum length of ${this.defaultConfig.maxInputLength} characters`,
+        `Input exceeds maximum length of ${this.defaultConfig.maxInputLength} characters`
       );
       riskLevel = "high";
     }
@@ -79,9 +79,7 @@ export class SecurityService {
 
     for (const pattern of sqlPatterns) {
       if (pattern.test(input)) {
-        warnings.push(
-          "Input contains SQL-like patterns that might be suspicious",
-        );
+        warnings.push("Input contains SQL-like patterns that might be suspicious");
         if (riskLevel === "low") riskLevel = "medium";
         break;
       }
@@ -93,8 +91,7 @@ export class SecurityService {
       errors.push(...urlValidation.errors);
       warnings.push(...urlValidation.warnings);
       if (urlValidation.riskLevel === "high") riskLevel = "high";
-      else if (urlValidation.riskLevel === "medium" && riskLevel === "low")
-        riskLevel = "medium";
+      else if (urlValidation.riskLevel === "medium" && riskLevel === "low") riskLevel = "medium";
     }
 
     // Email-specific validation
@@ -105,8 +102,7 @@ export class SecurityService {
     }
 
     // Check for suspicious file extensions in URLs
-    const suspiciousExtensions =
-      /\.(exe|bat|cmd|scr|pif|com|vbs|js|jar|app|dmg)(\?|$)/gi;
+    const suspiciousExtensions = /\.(exe|bat|cmd|scr|pif|com|vbs|js|jar|app|dmg)(\?|$)/gi;
     if (suspiciousExtensions.test(input)) {
       warnings.push("Input contains potentially dangerous file extensions");
       if (riskLevel === "low") riskLevel = "medium";
@@ -211,9 +207,7 @@ export class SecurityService {
 
       for (const pattern of suspiciousPatterns) {
         if (pattern.test(emailAddress)) {
-          warnings.push(
-            "Email address contains potentially suspicious patterns",
-          );
+          warnings.push("Email address contains potentially suspicious patterns");
           if (riskLevel === "low") riskLevel = "medium";
           break;
         }
@@ -297,19 +291,13 @@ export class SecurityService {
     // Check file size
     if (file.size > this.defaultConfig.maxFileSize) {
       errors.push(
-        `File size exceeds maximum of ${this.defaultConfig.maxFileSize / (1024 * 1024)}MB`,
+        `File size exceeds maximum of ${this.defaultConfig.maxFileSize / (1024 * 1024)}MB`
       );
       riskLevel = "high";
     }
 
     // Check file type
-    const allowedTypes = [
-      "text/plain",
-      "application/json",
-      "text/csv",
-      "image/png",
-      "image/jpeg",
-    ];
+    const allowedTypes = ["text/plain", "application/json", "text/csv", "image/png", "image/jpeg"];
     if (!allowedTypes.includes(file.type)) {
       errors.push("File type is not allowed");
       riskLevel = "high";
@@ -336,8 +324,8 @@ export class SecurityService {
   public checkRateLimit(identifier: string): boolean {
     // In a real implementation, this would use Redis or similar
     // For now, we'll use a simple in-memory approach
-    const now = Date.now();
-    const key = `rate_limit_${identifier}`;
+    const _now = Date.now();
+    const _key = `rate_limit_${identifier}`;
 
     // This is a simplified implementation
     // In production, implement proper rate limiting with Redis

@@ -20,10 +20,7 @@ interface UseLocalStorageReturn<T> {
 /**
  * Custom hook for localStorage operations with type safety
  */
-export function useLocalStorage<T>(
-  key: string,
-  initialValue: T,
-): UseLocalStorageReturn<T> {
+export function useLocalStorage<T>(key: string, initialValue: T): UseLocalStorageReturn<T> {
   const [storedValue, setStoredValue] = useState<T>(initialValue);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,9 +43,7 @@ export function useLocalStorage<T>(
         setStoredValue(parsed);
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to read from localStorage",
-      );
+      setError(err instanceof Error ? err.message : "Failed to read from localStorage");
       console.error(`Error reading localStorage key "${key}":`, err);
     } finally {
       setIsLoading(false);
@@ -62,8 +57,7 @@ export function useLocalStorage<T>(
         setError(null);
 
         // Allow value to be a function so we have the same API as useState
-        const valueToStore =
-          value instanceof Function ? value(storedValue) : value;
+        const valueToStore = value instanceof Function ? value(storedValue) : value;
 
         // Save state
         setStoredValue(valueToStore);
@@ -73,13 +67,11 @@ export function useLocalStorage<T>(
           window.localStorage.setItem(key, JSON.stringify(valueToStore));
         }
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to save to localStorage",
-        );
+        setError(err instanceof Error ? err.message : "Failed to save to localStorage");
         console.error(`Error setting localStorage key "${key}":`, err);
       }
     },
-    [key, storedValue],
+    [key, storedValue]
   );
 
   // Remove from localStorage
@@ -92,11 +84,7 @@ export function useLocalStorage<T>(
         window.localStorage.removeItem(key);
       }
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to remove from localStorage",
-      );
+      setError(err instanceof Error ? err.message : "Failed to remove from localStorage");
       console.error(`Error removing localStorage key "${key}":`, err);
     }
   }, [key, initialValue]);
@@ -118,7 +106,7 @@ export function useQRPresets() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const savePreset = useCallback(async (name: string, options: QROptions) => {
+  const savePreset = useCallback((name: string, options: QROptions) => {
     try {
       setIsLoading(true);
       setError(null);
@@ -137,7 +125,7 @@ export function useQRPresets() {
     }
   }, []);
 
-  const deletePreset = useCallback(async (id: string) => {
+  const deletePreset = useCallback((id: string) => {
     try {
       setIsLoading(true);
       setError(null);
@@ -157,10 +145,7 @@ export function useQRPresets() {
   }, []);
 
   const updatePreset = useCallback(
-    async (
-      id: string,
-      updates: Partial<Omit<QRPreset, "id" | "createdAt">>,
-    ) => {
+    (id: string, updates: Partial<Omit<QRPreset, "id" | "createdAt">>) => {
       try {
         setIsLoading(true);
         setError(null);
@@ -172,15 +157,13 @@ export function useQRPresets() {
         }
         throw new Error("Failed to update preset");
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to update preset",
-        );
+        setError(err instanceof Error ? err.message : "Failed to update preset");
         return false;
       } finally {
         setIsLoading(false);
       }
     },
-    [],
+    []
   );
 
   return {
@@ -201,31 +184,26 @@ export function useAppSettings() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const updateSettings = useCallback(
-    async (newSettings: Partial<AppConfig>) => {
-      try {
-        setIsLoading(true);
-        setError(null);
+  const updateSettings = useCallback((newSettings: Partial<AppConfig>) => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-        const success = storageService.updateSettings(newSettings);
-        if (success) {
-          setSettings(storageService.getSettings());
-          return true;
-        }
-        throw new Error("Failed to update settings");
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to update settings",
-        );
-        return false;
-      } finally {
-        setIsLoading(false);
+      const success = storageService.updateSettings(newSettings);
+      if (success) {
+        setSettings(storageService.getSettings());
+        return true;
       }
-    },
-    [],
-  );
+      throw new Error("Failed to update settings");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update settings");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-  const resetSettings = useCallback(async () => {
+  const resetSettings = useCallback(() => {
     try {
       setIsLoading(true);
       setError(null);

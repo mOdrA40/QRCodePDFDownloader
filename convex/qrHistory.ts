@@ -3,12 +3,11 @@
  * Database operations for QR code history management
  */
 
-import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { mutation, query } from "./_generated/server";
 
 // Auth helper function - simplified for Auth0 integration
 async function getAuthUserId(ctx: any): Promise<string | null> {
-  // biome-ignore lint/suspicious/noExplicitAny: Convex context type is complex
   const identity = await ctx.auth.getUserIdentity();
   return identity?.subject || null;
 }
@@ -27,7 +26,7 @@ export const getUserQRHistory = query({
       throw new Error("Not authenticated");
     }
 
-    const limit = Math.min(args.limit || 100, 1000); 
+    const limit = Math.min(args.limit || 100, 1000);
 
     return await ctx.db
       .query("qrHistory")
@@ -38,7 +37,7 @@ export const getUserQRHistory = query({
 });
 
 /**
- * Get user's QR code history 
+ * Get user's QR code history
  */
 export const getUserQRHistorySimple = query({
   args: {},
@@ -77,7 +76,7 @@ export const searchQRHistory = query({
       return [];
     }
 
-    const limit = Math.min(args.limit || 500, 1000); 
+    const limit = Math.min(args.limit || 500, 1000);
 
     return await ctx.db
       .query("qrHistory")
@@ -104,9 +103,7 @@ export const checkDuplicateQR = query({
     // Use optimized index for duplicate checking
     const existingQR = await ctx.db
       .query("qrHistory")
-      .withIndex("by_user_text", (q) =>
-        q.eq("userId", userId).eq("textContent", args.textContent)
-      )
+      .withIndex("by_user_text", (q) => q.eq("userId", userId).eq("textContent", args.textContent))
       .first();
 
     return {
@@ -157,7 +154,7 @@ export const saveQRToHistory = mutation({
           success: false,
           error: "DUPLICATE_QR_EXISTS",
           isDuplicate: true,
-          existingQR
+          existingQR,
         };
       }
     }
@@ -185,7 +182,7 @@ export const saveQRToHistory = mutation({
 });
 
 /**
- * Delete QR code from history 
+ * Delete QR code from history
  */
 export const deleteQRFromHistory = mutation({
   args: {
@@ -205,7 +202,7 @@ export const deleteQRFromHistory = mutation({
       return {
         success: true,
         message: "QR code was already deleted",
-        alreadyDeleted: true
+        alreadyDeleted: true,
       };
     }
 
@@ -219,13 +216,13 @@ export const deleteQRFromHistory = mutation({
     return {
       success: true,
       message: "QR code deleted successfully",
-      alreadyDeleted: false
+      alreadyDeleted: false,
     };
   },
 });
 
 /**
- * Get QR code statistics for user 
+ * Get QR code statistics for user
  */
 export const getQRStatistics = query({
   args: {},
@@ -240,15 +237,15 @@ export const getQRStatistics = query({
       .query("qrHistory")
       .withIndex("by_user_created", (q) => q.eq("userId", userId))
       .order("desc")
-      .take(500); 
+      .take(500);
 
     const totalGenerated = recentQRs.length;
     const todayStart = new Date().setHours(0, 0, 0, 0);
-    const todayGenerated = recentQRs.filter(qr => qr.createdAt >= todayStart).length;
+    const todayGenerated = recentQRs.filter((qr) => qr.createdAt >= todayStart).length;
 
     // Calculate format usage efficiently
     const formatUsage: Record<string, number> = {};
-    let favoriteFormat = 'png';
+    let favoriteFormat = "png";
     let maxCount = 0;
 
     for (const qr of recentQRs) {
@@ -267,7 +264,9 @@ export const getQRStatistics = query({
       todayGenerated,
       favoriteFormat,
       formatUsage,
-      lastUsed: recentQRs[0]?.createdAt ? new Date(recentQRs[0].createdAt).toLocaleDateString() : "Never",
+      lastUsed: recentQRs[0]?.createdAt
+        ? new Date(recentQRs[0].createdAt).toLocaleDateString()
+        : "Never",
     };
   },
 });

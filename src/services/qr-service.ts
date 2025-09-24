@@ -8,15 +8,12 @@ import QRCode from "qrcode";
 import type {
   QRGenerationConfig,
   QRGenerationResult,
+  QRImageFormat,
   QRMetadata,
   QROptions,
   QRValidationResult,
 } from "@/types";
-import {
-  simpleBrowserDetectionService,
-  QRGenerationMethod,
-} from "./browser-detection-simple";
-
+import { QRGenerationMethod, simpleBrowserDetectionService } from "./browser-detection-simple";
 
 // Browser capability detection interface
 interface BrowserCapabilities {
@@ -30,6 +27,8 @@ interface BrowserCapabilities {
 export class QRService {
   private static instance: QRService;
   private browserCapabilities: BrowserCapabilities | null = null;
+  private qrCache: Map<string, { result: QRGenerationResult; timestamp: number }> = new Map();
+  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache
 
   public static getInstance(): QRService {
     if (!QRService.instance) {
@@ -39,15 +38,12 @@ export class QRService {
   }
 
   /**
-   * Determine the best QR generation method 
+   * Determine the best QR generation method
    */
   private determineBestMethod(): QRGenerationMethod {
     const capabilities = simpleBrowserDetectionService.detectCapabilities();
 
-    console.log(
-      "Browser capabilities:",
-      simpleBrowserDetectionService.getCapabilitySummary()
-    );
+    console.log("Browser capabilities:", simpleBrowserDetectionService.getCapabilitySummary());
 
     return capabilities.recommendedMethod;
   }
@@ -55,10 +51,7 @@ export class QRService {
   /**
    * Validates QR code input and configuration
    */
-  public validateQRInput(
-    text: string,
-    options?: Partial<QROptions>
-  ): QRValidationResult {
+  public validateQRInput(text: string, options?: Partial<QROptions>): QRValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
@@ -109,12 +102,13 @@ export class QRService {
   }
 
   /**
-   * Enhanced QR code generation with automatic method selection
+   * Enhanced QR code generation with caching and automatic method selection
    * Supports server-side generation for maximum browser compatibility
    */
   public async generateQRCode(
     text: string,
-    options: QRGenerationConfig = {}
+    options: QRGenerationConfig = {},
+    useCache = true
   ): Promise<QRGenerationResult> {
     try {
       // Validate input
@@ -124,8 +118,20 @@ export class QRService {
       }
 
       const config = this.buildQRConfig(options);
-      const method = this.determineBestMethod();
 
+      // Generate cache key
+      const cacheKey = this.generateCacheKey(text, config);
+
+      // Check cache first if enabled
+      if (useCache) {
+        const cached = this.getCachedResult(cacheKey);
+        if (cached) {
+          console.log("Using cached QR result");
+          return cached;
+        }
+      }
+
+      const method = this.determineBestMethod();
       console.log(`Using QR generation method: ${method}`);
 
       let result: QRGenerationResult;
@@ -142,27 +148,31 @@ export class QRService {
           break;
       }
 
-      return {
+      const finalResult = {
         ...result,
         method,
         browserInfo: this.browserCapabilities?.userAgent || "unknown",
       };
+
+      // Cache the result if enabled
+      if (useCache) {
+        this.setCachedResult(cacheKey, finalResult);
+      }
+
+      return finalResult;
     } catch (error) {
       console.error("Primary QR generation failed, trying fallback:", error);
 
       // Try fallback method if primary fails
       try {
-        const fallbackResult = await this.generateFallback(
-          text,
-          this.buildQRConfig(options)
-        );
+        const fallbackResult = await this.generateFallback(text, this.buildQRConfig(options));
         return {
           ...fallbackResult,
           method: QRGenerationMethod.FALLBACK,
           browserInfo: this.browserCapabilities?.userAgent || "unknown",
           warning: "Used fallback method due to primary generation failure",
         };
-      } catch (fallbackError) {
+      } catch (_fallbackError) {
         throw new Error(
           `QR generation failed: ${error instanceof Error ? error.message : "Unknown error"}`
         );
@@ -200,8 +210,7 @@ export class QRService {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
-          errorData.error ||
-            `Server responded with ${response.status}: ${response.statusText}`
+          errorData.error || `Server responded with ${response.status}: ${response.statusText}`
         );
       }
 
@@ -213,8 +222,7 @@ export class QRService {
 
       return {
         dataUrl: result.dataUrl,
-        // biome-ignore lint/suspicious/noExplicitAny: QRImageFormat type compatibility
-        format: (config.format || "png") as any,
+        format: (config.format || "png") as QRImageFormat,
         size: result.size || config.size || 512,
         timestamp: result.timestamp || Date.now(),
         method: result.method || "server-side-api",
@@ -261,7 +269,7 @@ export class QRService {
   /**
    * Generates QR code using canvas with proper DPI scaling
    */
-  private async generateWithCanvas(
+  private generateWithCanvas(
     text: string,
     config: QRGenerationConfig
   ): Promise<QRGenerationResult> {
@@ -343,6 +351,58 @@ export class QRService {
         light: options.color?.light || "#ffffff",
       },
     };
+  }
+
+  /**
+   * Generate cache key for QR generation
+   */
+  private generateCacheKey(text: string, config: QRGenerationConfig): string {
+    const keyData = {
+      text,
+      size: config.size,
+      margin: config.margin,
+      errorCorrectionLevel: config.errorCorrectionLevel,
+      format: config.format,
+      foreground: config.color?.dark,
+      background: config.color?.light,
+    };
+    return btoa(JSON.stringify(keyData)).replace(/[+/=]/g, "");
+  }
+
+  /**
+   * Get cached QR result if valid
+   */
+  private getCachedResult(cacheKey: string): QRGenerationResult | null {
+    const cached = this.qrCache.get(cacheKey);
+    if (!cached) return null;
+
+    // Check if cache is still valid
+    if (Date.now() - cached.timestamp > this.CACHE_TTL) {
+      this.qrCache.delete(cacheKey);
+      return null;
+    }
+
+    return cached.result;
+  }
+
+  /**
+   * Set cached QR result
+   */
+  private setCachedResult(cacheKey: string, result: QRGenerationResult): void {
+    // Clean old cache entries periodically
+    if (this.qrCache.size > 50) {
+      const now = Date.now();
+      for (const [key, value] of this.qrCache.entries()) {
+        if (now - value.timestamp > this.CACHE_TTL) {
+          this.qrCache.delete(key);
+        }
+      }
+    }
+
+    this.qrCache.set(cacheKey, {
+      result,
+      timestamp: Date.now(),
+    });
   }
 
   /**

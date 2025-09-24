@@ -13,13 +13,8 @@ export const DragDropZone = memo(function DragDropZone({
   onTextExtracted,
   className,
 }: DragDropZoneProps) {
-  const {
-    dragDropState,
-    isProcessing,
-    handleDragOver,
-    handleDragLeave,
-    handleDrop,
-  } = useFileHandler(onTextExtracted, 1);
+  const { dragDropState, isProcessing, handleDragOver, handleDragLeave, handleDrop } =
+    useFileHandler(onTextExtracted, 1);
 
   const { isDragOver } = dragDropState;
 
@@ -43,19 +38,13 @@ export const DragDropZone = memo(function DragDropZone({
       <div className="flex flex-col items-center gap-3">
         <div
           className={`p-3 rounded-full ${
-            isDragOver
-              ? "bg-blue-100 dark:bg-blue-900/30"
-              : "bg-slate-100 dark:bg-slate-800"
+            isDragOver ? "bg-blue-100 dark:bg-blue-900/30" : "bg-slate-100 dark:bg-slate-800"
           }`}
         >
           {isProcessing ? (
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
           ) : (
-            <Upload
-              className={`h-6 w-6 ${
-                isDragOver ? "text-blue-600" : "text-slate-500"
-              }`}
-            />
+            <Upload className={`h-6 w-6 ${isDragOver ? "text-blue-600" : "text-slate-500"}`} />
           )}
         </div>
 

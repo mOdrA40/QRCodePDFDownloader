@@ -5,30 +5,24 @@
 
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { Calendar, Filter, Image, Settings, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import {
-  Settings,
-  Filter,
-  X,
-  Calendar,
-  Image
-} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 export interface QRFilterOptions {
   formats: string[];
-  dateRange: 'all' | 'today' | 'week' | 'month' | 'year';
+  dateRange: "all" | "today" | "week" | "month" | "year";
 }
 
 interface QRFilterProps {
@@ -39,21 +33,24 @@ interface QRFilterProps {
 
 const DEFAULT_FILTERS: QRFilterOptions = {
   formats: [],
-  dateRange: 'all',
+  dateRange: "all",
 };
 
 // Available filter options based on QR data structure
-const AVAILABLE_FORMATS = ['png', 'jpeg', 'webp', 'svg'];
+const AVAILABLE_FORMATS = ["png", "jpeg", "webp", "svg"];
 
 export function QRFilter({ onFilterChange, totalItems, filteredItems }: QRFilterProps) {
   const [filters, setFilters] = useState<QRFilterOptions>(DEFAULT_FILTERS);
   const [isOpen, setIsOpen] = useState(false);
 
-  const updateFilters = useCallback((newFilters: Partial<QRFilterOptions>) => {
-    const updatedFilters = { ...filters, ...newFilters };
-    setFilters(updatedFilters);
-    onFilterChange(updatedFilters);
-  }, [filters, onFilterChange]);
+  const updateFilters = useCallback(
+    (newFilters: Partial<QRFilterOptions>) => {
+      const updatedFilters = { ...filters, ...newFilters };
+      setFilters(updatedFilters);
+      onFilterChange(updatedFilters);
+    },
+    [filters, onFilterChange]
+  );
 
   const clearAllFilters = useCallback(() => {
     setFilters(DEFAULT_FILTERS);
@@ -69,7 +66,7 @@ export function QRFilter({ onFilterChange, totalItems, filteredItems }: QRFilter
       const originalPaddingRight = body.style.paddingRight;
 
       // Ensure body can scroll
-      body.style.overflow = 'auto';
+      body.style.overflow = "auto";
       body.style.paddingRight = originalPaddingRight;
 
       return () => {
@@ -82,13 +79,9 @@ export function QRFilter({ onFilterChange, totalItems, filteredItems }: QRFilter
     return undefined;
   }, [isOpen]);
 
-  const hasActiveFilters =
-    filters.formats.length > 0 ||
-    filters.dateRange !== 'all';
+  const hasActiveFilters = filters.formats.length > 0 || filters.dateRange !== "all";
 
-  const activeFilterCount =
-    filters.formats.length +
-    (filters.dateRange !== 'all' ? 1 : 0);
+  const activeFilterCount = filters.formats.length + (filters.dateRange !== "all" ? 1 : 0);
 
   return (
     <div className="flex items-center gap-2">
@@ -101,7 +94,7 @@ export function QRFilter({ onFilterChange, totalItems, filteredItems }: QRFilter
 
       {/* Filter Dropdown */}
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen} modal={false}>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger asChild={true}>
           <Button variant="outline" size="sm" className="relative">
             <Settings className="h-4 w-4 mr-2" />
             Filter
@@ -115,7 +108,7 @@ export function QRFilter({ onFilterChange, totalItems, filteredItems }: QRFilter
             )}
           </Button>
         </DropdownMenuTrigger>
-        
+
         <DropdownMenuContent
           className="w-72 sm:w-80 md:w-96 max-h-[80vh] sm:max-h-[85vh] min-w-[280px] z-50"
           align="end"
@@ -134,10 +127,12 @@ export function QRFilter({ onFilterChange, totalItems, filteredItems }: QRFilter
             const target = e.target as Element;
 
             // Don't close dropdown if clicking on scrollbar or scroll area
-            if (target.closest('[data-radix-scroll-area-viewport]') ||
-                target.closest('[data-radix-scroll-area-scrollbar]') ||
-                target.tagName === 'HTML' ||
-                target.tagName === 'BODY') {
+            if (
+              target.closest("[data-radix-scroll-area-viewport]") ||
+              target.closest("[data-radix-scroll-area-scrollbar]") ||
+              target.tagName === "HTML" ||
+              target.tagName === "BODY"
+            ) {
               e.preventDefault();
               return;
             }
@@ -170,7 +165,6 @@ export function QRFilter({ onFilterChange, totalItems, filteredItems }: QRFilter
           {/* Scrollable Content */}
           <div className="max-h-[60vh] sm:max-h-[65vh] md:max-h-[70vh] overflow-y-auto overflow-x-hidden">
             <div className="p-1">
-
               {/* Date Range Filter */}
               <div className="px-2 py-3">
                 <div className="flex items-center gap-2 mb-3 px-1">
@@ -179,13 +173,27 @@ export function QRFilter({ onFilterChange, totalItems, filteredItems }: QRFilter
                 </div>
                 <DropdownMenuRadioGroup
                   value={filters.dateRange}
-                  onValueChange={(value) => updateFilters({ dateRange: value as 'all' | 'today' | 'week' | 'month' | 'year' })}
+                  onValueChange={(value) =>
+                    updateFilters({
+                      dateRange: value as "all" | "today" | "week" | "month" | "year",
+                    })
+                  }
                 >
-                  <DropdownMenuRadioItem value="all" className="cursor-pointer">All Time</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="today" className="cursor-pointer">Today</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="week" className="cursor-pointer">This Week</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="month" className="cursor-pointer">This Month</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="year" className="cursor-pointer">This Year</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="all" className="cursor-pointer">
+                    All Time
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="today" className="cursor-pointer">
+                    Today
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="week" className="cursor-pointer">
+                    This Week
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="month" className="cursor-pointer">
+                    This Month
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="year" className="cursor-pointer">
+                    This Year
+                  </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </div>
 
@@ -205,7 +213,7 @@ export function QRFilter({ onFilterChange, totalItems, filteredItems }: QRFilter
                       onCheckedChange={(checked) => {
                         const newFormats = checked
                           ? [...filters.formats, format]
-                          : filters.formats.filter(f => f !== format);
+                          : filters.formats.filter((f) => f !== format);
                         updateFilters({ formats: newFormats });
                       }}
                       className="cursor-pointer"
@@ -215,8 +223,6 @@ export function QRFilter({ onFilterChange, totalItems, filteredItems }: QRFilter
                   ))}
                 </div>
               </div>
-
-
             </div>
           </div>
         </DropdownMenuContent>

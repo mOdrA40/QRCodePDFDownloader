@@ -4,13 +4,7 @@ import { AlertTriangle, Bug, Home, RefreshCw } from "lucide-react";
 import type React from "react";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface Props {
   children: ReactNode;
@@ -127,17 +121,11 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   private getErrorSeverity(error: Error): "low" | "medium" | "high" {
-    if (
-      error.message.includes("ChunkLoadError") ||
-      error.message.includes("Network")
-    ) {
+    if (error.message.includes("ChunkLoadError") || error.message.includes("Network")) {
       return "medium";
     }
 
-    if (
-      error.message.includes("Security") ||
-      error.message.includes("Validation")
-    ) {
+    if (error.message.includes("Security") || error.message.includes("Validation")) {
       return "high";
     }
 
@@ -179,20 +167,15 @@ export class ErrorBoundary extends Component<Props, State> {
                   />
                 </div>
               </div>
-              <CardTitle className="text-2xl font-bold">
-                Oops! Something went wrong
-              </CardTitle>
-              <CardDescription className="text-lg mt-2">
-                {errorMessage}
-              </CardDescription>
+              <CardTitle className="text-2xl font-bold">Oops! Something went wrong</CardTitle>
+              <CardDescription className="text-lg mt-2">{errorMessage}</CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-6">
               {/* Error ID for support */}
               <div className="bg-muted/50 p-4 rounded-lg">
                 <p className="text-sm text-muted-foreground">
-                  Error ID:{" "}
-                  <code className="font-mono">{this.state.errorId}</code>
+                  Error ID: <code className="font-mono">{this.state.errorId}</code>
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   Please include this ID when contacting support
@@ -201,29 +184,17 @@ export class ErrorBoundary extends Component<Props, State> {
 
               {/* Action buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button
-                  onClick={this.handleRetry}
-                  className="flex-1"
-                  variant="default"
-                >
+                <Button onClick={this.handleRetry} className="flex-1" variant="default">
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Try Again
                 </Button>
 
-                <Button
-                  onClick={this.handleReload}
-                  className="flex-1"
-                  variant="outline"
-                >
+                <Button onClick={this.handleReload} className="flex-1" variant="outline">
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Reload Page
                 </Button>
 
-                <Button
-                  onClick={this.handleGoHome}
-                  className="flex-1"
-                  variant="outline"
-                >
+                <Button onClick={this.handleGoHome} className="flex-1" variant="outline">
                   <Home className="h-4 w-4 mr-2" />
                   Go Home
                 </Button>
@@ -243,9 +214,7 @@ export class ErrorBoundary extends Component<Props, State> {
                     {this.state.error.stack && (
                       <div className="mb-4">
                         <strong>Stack Trace:</strong>
-                        <pre className="whitespace-pre-wrap mt-1">
-                          {this.state.error.stack}
-                        </pre>
+                        <pre className="whitespace-pre-wrap mt-1">{this.state.error.stack}</pre>
                       </div>
                     )}
                     {this.state.errorInfo?.componentStack && (
@@ -272,7 +241,7 @@ export class ErrorBoundary extends Component<Props, State> {
 // Higher-order component for easier usage
 export function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
-  errorBoundaryProps?: Omit<Props, "children">,
+  errorBoundaryProps?: Omit<Props, "children">
 ) {
   const WrappedComponent = (props: P) => (
     <ErrorBoundary {...errorBoundaryProps}>

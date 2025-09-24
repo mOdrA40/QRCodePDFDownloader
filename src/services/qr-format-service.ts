@@ -6,16 +6,7 @@ export interface QRFormatValidation {
 }
 
 export interface QRFormatOptions {
-  type:
-    | "wifi"
-    | "email"
-    | "phone"
-    | "url"
-    | "vcard"
-    | "event"
-    | "location"
-    | "sms"
-    | "text";
+  type: "wifi" | "email" | "phone" | "url" | "vcard" | "event" | "location" | "sms" | "text";
   data: Record<string, unknown>;
 }
 
@@ -32,10 +23,7 @@ export class QRFormatService {
   /**
    * Validates and optimizes QR format for maximum compatibility
    */
-  public validateAndOptimize(
-    format: string,
-    type?: string,
-  ): QRFormatValidation {
+  public validateAndOptimize(format: string, type?: string): QRFormatValidation {
     // Detect type if not provided
     const detectedType = type || this.detectQRType(format);
 
@@ -98,9 +86,7 @@ export class QRFormatService {
 
     // Validate security type
     if (params.T && !["WPA", "WEP", "nopass", ""].includes(params.T)) {
-      warnings.push(
-        "Security type should be WPA, WEP, or nopass for best compatibility",
-      );
+      warnings.push("Security type should be WPA, WEP, or nopass for best compatibility");
     }
 
     // Validate hidden parameter
@@ -246,9 +232,7 @@ export class QRFormatService {
     }
 
     if (!format.includes("VERSION:")) {
-      warnings.push(
-        "vCard should include VERSION field for better compatibility",
-      );
+      warnings.push("vCard should include VERSION field for better compatibility");
     }
 
     if (!format.includes("FN:")) {
@@ -310,9 +294,7 @@ export class QRFormatService {
       const query = url.searchParams.get("q");
 
       if (!query) {
-        warnings.push(
-          "Location should include query parameter for better compatibility",
-        );
+        warnings.push("Location should include query parameter for better compatibility");
       }
 
       return {
@@ -355,18 +337,14 @@ export class QRFormatService {
 
     // Check for optimal text length
     if (format.length > 2000) {
-      warnings.push(
-        "Text content is very long, consider shortening for better scanning",
-      );
+      warnings.push("Text content is very long, consider shortening for better scanning");
     }
 
     // Check for special characters that might cause issues
     // biome-ignore lint/suspicious/noControlCharactersInRegex: Need to check for control characters
     const problematicChars = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/;
     if (problematicChars.test(format)) {
-      warnings.push(
-        "Text contains control characters that might cause scanning issues",
-      );
+      warnings.push("Text contains control characters that might cause scanning issues");
     }
 
     return {

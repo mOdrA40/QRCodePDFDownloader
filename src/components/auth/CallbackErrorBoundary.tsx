@@ -5,8 +5,8 @@
 
 "use client";
 
-import React from "react";
 import { useRouter } from "next/navigation";
+import React from "react";
 
 interface CallbackErrorBoundaryState {
   hasError: boolean;
@@ -78,9 +78,7 @@ function CallbackErrorFallback({ error }: { error?: Error | undefined }) {
               />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Authentication Error
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Authentication Error</h1>
           <p className="text-gray-600 mb-4">
             Something went wrong during the authentication process.
           </p>
@@ -89,9 +87,7 @@ function CallbackErrorFallback({ error }: { error?: Error | undefined }) {
               <summary className="cursor-pointer text-sm font-medium text-gray-700">
                 Error Details
               </summary>
-              <pre className="text-xs text-gray-600 mt-2 whitespace-pre-wrap">
-                {error.message}
-              </pre>
+              <pre className="text-xs text-gray-600 mt-2 whitespace-pre-wrap">{error.message}</pre>
             </details>
           )}
         </div>

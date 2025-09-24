@@ -6,10 +6,10 @@
 "use client";
 
 import { useAuth0 } from "@auth0/auth0-react";
+import { ArrowLeft, Loader2, LogIn } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { LogIn, ArrowLeft, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const { loginWithRedirect, isLoading, isAuthenticated, user } = useAuth0();
@@ -18,15 +18,23 @@ export default function LoginPage() {
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Get returnTo parameter from URL, but avoid callback/login loops
-  const rawReturnTo = searchParams.get('returnTo') || '/';
-  const returnTo = (rawReturnTo === '/auth/callback' || rawReturnTo === '/auth/login') ? '/' : rawReturnTo;
+  const rawReturnTo = searchParams.get("returnTo") || "/";
+  const returnTo =
+    rawReturnTo === "/auth/callback" || rawReturnTo === "/auth/login" ? "/" : rawReturnTo;
 
   useEffect(() => {
     // Prevent infinite loops by checking if we came from callback
     const referrer = document.referrer;
-    const isFromCallback = referrer.includes('/auth/callback');
+    const isFromCallback = referrer.includes("/auth/callback");
 
-    console.log("Login page effect:", { isLoading, isAuthenticated, user: !!user, isRedirecting, returnTo, isFromCallback });
+    console.log("Login page effect:", {
+      isLoading,
+      isAuthenticated,
+      user: !!user,
+      isRedirecting,
+      returnTo,
+      isFromCallback,
+    });
 
     // If user is already authenticated, redirect to returnTo
     if (isAuthenticated && user && !isLoading) {
@@ -41,7 +49,7 @@ export default function LoginPage() {
     }
 
     // Auto-redirect to Auth0 login after a short delay, but not if we just came from callback
-    if (!isLoading && !isAuthenticated && !isRedirecting && !isFromCallback) {
+    if (!(isLoading || isAuthenticated || isRedirecting || isFromCallback)) {
       console.log("Auto-redirecting to Auth0 login...");
       setIsRedirecting(true);
 
@@ -49,7 +57,7 @@ export default function LoginPage() {
         loginWithRedirect({
           authorizationParams: {
             redirect_uri: `${window.location.origin}/auth/callback`,
-            screen_hint: 'login',
+            screen_hint: "login",
           },
           appState: {
             returnTo: returnTo,
@@ -77,7 +85,7 @@ export default function LoginPage() {
     loginWithRedirect({
       authorizationParams: {
         redirect_uri: `${window.location.origin}/auth/callback`,
-        screen_hint: 'login',
+        screen_hint: "login",
       },
       appState: {
         returnTo: returnTo,
@@ -108,8 +116,18 @@ export default function LoginPage() {
         <div className="text-center">
           <div className="mb-4">
             <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <svg
+                className="w-8 h-8 text-green-600 dark:text-green-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
             </div>
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
@@ -134,9 +152,7 @@ export default function LoginPage() {
             <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <LogIn className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              Welcome Back
-            </h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Welcome Back</h1>
             <p className="text-gray-600 dark:text-gray-400">
               Sign in to access your QR PDF Downloader
             </p>
@@ -147,17 +163,16 @@ export default function LoginPage() {
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               {isRedirecting
                 ? "Redirecting to secure login..."
-                : "You will be redirected to our secure login page automatically."
-              }
+                : "You will be redirected to our secure login page automatically."}
             </p>
 
             {/* Smooth Progress Bar */}
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-4 overflow-hidden shadow-inner">
               <div
                 className={`bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full progress-bar-smooth ${
-                  isRedirecting ? 'auth-progress-login auth-progress-pulse' : 'w-3/5'
+                  isRedirecting ? "auth-progress-login auth-progress-pulse" : "w-3/5"
                 }`}
-              ></div>
+              />
             </div>
           </div>
 

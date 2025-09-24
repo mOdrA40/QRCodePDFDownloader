@@ -27,10 +27,10 @@ class SimpleBrowserDetectionService {
       return this.capabilities;
     }
 
-    const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+    const userAgent = typeof navigator !== "undefined" ? navigator.userAgent : "";
     const supportsCanvas = this.checkCanvasSupport();
     const isPrivacyBrowser = this.detectPrivacyBrowser(userAgent);
-    
+
     const recommendedMethod = this.getRecommendedMethod(supportsCanvas, isPrivacyBrowser);
 
     this.capabilities = {
@@ -47,11 +47,11 @@ class SimpleBrowserDetectionService {
    * Simple canvas support check
    */
   private checkCanvasSupport(): boolean {
-    if (typeof document === 'undefined') return false;
-    
+    if (typeof document === "undefined") return false;
+
     try {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
       return !!ctx;
     } catch {
       return false;
@@ -62,31 +62,28 @@ class SimpleBrowserDetectionService {
    * Detect privacy-focused browsers
    */
   private detectPrivacyBrowser(userAgent: string): boolean {
-    const privacyBrowsers = [
-      'librewolf',
-      'tor browser',
-      'brave',
-      'duckduckgo',
-    ];
+    const privacyBrowsers = ["librewolf", "tor browser", "brave", "duckduckgo"];
 
     const lowerUA = userAgent.toLowerCase();
-    return privacyBrowsers.some(browser => lowerUA.includes(browser));
+    return privacyBrowsers.some((browser) => lowerUA.includes(browser));
   }
 
   /**
-   * Get recommended QR generation method
+   * Get recommended QR generation method with performance optimization
    */
   private getRecommendedMethod(
     supportsCanvas: boolean,
     isPrivacyBrowser: boolean
   ): QRGenerationMethod {
-    // For privacy browsers or when canvas is not supported, use server-side
-    if (isPrivacyBrowser || !supportsCanvas) {
-      return QRGenerationMethod.SERVER_SIDE;
+    // For privacy browsers, prefer server-side but allow client-side for better performance
+    if (isPrivacyBrowser) {
+      // Use client-side if canvas is supported for better performance
+      // Server-side only if canvas is not supported
+      return supportsCanvas ? QRGenerationMethod.CLIENT_CANVAS : QRGenerationMethod.SERVER_SIDE;
     }
 
-    // Default to client-side canvas for better performance
-    return QRGenerationMethod.CLIENT_CANVAS;
+    // For regular browsers, prefer client-side canvas for better performance
+    return supportsCanvas ? QRGenerationMethod.CLIENT_CANVAS : QRGenerationMethod.SERVER_SIDE;
   }
 
   /**

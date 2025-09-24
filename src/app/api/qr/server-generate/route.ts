@@ -73,10 +73,13 @@ function checkRateLimit(ip: string): boolean {
   return true;
 }
 
-export async function POST(request: NextRequest): Promise<NextResponse<QRGenerationResponse | QRErrorResponse>> {
+export async function POST(
+  request: NextRequest
+): Promise<NextResponse<QRGenerationResponse | QRErrorResponse>> {
   try {
     // Basic rate limiting
-    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+    const ip =
+      request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
     if (!checkRateLimit(ip)) {
       return NextResponse.json(
         {
@@ -91,7 +94,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<QRGenerat
     let body: QRGenerationRequest;
     try {
       body = await request.json();
-    } catch (error) {
+    } catch (_error) {
       return NextResponse.json(
         {
           success: false,
@@ -155,10 +158,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<QRGenerat
     response.headers.set("X-Frame-Options", "DENY");
 
     return response;
-
   } catch (error) {
     console.error("Server QR generation error:", error);
-    
+
     return NextResponse.json(
       {
         success: false,
@@ -170,7 +172,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<QRGenerat
 }
 
 // Handle OPTIONS for CORS
-export async function OPTIONS() {
+export function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {

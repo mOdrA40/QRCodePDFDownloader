@@ -5,8 +5,8 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useEffect, useState } from "react";
 import { clearAuth0State } from "@/utils/auth-cleanup";
 
 interface AuthRecoveryProps {
@@ -22,17 +22,18 @@ export function AuthRecovery({ children }: AuthRecoveryProps) {
       console.log("Auth error detected, attempting recovery...", error);
 
       // Check if it's a state-related error
-      if (error.message?.includes('Invalid state') ||
-          error.message?.includes('state mismatch') ||
-          error.message?.includes('invalid_request')) {
-
+      if (
+        error.message?.includes("Invalid state") ||
+        error.message?.includes("state mismatch") ||
+        error.message?.includes("invalid_request")
+      ) {
         console.log("State error detected, clearing auth state...");
         clearAuth0State();
         setHasRecovered(true);
 
         // Redirect to home instead of login to avoid loops
         setTimeout(() => {
-          window.location.href = '/';
+          window.location.href = "/";
         }, 1000);
       }
     }
@@ -59,18 +60,17 @@ export function AuthRecovery({ children }: AuthRecoveryProps) {
                 />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Recovering Authentication
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Recovering Authentication</h2>
             <p className="text-gray-600 mb-4">
               We detected an authentication issue and are fixing it automatically.
             </p>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-yellow-600 h-2 rounded-full animate-pulse" style={{ width: "60%" }}></div>
+              <div
+                className="bg-yellow-600 h-2 rounded-full animate-pulse"
+                style={{ width: "60%" }}
+              />
             </div>
-            <p className="text-sm text-gray-500 mt-4">
-              You will be redirected to login shortly...
-            </p>
+            <p className="text-sm text-gray-500 mt-4">You will be redirected to login shortly...</p>
           </div>
         </div>
       </div>

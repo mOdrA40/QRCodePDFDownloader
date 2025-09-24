@@ -43,10 +43,9 @@ const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
       enableIPDetection = true,
       ...props
     },
-    _ref,
+    _ref
   ) => {
-    const [detectedCountry, setDetectedCountry] =
-      useState<Country>(defaultCountry);
+    const [detectedCountry, setDetectedCountry] = useState<Country>(defaultCountry);
     const [isDetecting, setIsDetecting] = useState(false);
 
     // Detect user's country based on IP
@@ -74,9 +73,7 @@ const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
       detectCountry();
     }, [enableIPDetection, defaultCountry]);
 
-    const currentDefaultCountry = enableIPDetection
-      ? detectedCountry
-      : defaultCountry;
+    const currentDefaultCountry = enableIPDetection ? detectedCountry : defaultCountry;
     return (
       <div className="space-y-2">
         {label && (
@@ -89,7 +86,12 @@ const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
           <PhoneInputComponent
             id={id}
             value={value ?? ""}
-            onChange={onChange || (() => {})}
+            onChange={
+              onChange ||
+              (() => {
+                // No-op function for when onChange is not provided
+              })
+            }
             defaultCountry={currentDefaultCountry}
             placeholder={placeholder}
             disabled={disabled || isDetecting}
@@ -98,18 +100,18 @@ const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
               "phone-input-container",
               error && "phone-input-error",
               isDetecting && "phone-input-loading",
-              className,
+              className
             )}
             numberInputProps={{
               className: cn(
                 "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                error && "border-red-500 focus-visible:ring-red-500",
+                error && "border-red-500 focus-visible:ring-red-500"
               ),
             }}
             countrySelectProps={{
               className: cn(
                 "flex h-10 items-center justify-center rounded-l-md border border-r-0 border-input bg-background px-3 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                error && "border-red-500",
+                error && "border-red-500"
               ),
             }}
             {...props}
@@ -123,7 +125,7 @@ const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(
         )}
       </div>
     );
-  },
+  }
 );
 
 PhoneInput.displayName = "PhoneInput";

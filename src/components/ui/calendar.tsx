@@ -1,8 +1,7 @@
 "use client";
 
-import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -11,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 interface CalendarProps {
   mode?: "single";
@@ -20,14 +20,8 @@ interface CalendarProps {
   className?: string;
 }
 
-function Calendar({
-  selected,
-  onSelect,
-  className,
-}: CalendarProps) {
-  const [currentDate, setCurrentDate] = React.useState(
-    selected || new Date()
-  );
+function Calendar({ selected, onSelect, className }: CalendarProps) {
+  const [currentDate, setCurrentDate] = React.useState(selected || new Date());
 
   const today = new Date();
   const currentMonth = currentDate.getMonth();
@@ -61,10 +55,10 @@ function Calendar({
     calendarDays.push({ date: nextDate, isCurrentMonth: false });
   }
 
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    setCurrentDate(prev => {
+  const navigateMonth = (direction: "prev" | "next") => {
+    setCurrentDate((prev) => {
       const newDate = new Date(prev);
-      if (direction === 'prev') {
+      if (direction === "prev") {
         newDate.setMonth(prev.getMonth() - 1);
       } else {
         newDate.setMonth(prev.getMonth() + 1);
@@ -74,43 +68,55 @@ function Calendar({
   };
 
   const handleMonthChange = (monthIndex: string) => {
-    setCurrentDate(prev => {
+    setCurrentDate((prev) => {
       const newDate = new Date(prev);
-      newDate.setMonth(parseInt(monthIndex, 10));
+      newDate.setMonth(Number.parseInt(monthIndex, 10));
       return newDate;
     });
   };
 
   const handleYearChange = (year: string) => {
-    setCurrentDate(prev => {
+    setCurrentDate((prev) => {
       const newDate = new Date(prev);
-      newDate.setFullYear(parseInt(year, 10));
+      newDate.setFullYear(Number.parseInt(year, 10));
       return newDate;
     });
   };
-
-
 
   const handleDateSelect = (date: Date) => {
     onSelect?.(date);
   };
 
   const isSelected = (date: Date) => {
-    return selected &&
-           date.getDate() === selected.getDate() &&
-           date.getMonth() === selected.getMonth() &&
-           date.getFullYear() === selected.getFullYear();
+    return (
+      selected &&
+      date.getDate() === selected.getDate() &&
+      date.getMonth() === selected.getMonth() &&
+      date.getFullYear() === selected.getFullYear()
+    );
   };
 
   const isToday = (date: Date) => {
-    return date.getDate() === today.getDate() &&
-           date.getMonth() === today.getMonth() &&
-           date.getFullYear() === today.getFullYear();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
   };
 
   const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   const weekDays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -127,7 +133,7 @@ function Calendar({
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => navigateMonth('prev')}
+          onClick={() => navigateMonth("prev")}
           className="h-8 w-8 p-0 shrink-0"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -141,7 +147,9 @@ function Calendar({
             onOpenChange={(isOpen) => {
               if (isOpen) {
                 // Add a small delay to prevent immediate closure
-                setTimeout(() => {}, 100);
+                setTimeout(() => {
+                  // Small delay to prevent immediate closure
+                }, 100);
               }
             }}
           >
@@ -188,7 +196,9 @@ function Calendar({
             onValueChange={handleYearChange}
             onOpenChange={(isOpen) => {
               if (isOpen) {
-                setTimeout(() => {}, 100);
+                setTimeout(() => {
+                  // Small delay to prevent immediate closure
+                }, 100);
               }
             }}
           >
@@ -231,7 +241,7 @@ function Calendar({
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => navigateMonth('next')}
+          onClick={() => navigateMonth("next")}
           className="h-8 w-8 p-0 shrink-0"
         >
           <ChevronRight className="h-4 w-4" />
@@ -265,7 +275,8 @@ function Calendar({
               className={cn(
                 "h-8 w-8 sm:h-9 sm:w-9 p-0 font-normal text-xs sm:text-sm",
                 !isCurrentMonth && "text-muted-foreground opacity-50",
-                isSelected(date) && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+                isSelected(date) &&
+                  "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
                 isToday(date) && !isSelected(date) && "bg-accent text-accent-foreground",
                 "hover:bg-accent hover:text-accent-foreground transition-colors"
               )}

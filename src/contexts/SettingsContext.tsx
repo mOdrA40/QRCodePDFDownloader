@@ -7,13 +7,7 @@
 
 import { useTheme } from "next-themes";
 import type React from "react";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useReducer,
-} from "react";
+import { createContext, useCallback, useContext, useEffect, useReducer } from "react";
 import { storageService } from "@/services";
 import type { AppConfig, QRColorTheme, Theme, UsageStats } from "@/types";
 
@@ -43,10 +37,7 @@ interface SettingsContextType {
   state: SettingsState;
 
   // Actions
-  updateConfig: <K extends keyof AppConfig>(
-    key: K,
-    value: AppConfig[K],
-  ) => void;
+  updateConfig: <K extends keyof AppConfig>(key: K, value: AppConfig[K]) => void;
   setTheme: (theme: Theme) => void;
   setPreviewMode: (enabled: boolean) => void;
   setAutoGenerate: (enabled: boolean) => void;
@@ -94,10 +85,7 @@ const initialState: SettingsState = {
 };
 
 // Reducer
-function settingsReducer(
-  state: SettingsState,
-  action: SettingsAction,
-): SettingsState {
+function settingsReducer(state: SettingsState, action: SettingsAction): SettingsState {
   switch (action.type) {
     case "SET_CONFIG":
       return { ...state, config: { ...state.config, ...action.payload } };
@@ -129,9 +117,7 @@ function settingsReducer(
 }
 
 // Create context
-const SettingsContext = createContext<SettingsContextType | undefined>(
-  undefined,
-);
+const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 // Provider component
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
@@ -149,7 +135,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       const updatedConfig = { ...state.config, [key]: value };
       storageService.updateSettings(updatedConfig);
     },
-    [state.config],
+    [state.config]
   );
 
   /**
@@ -161,7 +147,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setNextTheme(theme);
       storageService.setTheme(theme);
     },
-    [setNextTheme],
+    [setNextTheme]
   );
 
   /**
@@ -232,7 +218,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         const importData = JSON.parse(settingsJson);
 
         // Validate import data structure
-        if (!importData.config || !importData.version) {
+        if (!(importData.config && importData.version)) {
           throw new Error("Invalid settings format");
         }
 
@@ -268,7 +254,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         return false;
       }
     },
-    [setTheme, setPreviewMode, setAutoGenerate],
+    [setTheme, setPreviewMode, setAutoGenerate]
   );
 
   // Load settings from storage on mount (client-only to prevent hydration mismatch)
@@ -320,7 +306,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Predefined color themes
-  const colorThemes: QRColorTheme[] = [
+  const _colorThemes: QRColorTheme[] = [
     { name: "Classic", foreground: "#000000", background: "#ffffff" },
     { name: "Ocean", foreground: "#0EA5E9", background: "#F0F9FF" },
     { name: "Forest", foreground: "#059669", background: "#ECFDF5" },
@@ -342,20 +328,14 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     importSettings,
   };
 
-  return (
-    <SettingsContext.Provider value={contextValue}>
-      {children}
-    </SettingsContext.Provider>
-  );
+  return <SettingsContext.Provider value={contextValue}>{children}</SettingsContext.Provider>;
 }
 
 // Hook to use settings context
 export function useSettingsContext(): SettingsContextType {
   const context = useContext(SettingsContext);
   if (context === undefined) {
-    throw new Error(
-      "useSettingsContext must be used within a SettingsProvider",
-    );
+    throw new Error("useSettingsContext must be used within a SettingsProvider");
   }
   return context;
 }

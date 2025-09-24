@@ -110,9 +110,7 @@ export class StorageService {
   /**
    * Saves a new QR preset
    */
-  public savePreset(
-    preset: Omit<QRPreset, "id" | "createdAt" | "updatedAt">,
-  ): boolean {
+  public savePreset(preset: Omit<QRPreset, "id" | "createdAt" | "updatedAt">): boolean {
     const presets = this.getPresets();
     const newPreset: QRPreset = {
       ...preset,
@@ -128,10 +126,7 @@ export class StorageService {
   /**
    * Updates an existing preset
    */
-  public updatePreset(
-    id: string,
-    updates: Partial<Omit<QRPreset, "id" | "createdAt">>,
-  ): boolean {
+  public updatePreset(id: string, updates: Partial<Omit<QRPreset, "id" | "createdAt">>): boolean {
     const presets = this.getPresets();
     const index = presets.findIndex((p) => p.id === id);
 
@@ -224,9 +219,7 @@ export class StorageService {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
 
-    const filteredEvents = events.filter(
-      (event) => new Date(event.timestamp) > cutoffDate,
-    );
+    const filteredEvents = events.filter((event) => new Date(event.timestamp) > cutoffDate);
 
     return this.setItem(this.keys.usageEvents, filteredEvents);
   }

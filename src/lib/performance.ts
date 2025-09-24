@@ -10,7 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
  */
 export function useLazyLoad<T>(
   importFunc: () => Promise<{ default: T }>,
-  fallback?: T,
+  fallback?: T
 ): { Component: T | null; isLoading: boolean; error: Error | null } {
   const [Component, setComponent] = useState<T | null>(fallback || null);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,17 +46,14 @@ export function useLazyLoad<T>(
  * SSR-safe implementation
  */
 export function useIntersectionObserver(
-  options: IntersectionObserverInit = {},
+  options: IntersectionObserverInit = {}
 ): [React.RefObject<HTMLElement | null>, boolean] {
   const [isIntersecting, setIsIntersecting] = useState(false);
   const ref = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     // Check if we're in a browser environment
-    if (
-      typeof window === "undefined" ||
-      typeof IntersectionObserver === "undefined"
-    ) {
+    if (typeof window === "undefined" || typeof IntersectionObserver === "undefined") {
       // On server or unsupported browsers, assume element is intersecting
       setIsIntersecting(true);
       return;
@@ -72,7 +69,7 @@ export function useIntersectionObserver(
       {
         threshold: 0.1,
         ...options,
-      },
+      }
     );
 
     observer.observe(element);
@@ -119,7 +116,7 @@ export function useThrottle<T>(value: T, limit: number): T {
           lastRan.current = Date.now();
         }
       },
-      limit - (Date.now() - lastRan.current),
+      limit - (Date.now() - lastRan.current)
     );
 
     return () => {
@@ -137,7 +134,7 @@ export function useThrottle<T>(value: T, limit: number): T {
  */
 export function useExpensiveCalculation<T>(
   calculation: () => T,
-  dependencies: React.DependencyList,
+  dependencies: React.DependencyList
 ): T {
   // biome-ignore lint/correctness/useExhaustiveDependencies: This is a utility function that intentionally accepts dependencies as parameter
   return useMemo(calculation, dependencies);
@@ -168,7 +165,7 @@ export function usePerformanceMonitor(name: string) {
       fn();
       return end();
     },
-    [start, end],
+    [start, end]
   );
 
   return { start, end, measure };
@@ -222,7 +219,7 @@ export function useLazyImage(src: string): {
 export function useVirtualScroll<T>(
   items: T[],
   itemHeight: number,
-  containerHeight: number,
+  containerHeight: number
 ): {
   visibleItems: T[];
   startIndex: number;
@@ -235,7 +232,7 @@ export function useVirtualScroll<T>(
   const startIndex = Math.floor(scrollTop / itemHeight);
   const endIndex = Math.min(
     startIndex + Math.ceil(containerHeight / itemHeight) + 1,
-    items.length - 1,
+    items.length - 1
   );
 
   const visibleItems = items.slice(startIndex, endIndex + 1);
@@ -274,9 +271,7 @@ export function useMemoryMonitor(): {
 
   const refreshMemoryInfo = useCallback(() => {
     if ("memory" in performance) {
-      setMemoryInfo(
-        (performance as Performance & { memory: MemoryInfo }).memory,
-      );
+      setMemoryInfo((performance as Performance & { memory: MemoryInfo }).memory);
     }
   }, []);
 
@@ -296,7 +291,7 @@ export function useMemoryMonitor(): {
 export function useBatchProcessor<T, R>(
   processor: (batch: T[]) => Promise<R[]>,
   batchSize = 10,
-  delay = 100,
+  delay = 100
 ): {
   processBatch: (items: T[]) => Promise<R[]>;
   isProcessing: boolean;
@@ -332,7 +327,7 @@ export function useBatchProcessor<T, R>(
 
       return results;
     },
-    [processor, batchSize, delay],
+    [processor, batchSize, delay]
   );
 
   return { processBatch, isProcessing, progress };

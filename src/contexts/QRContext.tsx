@@ -5,22 +5,16 @@
 
 "use client";
 
-import type React from "react";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useReducer,
-} from "react";
-import { toast } from "sonner";
-import { useMutation } from "convex/react";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useMutation } from "convex/react";
+import type React from "react";
+import { createContext, useCallback, useContext, useReducer } from "react";
+import { toast } from "sonner";
 import { api } from "@/convex/_generated/api";
 import { qrService, storageService } from "@/services";
 import type {
   ComponentState,
   QRGenerationResult,
-  QRHistorySaveResult,
   QROptions,
   QRPreset,
   QRValidationResult,
@@ -54,11 +48,8 @@ interface QRContextType {
 
   // Actions
   setOptions: (options: QROptions) => void;
-  updateOption: <K extends keyof QROptions>(
-    key: K,
-    value: QROptions[K],
-  ) => void;
-  generateAndSaveQR: () => Promise<void>; 
+  updateOption: <K extends keyof QROptions>(key: K, value: QROptions[K]) => void;
+  generateAndSaveQR: () => Promise<void>;
   validateInput: (text: string) => QRValidationResult;
   resetQR: () => void;
 
@@ -143,6 +134,53 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
   const saveToHistory = useMutation(api.qrHistory.saveQRToHistory);
 
   /**
+   * Async function to save QR to history without blocking UI
+   */
+  const saveToHistoryAsync = useCallback(
+    async (options: QROptions, result: QRGenerationResult): Promise<void> => {
+      if (!user) return;
+
+      const historyData: any = {
+        textContent: options.text,
+        qrSettings: {
+          size: options.size,
+          margin: options.margin,
+          errorCorrectionLevel: options.errorCorrectionLevel,
+          foreground: options.foreground,
+          background: options.background,
+          format: options.format,
+          logoUrl: options.logoUrl || "",
+          logoSize: options.logoSize || 60,
+          logoBackground: options.logoBackground,
+        },
+      };
+
+      if (result.method) {
+        historyData.generationMethod = result.method;
+      }
+
+      if (result.browserInfo) {
+        historyData.browserInfo = result.browserInfo;
+      }
+
+      try {
+        const saveResult = await saveToHistory(historyData);
+
+        // Handle duplicate QR response
+        if (saveResult && !saveResult.success && saveResult.isDuplicate) {
+          toast.info("QR code already exists in your history", {
+            description: "This QR code content has been generated before.",
+            duration: 4000,
+          });
+        }
+      } catch (error) {
+        console.warn("Failed to save to history:", error);
+      }
+    },
+    [user, saveToHistory]
+  );
+
+  /**
    * Sets QR options
    */
   const setOptions = useCallback((options: QROptions) => {
@@ -152,12 +190,9 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
   /**
    * Updates a specific QR option
    */
-  const updateOption = useCallback(
-    <K extends keyof QROptions>(key: K, value: QROptions[K]) => {
-      dispatch({ type: "UPDATE_OPTION", payload: { key, value } });
-    },
-    [],
-  );
+  const updateOption = useCallback(<K extends keyof QROptions>(key: K, value: QROptions[K]) => {
+    dispatch({ type: "UPDATE_OPTION", payload: { key, value } });
+  }, []);
 
   /**
    * Validates QR input
@@ -168,7 +203,7 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: "SET_VALIDATION", payload: result });
       return result;
     },
-    [state.options],
+    [state.options]
   );
 
   /**
@@ -200,74 +235,35 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
       }, 100);
 
       // Generate QR code
-      const result: QRGenerationResult = await qrService.generateQRCode(
-        state.options.text,
-        {
-          size: state.options.size,
-          margin: state.options.margin,
-          errorCorrectionLevel: state.options.errorCorrectionLevel,
-          format: state.options.format,
-          color: {
-            dark: state.options.foreground,
-            light: state.options.background,
-          },
+      const result: QRGenerationResult = await qrService.generateQRCode(state.options.text, {
+        size: state.options.size,
+        margin: state.options.margin,
+        errorCorrectionLevel: state.options.errorCorrectionLevel,
+        format: state.options.format,
+        color: {
+          dark: state.options.foreground,
+          light: state.options.background,
         },
-      );
+      });
 
       clearInterval(progressInterval);
       dispatch({ type: "SET_PROGRESS", payload: 100 });
       dispatch({ type: "SET_QR_DATA", payload: result.dataUrl });
       dispatch({ type: "SET_STATE", payload: "success" });
 
-      // Save to history if user is authenticated
+      // Save to history if user is authenticated (async, non-blocking)
       if (user) {
-        try {
-          // biome-ignore lint/suspicious/noExplicitAny: Convex mutation requires flexible object structure
-          const historyData: any = {
-            textContent: state.options.text,
-            qrSettings: {
-              size: state.options.size,
-              margin: state.options.margin,
-              errorCorrectionLevel: state.options.errorCorrectionLevel,
-              foreground: state.options.foreground,
-              background: state.options.background,
-              format: state.options.format,
-              logoUrl: state.options.logoUrl,
-              logoSize: state.options.logoSize,
-              logoBackground: state.options.logoBackground,
-            },
-          };
-
-          if (result.method) {
-            historyData.generationMethod = result.method;
-          }
-
-          if (result.browserInfo) {
-            historyData.browserInfo = result.browserInfo;
-          }
-
-          const saveResult = await saveToHistory(historyData) as QRHistorySaveResult;
-
-          // Handle duplicate QR response
-          if (saveResult && !saveResult.success && saveResult.isDuplicate) {
-            toast.info("QR code already exists in your history", {
-              description: "This QR code content has been generated before.",
-              duration: 4000,
-            });
-          } else {
-            toast.success("QR code generated and saved successfully!");
-          }
-        } catch (historyError) {
-          console.warn("Failed to save to history:", historyError);
-          toast.success("QR code generated successfully!");
-        }
-      } else {
-        toast.success("QR code generated successfully!");
+        // Don't await this to avoid blocking UI - run in background
+        saveToHistoryAsync(state.options, result).catch((error) => {
+          console.warn("Failed to save QR to history:", error);
+        });
       }
+
+      // Show success message immediately
+      toast.success("QR code generated successfully!");
     } catch (error) {
       dispatch({ type: "SET_STATE", payload: "error" });
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to generate QR code";
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate QR code";
       toast.error(errorMessage);
       dispatch({ type: "SET_QR_DATA", payload: "" });
     } finally {
@@ -277,7 +273,7 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
         dispatch({ type: "SET_STATE", payload: "idle" });
       }, 1000);
     }
-  }, [state.options, validateInput, user, saveToHistory]);
+  }, [state.options, validateInput, user, saveToHistoryAsync]);
 
   /**
    * Resets QR state
@@ -290,10 +286,10 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
    * Saves current options as preset
    */
   const savePreset = useCallback(
-    async (name: string): Promise<boolean> => {
+    (name: string): Promise<boolean> => {
       if (!name.trim()) {
         toast.error("Please enter a preset name");
-        return false;
+        return Promise.resolve(false);
       }
 
       try {
@@ -304,16 +300,16 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
 
         if (success) {
           toast.success(`Preset "${name}" saved successfully!`);
-          return true;
+          return Promise.resolve(true);
         }
         toast.error("Failed to save preset");
-        return false;
-      } catch (error) {
+        return Promise.resolve(false);
+      } catch (_error) {
         toast.error("Failed to save preset");
-        return false;
+        return Promise.resolve(false);
       }
     },
-    [state.options],
+    [state.options]
   );
 
   /**
@@ -324,24 +320,24 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
       setOptions(preset.options);
       toast.success(`Preset "${preset.name}" loaded successfully!`);
     },
-    [setOptions],
+    [setOptions]
   );
 
   /**
    * Deletes a preset
    */
-  const deletePreset = useCallback(async (id: string): Promise<boolean> => {
+  const deletePreset = useCallback((id: string): Promise<boolean> => {
     try {
       const success = storageService.deletePreset(id);
       if (success) {
         toast.success("Preset deleted successfully!");
-        return true;
+        return Promise.resolve(true);
       }
       toast.error("Failed to delete preset");
-      return false;
-    } catch (error) {
+      return Promise.resolve(false);
+    } catch (_error) {
       toast.error("Failed to delete preset");
-      return false;
+      return Promise.resolve(false);
     }
   }, []);
 
@@ -365,9 +361,7 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
     getPresets,
   };
 
-  return (
-    <QRContext.Provider value={contextValue}>{children}</QRContext.Provider>
-  );
+  return <QRContext.Provider value={contextValue}>{children}</QRContext.Provider>;
 }
 
 // Hook to use QR context

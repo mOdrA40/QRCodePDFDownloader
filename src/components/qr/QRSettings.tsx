@@ -19,9 +19,7 @@ interface QRSettingsProps {
 
 export function QRSettings({ className }: QRSettingsProps) {
   return (
-    <Card
-      className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}
-    >
+    <Card className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}>
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2">
           <Settings className="h-5 w-5 text-muted-foreground" />

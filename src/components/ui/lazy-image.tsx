@@ -51,10 +51,7 @@ export const LazyImage = memo(function LazyImage({
   };
 
   return (
-    <div
-      ref={ref}
-      className={cn("relative overflow-hidden bg-muted", containerClassName)}
-    >
+    <div ref={ref} className={cn("relative overflow-hidden bg-muted", containerClassName)}>
       {isIntersecting && (
         <Image
           src={hasError ? fallback : src}
@@ -67,16 +64,14 @@ export const LazyImage = memo(function LazyImage({
           className={cn(
             "transition-opacity duration-300",
             isLoaded ? "opacity-100" : "opacity-0",
-            className,
+            className
           )}
         />
       )}
 
       {!isLoaded && (
         <div className="absolute inset-0 flex items-center justify-center">
-          {placeholder || (
-            <div className="animate-pulse bg-muted-foreground/20 w-full h-full" />
-          )}
+          {placeholder || <div className="animate-pulse bg-muted-foreground/20 w-full h-full" />}
         </div>
       )}
     </div>

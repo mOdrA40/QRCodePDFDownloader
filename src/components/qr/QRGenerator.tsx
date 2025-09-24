@@ -6,9 +6,9 @@
 "use client";
 
 import { QrCode } from "lucide-react";
+import { AuthButton } from "@/components/auth/AuthButton";
 import { QuickActions } from "@/components/quick-actions";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { AuthButton } from "@/components/auth/AuthButton";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { UsageStats } from "@/components/usage-stats";
 import { useQRContext } from "@/contexts";
@@ -49,8 +49,8 @@ export function QRGenerator({ className }: QRGeneratorProps) {
               </h1>
             </div>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Create stunning QR codes and download them as beautiful PDFs with
-              advanced customization options
+              Create stunning QR codes and download them as beautiful PDFs with advanced
+              customization options
             </p>
           </div>
 

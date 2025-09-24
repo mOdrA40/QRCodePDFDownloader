@@ -8,13 +8,7 @@
 import { Image as ImageIcon, QrCode } from "lucide-react";
 import Image from "next/image";
 import { memo, type RefObject, useEffect, useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useQRContext } from "@/contexts";
 import { useIntersectionObserver } from "@/lib/performance";
@@ -24,11 +18,9 @@ interface QRPreviewProps {
   className?: string;
 }
 
-export const QRPreview = memo(function QRPreview({
-  className,
-}: QRPreviewProps) {
+export const QRPreview = memo(function QRPreview({ className }: QRPreviewProps) {
   const { state } = useQRContext();
-  const { options, isGenerating, progress } = state;
+  const { options, isGenerating, progress, qrDataUrl: contextQrDataUrl } = state;
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -37,9 +29,17 @@ export const QRPreview = memo(function QRPreview({
     boolean,
   ];
 
-  // Simple real-time QR preview (no database save)
+  // Use context QR data if available, otherwise generate preview
   useEffect(() => {
-    if (!options.text.trim() || !isIntersecting) {
+    // If context has QR data (from main generation), use it
+    if (contextQrDataUrl) {
+      setQrDataUrl(contextQrDataUrl);
+      setIsLoading(false);
+      return;
+    }
+
+    // Only generate preview if no context data and component is visible
+    if (!(options.text.trim() && isIntersecting)) {
       setQrDataUrl("");
       return;
     }
@@ -47,16 +47,21 @@ export const QRPreview = memo(function QRPreview({
     const generatePreview = async () => {
       setIsLoading(true);
       try {
-        const result = await qrService.generateQRCode(options.text, {
-          size: options.size,
-          margin: options.margin,
-          errorCorrectionLevel: options.errorCorrectionLevel,
-          color: {
-            dark: options.foreground,
-            light: options.background,
+        // Use cache for preview generation to avoid duplicate work
+        const result = await qrService.generateQRCode(
+          options.text,
+          {
+            size: Math.min(options.size, 256), // Smaller size for preview
+            margin: options.margin,
+            errorCorrectionLevel: options.errorCorrectionLevel,
+            color: {
+              dark: options.foreground,
+              light: options.background,
+            },
+            format: "png",
           },
-          format: "png",
-        });
+          true
+        ); // Enable cache
         setQrDataUrl(result.dataUrl);
       } catch (error) {
         console.error("QR preview generation failed:", error);
@@ -67,7 +72,7 @@ export const QRPreview = memo(function QRPreview({
     };
 
     // Debounce preview generation for better UX
-    const debounceTimer = setTimeout(generatePreview, 300);
+    const debounceTimer = setTimeout(generatePreview, 200); // Reduced debounce for faster response
     return () => clearTimeout(debounceTimer);
   }, [
     options.text,
@@ -77,13 +82,11 @@ export const QRPreview = memo(function QRPreview({
     options.foreground,
     options.background,
     isIntersecting,
+    contextQrDataUrl, // Add context data as dependency
   ]);
 
   return (
-    <Card
-      className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}
-      ref={ref}
-    >
+    <Card className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`} ref={ref}>
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2">
           <ImageIcon className="h-5 w-5 text-green-600" />
@@ -118,15 +121,15 @@ export const QRPreview = memo(function QRPreview({
             }}
           >
             {qrDataUrl && !isLoading ? (
-              <div className="flex items-center justify-center" data-qr-preview>
+              <div className="flex items-center justify-center" data-qr-preview={true}>
                 <Image
                   src={qrDataUrl}
                   alt="QR Code"
                   width={options.size}
                   height={options.size}
                   className="block max-w-full h-auto"
-                  priority
-                  unoptimized
+                  priority={true}
+                  unoptimized={true}
                 />
               </div>
             ) : options.text.trim() ? (
@@ -137,9 +140,7 @@ export const QRPreview = memo(function QRPreview({
             ) : (
               <div className="text-center text-slate-400">
                 <QrCode className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                <p className="text-lg font-medium">
-                  Enter text to generate QR code
-                </p>
+                <p className="text-lg font-medium">Enter text to generate QR code</p>
                 <p className="text-sm">Your QR code will appear here</p>
               </div>
             )}

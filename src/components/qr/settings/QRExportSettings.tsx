@@ -18,8 +18,8 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useQRContext, useSettingsContext } from "@/contexts";
-import { QR_FORMAT_INFO } from "@/utils/qr-content-utils";
 import type { QRImageFormat } from "@/types";
+import { QR_FORMAT_INFO } from "@/utils/qr-content-utils";
 
 export function QRExportSettings() {
   const { state, updateOption } = useQRContext();
@@ -41,9 +41,7 @@ export function QRExportSettings() {
         </div>
         <Select
           value={options.format}
-          onValueChange={(value: QRImageFormat) =>
-            updateOption("format", value)
-          }
+          onValueChange={(value: QRImageFormat) => updateOption("format", value)}
         >
           <SelectTrigger className="mt-2">
             <SelectValue />
@@ -69,8 +67,6 @@ export function QRExportSettings() {
         <p className="text-xs text-muted-foreground mt-1">
           PNG provides the best quality for most use cases.
         </p>
-
-
       </div>
 
       <div className="flex items-center space-x-2">
@@ -91,9 +87,7 @@ export function QRExportSettings() {
         <Switch
           id={enablePdfPasswordId}
           checked={options.enablePdfPassword ?? false}
-          onCheckedChange={(checked) =>
-            updateOption("enablePdfPassword", checked)
-          }
+          onCheckedChange={(checked) => updateOption("enablePdfPassword", checked)}
         />
         <Label htmlFor={enablePdfPasswordId} className="text-sm font-medium">
           Password Protect PDF

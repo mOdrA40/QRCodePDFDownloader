@@ -54,58 +54,26 @@ export class QRDataValidator {
     // Basic format validation
     if (!dataUrl || typeof dataUrl !== "string") {
       errors.push("Data URL is required and must be a string");
-      return this.createValidationResult(
-        false,
-        "",
-        "",
-        0,
-        true,
-        errors,
-        warnings,
-      );
+      return this.createValidationResult(false, "", "", 0, true, errors, warnings);
     }
 
     if (!dataUrl.startsWith("data:")) {
       errors.push('Invalid data URL format - must start with "data:"');
-      return this.createValidationResult(
-        false,
-        "",
-        "",
-        0,
-        true,
-        errors,
-        warnings,
-      );
+      return this.createValidationResult(false, "", "", 0, true, errors, warnings);
     }
 
     // Parse data URL
     const [header, base64Data] = dataUrl.split(",");
-    if (!header || !base64Data) {
+    if (!(header && base64Data)) {
       errors.push("Malformed data URL - missing header or data");
-      return this.createValidationResult(
-        false,
-        "",
-        "",
-        0,
-        true,
-        errors,
-        warnings,
-      );
+      return this.createValidationResult(false, "", "", 0, true, errors, warnings);
     }
 
     // Extract MIME type and format
     const mimeMatch = header.match(/data:([^;]+)/);
     if (!mimeMatch) {
       errors.push("Cannot extract MIME type from data URL");
-      return this.createValidationResult(
-        false,
-        "",
-        "",
-        0,
-        true,
-        errors,
-        warnings,
-      );
+      return this.createValidationResult(false, "", "", 0, true, errors, warnings);
     }
 
     const mimeType = mimeMatch[1] ?? "application/octet-stream";
@@ -121,7 +89,7 @@ export class QRDataValidator {
         0,
         true,
         errors,
-        warnings,
+        warnings
       );
     }
 
@@ -152,7 +120,7 @@ export class QRDataValidator {
       size,
       isCorrupted,
       errors,
-      warnings,
+      warnings
     );
   }
 
@@ -161,7 +129,7 @@ export class QRDataValidator {
    */
   public async convertForPDF(
     dataUrl: string,
-    options: ConversionOptions = {},
+    options: ConversionOptions = {}
   ): Promise<ConversionResult> {
     try {
       // Validate input first
@@ -221,8 +189,7 @@ export class QRDataValidator {
         originalFormat: "",
         size: 0,
         conversionMethod: "conversion-failed",
-        error:
-          error instanceof Error ? error.message : "Unknown conversion error",
+        error: error instanceof Error ? error.message : "Unknown conversion error",
       };
     }
   }
@@ -233,7 +200,7 @@ export class QRDataValidator {
   private async convertToPNG(
     dataUrl: string,
     validation: DataURLValidationResult,
-    _options: ConversionOptions,
+    _options: ConversionOptions
   ): Promise<ConversionResult> {
     if (typeof window === "undefined") {
       // Server-side conversion not available, fallback to PNG
@@ -246,12 +213,7 @@ export class QRDataValidator {
         const ctx = canvas.getContext("2d");
 
         if (!ctx) {
-          resolve(
-            this.createFailedResult(
-              "Canvas context not available",
-              validation.format,
-            ),
-          );
+          resolve(this.createFailedResult("Canvas context not available", validation.format));
           return;
         }
 
@@ -287,34 +249,24 @@ export class QRDataValidator {
               resolve(
                 this.createFailedResult(
                   "PNG conversion resulted in corrupted data",
-                  validation.format,
-                ),
+                  validation.format
+                )
               );
             }
           } catch (error) {
             resolve(
-              this.createFailedResult(
-                `Canvas conversion failed: ${error}`,
-                validation.format,
-              ),
+              this.createFailedResult(`Canvas conversion failed: ${error}`, validation.format)
             );
           }
         };
 
         img.onerror = () => {
-          resolve(
-            this.createFailedResult("Image loading failed", validation.format),
-          );
+          resolve(this.createFailedResult("Image loading failed", validation.format));
         };
 
         img.src = dataUrl;
       } catch (error) {
-        resolve(
-          this.createFailedResult(
-            `PNG conversion failed: ${error}`,
-            validation.format,
-          ),
-        );
+        resolve(this.createFailedResult(`PNG conversion failed: ${error}`, validation.format));
       }
     });
   }
@@ -325,7 +277,7 @@ export class QRDataValidator {
   private async convertToJPEG(
     dataUrl: string,
     validation: DataURLValidationResult,
-    _options: ConversionOptions,
+    _options: ConversionOptions
   ): Promise<ConversionResult> {
     if (typeof window === "undefined") {
       return await this.convertToPNGFallback(dataUrl);
@@ -377,14 +329,10 @@ export class QRDataValidator {
     });
   }
 
-
-
   /**
    * Ultimate fallback to PNG
    */
-  private async convertToPNGFallback(
-    _dataUrl: string,
-  ): Promise<ConversionResult> {
+  private convertToPNGFallback(_dataUrl: string): Promise<ConversionResult> {
     try {
       // Create a simple canvas with error message
       const canvas = document.createElement("canvas");
@@ -417,18 +365,17 @@ export class QRDataValidator {
 
       const pngDataUrl = canvas.toDataURL("image/png");
 
-      return {
+      return Promise.resolve({
         success: true,
         dataUrl: pngDataUrl,
         format: "png",
         originalFormat: "unknown",
         size: pngDataUrl.length,
         conversionMethod: "error-fallback",
-      };
+      });
     } catch (error) {
-      return this.createFailedResult(
-        `Fallback conversion failed: ${error}`,
-        "unknown",
+      return Promise.resolve(
+        this.createFailedResult(`Fallback conversion failed: ${error}`, "unknown")
       );
     }
   }
@@ -444,7 +391,7 @@ export class QRDataValidator {
   private isValidBase64(str: string): boolean {
     try {
       return btoa(atob(str)) === str;
-    } catch (err) {
+    } catch (_err) {
       return false;
     }
   }
@@ -456,8 +403,7 @@ export class QRDataValidator {
   private detectCorruption(base64Data: string, format: string): boolean {
     // Basic corruption detection
     if (base64Data.length < 100) return true; // Too small
-    if (base64Data.includes("undefined") || base64Data.includes("null"))
-      return true;
+    if (base64Data.includes("undefined") || base64Data.includes("null")) return true;
 
     // Format-specific checks
     if (format === "png") {
@@ -475,7 +421,7 @@ export class QRDataValidator {
 
   private validateFormatSpecific(
     _base64Data: string,
-    format: string,
+    format: string
   ): { errors: string[]; warnings: string[] } {
     const errors: string[] = [];
     const warnings: string[] = [];
@@ -488,8 +434,6 @@ export class QRDataValidator {
     return { errors, warnings };
   }
 
-
-
   private createValidationResult(
     isValid: boolean,
     format: string,
@@ -497,15 +441,12 @@ export class QRDataValidator {
     size: number,
     isCorrupted: boolean,
     errors: string[],
-    warnings: string[],
+    warnings: string[]
   ): DataURLValidationResult {
     return { isValid, format, mimeType, size, isCorrupted, errors, warnings };
   }
 
-  private createFailedResult(
-    error: string,
-    originalFormat: string,
-  ): ConversionResult {
+  private createFailedResult(error: string, originalFormat: string): ConversionResult {
     return {
       success: false,
       dataUrl: "",
@@ -516,8 +457,6 @@ export class QRDataValidator {
       error,
     };
   }
-
-
 }
 
 // Export singleton instance

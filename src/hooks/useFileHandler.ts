@@ -38,7 +38,7 @@ interface UseFileHandlerReturn {
 
 export function useFileHandler(
   onTextExtracted?: (text: string) => void,
-  maxFiles = 1,
+  maxFiles = 1
 ): UseFileHandlerReturn {
   const [dragDropState, setDragDropState] = useState<DragDropState>({
     isDragOver: false,
@@ -47,8 +47,7 @@ export function useFileHandler(
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
-  const [lastProcessedFile, setLastProcessedFile] =
-    useState<FileProcessingResult | null>(null);
+  const [lastProcessedFile, setLastProcessedFile] = useState<FileProcessingResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const dragCounter = useRef(0);
@@ -165,7 +164,7 @@ export function useFileHandler(
       setIsProcessing(false);
       return results;
     },
-    [onTextExtracted, validateFile],
+    [onTextExtracted, validateFile]
   );
 
   /**
@@ -213,7 +212,7 @@ export function useFileHandler(
         draggedFiles: [],
       }));
     },
-    [maxFiles, onTextExtracted, processFiles],
+    [maxFiles, onTextExtracted, processFiles]
   );
 
   /**
@@ -228,9 +227,7 @@ export function useFileHandler(
         if (result.success) {
           const formatName = options.format.toUpperCase();
           toast.success(`${formatName} file downloaded successfully!`, {
-            description: result.filename
-              ? `File: ${result.filename}`
-              : undefined,
+            description: result.filename ? `File: ${result.filename}` : undefined,
             duration: 3000,
           });
         } else {
@@ -251,7 +248,7 @@ export function useFileHandler(
         };
       }
     },
-    [],
+    []
   );
 
   /**

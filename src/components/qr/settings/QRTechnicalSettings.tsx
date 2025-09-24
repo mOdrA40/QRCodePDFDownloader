@@ -41,9 +41,7 @@ export function QRTechnicalSettings() {
       <div>
         <Label className="text-sm font-medium mb-2 block">
           Size: {options.size}px
-          <span className="text-xs text-muted-foreground ml-2">
-            ({getSizeLabel(options.size)})
-          </span>
+          <span className="text-xs text-muted-foreground ml-2">({getSizeLabel(options.size)})</span>
         </Label>
         <Slider
           value={[options.size]}
@@ -68,9 +66,7 @@ export function QRTechnicalSettings() {
             variant="outline"
             size="sm"
             onClick={() => handleSizePresetClick(256)}
-            className={
-              options.size === 256 ? "bg-primary text-primary-foreground" : ""
-            }
+            className={options.size === 256 ? "bg-primary text-primary-foreground" : ""}
           >
             Small
           </Button>
@@ -79,9 +75,7 @@ export function QRTechnicalSettings() {
             variant="outline"
             size="sm"
             onClick={() => handleSizePresetClick(512)}
-            className={
-              options.size === 512 ? "bg-primary text-primary-foreground" : ""
-            }
+            className={options.size === 512 ? "bg-primary text-primary-foreground" : ""}
           >
             Medium
           </Button>
@@ -90,9 +84,7 @@ export function QRTechnicalSettings() {
             variant="outline"
             size="sm"
             onClick={() => handleSizePresetClick(768)}
-            className={
-              options.size === 768 ? "bg-primary text-primary-foreground" : ""
-            }
+            className={options.size === 768 ? "bg-primary text-primary-foreground" : ""}
           >
             Large
           </Button>
@@ -101,9 +93,7 @@ export function QRTechnicalSettings() {
             variant="outline"
             size="sm"
             onClick={() => handleSizePresetClick(1024)}
-            className={
-              options.size === 1024 ? "bg-primary text-primary-foreground" : ""
-            }
+            className={options.size === 1024 ? "bg-primary text-primary-foreground" : ""}
           >
             XL
           </Button>
@@ -111,9 +101,7 @@ export function QRTechnicalSettings() {
       </div>
 
       <div>
-        <Label className="text-sm font-medium mb-2 block">
-          Margin: {options.margin}
-        </Label>
+        <Label className="text-sm font-medium mb-2 block">Margin: {options.margin}</Label>
         <Slider
           value={[options.margin]}
           onValueChange={(value) => updateOption("margin", value[0] ?? 4)}
@@ -147,9 +135,7 @@ export function QRTechnicalSettings() {
       </div>
 
       <div>
-        <Label className="text-sm font-medium mb-2 block">
-          Logo Size: {options.logoSize}px
-        </Label>
+        <Label className="text-sm font-medium mb-2 block">Logo Size: {options.logoSize}px</Label>
         <Slider
           value={[options.logoSize || 60]}
           onValueChange={(value) => updateOption("logoSize", value[0])}

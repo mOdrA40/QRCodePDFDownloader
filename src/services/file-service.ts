@@ -18,13 +18,7 @@ export class FileService {
   // Default configuration
   private readonly defaultConfig: FileUploadConfig = {
     maxSize: 10 * 1024 * 1024, // 10MB
-    allowedTypes: [
-      "text/plain",
-      "application/json",
-      "text/csv",
-      "text/xml",
-      "text/html",
-    ],
+    allowedTypes: ["text/plain", "application/json", "text/csv", "text/xml", "text/html"],
     maxFiles: 1,
   };
 
@@ -38,10 +32,7 @@ export class FileService {
   /**
    * Validates uploaded file against security rules
    */
-  public validateFile(
-    file: File,
-    config?: Partial<FileUploadConfig>,
-  ): FileValidationResult {
+  public validateFile(file: File, config?: Partial<FileUploadConfig>): FileValidationResult {
     const finalConfig = { ...this.defaultConfig, ...config };
     const errors: string[] = [];
     const warnings: string[] = [];
@@ -49,7 +40,7 @@ export class FileService {
     // Size validation
     if (file.size > finalConfig.maxSize) {
       errors.push(
-        `File size (${this.formatFileSize(file.size)}) exceeds maximum allowed size (${this.formatFileSize(finalConfig.maxSize)})`,
+        `File size (${this.formatFileSize(file.size)}) exceeds maximum allowed size (${this.formatFileSize(finalConfig.maxSize)})`
       );
     }
 
@@ -119,8 +110,7 @@ export class FileService {
     } catch (error) {
       return {
         success: false,
-        error:
-          error instanceof Error ? error.message : "File processing failed",
+        error: error instanceof Error ? error.message : "File processing failed",
         fileInfo: {
           name: file.name,
           size: file.size,
@@ -164,14 +154,9 @@ export class FileService {
   /**
    * Downloads data as file with proper security measures
    */
-  public downloadFile(
-    data: string | Blob,
-    options: DownloadOptions,
-  ): ExportResult {
+  public downloadFile(data: string | Blob, options: DownloadOptions): ExportResult {
     try {
-      const filename = this.sanitizeFilename(
-        options.filename || `download-${Date.now()}`,
-      );
+      const filename = this.sanitizeFilename(options.filename || `download-${Date.now()}`);
       let blob: Blob;
 
       if (typeof data === "string") {
@@ -254,9 +239,7 @@ export class FileService {
       .filter((char) => {
         const code = char.charCodeAt(0);
         // Allow newline (10), tab (9), and printable characters (32-126)
-        return (
-          code === 9 || code === 10 || (code >= 32 && code <= 126) || code > 127
-        );
+        return code === 9 || code === 10 || (code >= 32 && code <= 126) || code > 127;
       })
       .join("");
 

@@ -7,16 +7,18 @@
 
 import { useAuth0 } from "@auth0/auth0-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CallbackErrorBoundary } from "@/components/auth/CallbackErrorBoundary";
-import { isValidAuthCallback, getCallbackError } from "@/utils/auth-cleanup";
-import { suppressAuth0Errors, restoreConsoleError } from "@/utils/auth0-error-suppressor";
+import { getCallbackError, isValidAuthCallback } from "@/utils/auth-cleanup";
+import { restoreConsoleError, suppressAuth0Errors } from "@/utils/auth0-error-suppressor";
 
 function CallbackPageContent() {
   const { isLoading, error, isAuthenticated, handleRedirectCallback } = useAuth0();
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(true);
-  const [progressStage, setProgressStage] = useState<'initializing' | 'processing' | 'completing'>('initializing');
+  const [progressStage, setProgressStage] = useState<"initializing" | "processing" | "completing">(
+    "initializing"
+  );
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hasProcessedRef = useRef(false);
 
@@ -28,7 +30,7 @@ function CallbackPageContent() {
 
       try {
         console.log("Processing Auth0 callback...");
-        setProgressStage('processing');
+        setProgressStage("processing");
 
         // Activate error suppression for Auth0 errors
         suppressAuth0Errors();
@@ -77,10 +79,12 @@ function CallbackPageContent() {
 
               // Suppress specific Auth0 errors
               console.error = (...args: unknown[]) => {
-                const message = args.join(' ');
-                if (message.includes('Invalid state') ||
-                    message.includes('state mismatch') ||
-                    message.includes('invalid_request')) {
+                const message = args.join(" ");
+                if (
+                  message.includes("Invalid state") ||
+                  message.includes("state mismatch") ||
+                  message.includes("invalid_request")
+                ) {
                   // Silently ignore these errors
                   return;
                 }
@@ -96,7 +100,7 @@ function CallbackPageContent() {
                   console.error = originalConsoleError;
                 }, 100);
 
-                if (result && typeof result.then === 'function') {
+                if (result && typeof result.then === "function") {
                   result
                     .then(() => {
                       console.error = originalConsoleError;
@@ -108,9 +112,11 @@ function CallbackPageContent() {
                       const errorMessage = error instanceof Error ? error.message : String(error);
                       const errorObj = error as { error?: string; message?: string };
 
-                      if (errorMessage.includes('Invalid state') ||
-                          errorMessage.includes('state mismatch') ||
-                          errorObj?.error === 'invalid_request') {
+                      if (
+                        errorMessage.includes("Invalid state") ||
+                        errorMessage.includes("state mismatch") ||
+                        errorObj?.error === "invalid_request"
+                      ) {
                         // Silently resolve instead of rejecting
                         console.log("Auth0 error silently handled:", errorMessage);
                         resolve();
@@ -127,9 +133,11 @@ function CallbackPageContent() {
                 const errorMessage = error instanceof Error ? error.message : String(error);
                 const errorObj = error as { error?: string; message?: string };
 
-                if (errorMessage.includes('Invalid state') ||
-                    errorMessage.includes('state mismatch') ||
-                    errorObj?.error === 'invalid_request') {
+                if (
+                  errorMessage.includes("Invalid state") ||
+                  errorMessage.includes("state mismatch") ||
+                  errorObj?.error === "invalid_request"
+                ) {
                   // Silently resolve instead of rejecting
                   console.log("Auth0 error silently handled:", errorMessage);
                   resolve();
@@ -143,7 +151,6 @@ function CallbackPageContent() {
           console.log("Attempting handleRedirectCallback with silent error handling...");
           await silentHandleRedirectCallback();
           console.log("Callback processed successfully (or silently handled)");
-
         } catch (callbackError: unknown) {
           console.error("Unhandled callback error:", callbackError);
 
@@ -156,13 +163,12 @@ function CallbackPageContent() {
         }
 
         // Wait a moment for auth state to update with cleanup
-        setProgressStage('completing');
+        setProgressStage("completing");
         timeoutRef.current = setTimeout(() => {
           setIsProcessing(false);
           // Restore console error after processing
           restoreConsoleError();
         }, 1000);
-
       } catch (err) {
         console.error("Callback processing error:", err);
         setIsProcessing(false);
@@ -171,7 +177,7 @@ function CallbackPageContent() {
       }
     };
 
-    if (!isLoading && !hasProcessedRef.current) {
+    if (!(isLoading || hasProcessedRef.current)) {
       processCallback();
     }
 
@@ -184,7 +190,7 @@ function CallbackPageContent() {
   }, [isLoading, handleRedirectCallback, router]);
 
   useEffect(() => {
-    if (!isLoading && !isProcessing) {
+    if (!(isLoading || isProcessing)) {
       console.log("Auth state:", { isAuthenticated, error });
 
       // Use a small delay to ensure smooth navigation
@@ -199,7 +205,7 @@ function CallbackPageContent() {
           const returnTo = urlParams.get("returnTo");
 
           // Avoid redirecting back to callback or login pages
-          if (returnTo && returnTo !== '/auth/callback' && returnTo !== '/auth/login') {
+          if (returnTo && returnTo !== "/auth/callback" && returnTo !== "/auth/login") {
             router.replace(returnTo);
           } else {
             router.replace("/");
@@ -208,7 +214,7 @@ function CallbackPageContent() {
           console.log("User not authenticated after callback processing, redirecting to home...");
           router.replace("/");
         }
-      }, 500); 
+      }, 500);
 
       return () => clearTimeout(navigationTimeout);
     }
@@ -225,25 +231,25 @@ function CallbackPageContent() {
             Completing Authentication
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            {progressStage === 'initializing' && "Initializing..."}
-            {progressStage === 'processing' && "Processing your login..."}
-            {progressStage === 'completing' && "Almost done..."}
+            {progressStage === "initializing" && "Initializing..."}
+            {progressStage === "processing" && "Processing your login..."}
+            {progressStage === "completing" && "Almost done..."}
           </p>
 
           {/* Smooth Progress Bar */}
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-4 overflow-hidden shadow-inner">
             <div
               className={`bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full progress-bar-smooth auth-progress-pulse ${
-                progressStage === 'initializing' ? 'w-1/4' :
-                progressStage === 'processing' ? 'w-3/5' :
-                'auth-progress-complete'
+                progressStage === "initializing"
+                  ? "w-1/4"
+                  : progressStage === "processing"
+                    ? "w-3/5"
+                    : "auth-progress-complete"
               }`}
-            ></div>
+            />
           </div>
 
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            This should only take a moment
-          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">This should only take a moment</p>
         </div>
       </div>
     );

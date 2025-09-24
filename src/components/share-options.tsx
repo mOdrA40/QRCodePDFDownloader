@@ -27,9 +27,7 @@ export const ShareOptions = memo(function ShareOptions({
   const shareToEmail = useCallback(() => {
     const subject = "QR Code Generated";
     const body = `Check out this QR code I generated! It contains: ${qrText}\n\nGenerated with QR PDF Generator`;
-    window.open(
-      `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
-    );
+    window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
     toast.success("Email client opened!");
   }, [qrText]);
 
@@ -43,7 +41,7 @@ export const ShareOptions = memo(function ShareOptions({
     try {
       await navigator.clipboard.writeText(qrText);
       toast.success("QR code content copied to clipboard!");
-    } catch (err) {
+    } catch (_err) {
       // Fallback for older browsers
       try {
         const textArea = document.createElement("textarea");
@@ -53,7 +51,7 @@ export const ShareOptions = memo(function ShareOptions({
         document.execCommand("copy");
         document.body.removeChild(textArea);
         toast.success("QR code content copied to clipboard!");
-      } catch (fallbackErr) {
+      } catch (_fallbackErr) {
         toast.error("Failed to copy to clipboard");
       }
     }
@@ -80,11 +78,11 @@ export const ShareOptions = memo(function ShareOptions({
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
+      <DialogTrigger asChild={true}>
         <Button
           variant="outline"
           className={`w-full ${className || ""}`}
-          disabled={!qrDataUrl || !qrText.trim()}
+          disabled={!(qrDataUrl && qrText.trim())}
         >
           <Share2 className="h-4 w-4 mr-2" />
           Share QR Code

@@ -87,9 +87,7 @@ export function QRPresetSettings() {
                 className="flex items-center justify-between p-2 border rounded-md bg-slate-50 dark:bg-slate-800"
               >
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm font-medium truncate block">
-                    {preset.name}
-                  </span>
+                  <span className="text-sm font-medium truncate block">{preset.name}</span>
                   <span className="text-xs text-muted-foreground">
                     {new Date(preset.createdAt).toLocaleDateString()}
                   </span>
@@ -118,9 +116,7 @@ export function QRPresetSettings() {
         ) : (
           <div className="text-center py-8 border-2 border-dashed border-muted rounded-lg">
             <Star className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
-              No saved presets yet
-            </p>
+            <p className="text-sm text-muted-foreground">No saved presets yet</p>
             <p className="text-xs text-muted-foreground mt-1">
               Save your current configuration above
             </p>

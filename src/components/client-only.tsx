@@ -48,10 +48,7 @@ export function useIsClient() {
  * Hook for safe access to browser APIs
  * Returns null on server-side, actual value on client-side
  */
-export function useBrowserAPI<T>(
-  getAPI: () => T,
-  fallback: T | null = null,
-): T | null {
+export function useBrowserAPI<T>(getAPI: () => T, fallback: T | null = null): T | null {
   const [api, setApi] = useState<T | null>(fallback);
   const isClient = useIsClient();
 

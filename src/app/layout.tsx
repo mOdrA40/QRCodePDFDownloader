@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "@/styles/globals/index.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { ConvexClientProvider } from "./ConvexClientProvider";
 import ClientBody from "./ClientBody";
+import { ConvexClientProvider } from "./ConvexClientProvider";
 
 export const metadata: Metadata = {
   title: "QR PDF Generator - Professional QR Code & PDF Creator",
@@ -27,20 +27,16 @@ export const viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning={true}>
       <body className="antialiased">
         <ConvexClientProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
+            enableSystem={true}
+            disableTransitionOnChange={true}
           >
             <ClientBody>
               {children}

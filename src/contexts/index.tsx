@@ -7,11 +7,7 @@
 
 import type React from "react";
 import { QRProvider, useQRContext } from "./QRContext";
-import {
-  getColorThemes,
-  SettingsProvider,
-  useSettingsContext,
-} from "./SettingsContext";
+import { getColorThemes, SettingsProvider, useSettingsContext } from "./SettingsContext";
 
 // Combined provider component
 interface AppProvidersProps {

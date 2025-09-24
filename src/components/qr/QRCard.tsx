@@ -5,18 +5,11 @@
 
 "use client";
 
+import { Calendar, Copy, Download, MoreHorizontal, QrCode, Trash2 } from "lucide-react";
 import { memo } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Download, 
-  Trash2, 
-  Copy, 
-  Calendar,
-  QrCode,
-  MoreHorizontal
-} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,16 +40,20 @@ export const QRCard = memo(function QRCard({
   onCopyText,
   onDownload,
   onDelete,
-  isDeleting = false
+  isDeleting = false,
 }: QRCardProps) {
   return (
-    <Card className={`hover:shadow-md transition-all duration-300 ${styles.qrCard} h-full ${
-      isDeleting ? 'opacity-50 pointer-events-none' : ''
-    }`}>
+    <Card
+      className={`hover:shadow-md transition-all duration-300 ${styles.qrCard} h-full ${
+        isDeleting ? "opacity-50 pointer-events-none" : ""
+      }`}
+    >
       <CardContent className="p-3 xs:p-4">
         <div className={styles.qrCardContent}>
           {/* QR Preview Placeholder */}
-          <div className={`bg-muted rounded-lg flex items-center justify-center ${styles.qrPreview}`}>
+          <div
+            className={`bg-muted rounded-lg flex items-center justify-center ${styles.qrPreview}`}
+          >
             <QrCode className="h-6 w-6 xs:h-8 xs:w-8 text-muted-foreground" />
           </div>
 
@@ -79,9 +76,7 @@ export const QRCard = memo(function QRCard({
                   <Calendar className="h-3 w-3" />
                   {new Date(qr.createdAt).toLocaleDateString()}
                 </span>
-                <span className={styles.qrMetaItem}>
-                  {qr.qrSettings.size}px
-                </span>
+                <span className={styles.qrMetaItem}>{qr.qrSettings.size}px</span>
               </div>
               <div className={styles.qrMetaRow}>
                 <span className={styles.qrMetaItem}>
@@ -94,7 +89,7 @@ export const QRCard = memo(function QRCard({
           {/* Actions */}
           <div className={styles.qrActions}>
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+              <DropdownMenuTrigger asChild={true}>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0 xs:h-9 xs:w-9">
                   <MoreHorizontal className="h-3 w-3 xs:h-4 xs:w-4" />
                 </Button>
@@ -108,10 +103,7 @@ export const QRCard = memo(function QRCard({
                   <Download className="h-4 w-4 mr-2" />
                   Download
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => onDelete(qr._id)}
-                  className="text-red-600"
-                >
+                <DropdownMenuItem onClick={() => onDelete(qr._id)} className="text-red-600">
                   <Trash2 className="h-4 w-4 mr-2" />
                   Delete
                 </DropdownMenuItem>

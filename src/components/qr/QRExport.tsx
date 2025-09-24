@@ -10,13 +10,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ShareOptions } from "@/components/share-options";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -37,9 +31,9 @@ export function QRExport({ className }: QRExportProps) {
   const { qrDataUrl, options, isGenerating } = state;
 
   // Fix hydration mismatch by initializing state after mount
-  const [selectedTheme, setSelectedTheme] = useState<
-    "modern" | "elegant" | "professional" | null
-  >(null);
+  const [selectedTheme, setSelectedTheme] = useState<"modern" | "elegant" | "professional" | null>(
+    null
+  );
   const [isMounted, setIsMounted] = useState(false);
   const themes = [
     {
@@ -68,9 +62,7 @@ export function QRExport({ className }: QRExportProps) {
     setIsMounted(true);
   }, []);
 
-  const downloadPDF = async (
-    theme: "modern" | "elegant" | "professional" = "modern"
-  ) => {
+  const downloadPDF = async (theme: "modern" | "elegant" | "professional" = "modern") => {
     if (!qrDataUrl) {
       toast.error("Please generate a QR code first");
       return;
@@ -80,9 +72,7 @@ export function QRExport({ className }: QRExportProps) {
     await performPDFDownload(theme);
   };
 
-  const performPDFDownload = async (
-    theme: "modern" | "elegant" | "professional"
-  ) => {
+  const performPDFDownload = async (theme: "modern" | "elegant" | "professional") => {
     try {
       const pdfOptions: {
         title: string;
@@ -101,21 +91,17 @@ export function QRExport({ className }: QRExportProps) {
         pdfOptions.password = options.pdfPassword;
       }
 
-      const result = await pdfService.generatePDF(
-        qrDataUrl,
-        options.text,
-        pdfOptions
-      );
+      const result = await pdfService.generatePDF(qrDataUrl, options.text, pdfOptions);
 
-      if (!result.success) {
-        toast.error(result.error || "Failed to generate PDF");
-      } else {
+      if (result.success) {
         toast.success("PDF generated successfully!", {
           description: `Theme: ${theme.charAt(0).toUpperCase() + theme.slice(1)} | Type: ${result.contentType || "Unknown"}`,
           duration: 4000,
         });
+      } else {
+        toast.error(result.error || "Failed to generate PDF");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to generate PDF");
     }
   };
@@ -137,17 +123,13 @@ export function QRExport({ className }: QRExportProps) {
   };
 
   return (
-    <Card
-      className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}
-    >
+    <Card className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}>
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2">
           <Download className="h-5 w-5 text-purple-600" />
           Download Options
         </CardTitle>
-        <CardDescription>
-          Export your QR code in different formats
-        </CardDescription>
+        <CardDescription>Export your QR code in different formats</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Theme Selection */}
@@ -173,9 +155,7 @@ export function QRExport({ className }: QRExportProps) {
                       <div className={`w-3 h-3 rounded-full ${theme.color}`} />
                       <div>
                         <div className="font-medium">{theme.label}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {theme.description}
-                        </div>
+                        <div className="text-xs text-muted-foreground">{theme.description}</div>
                       </div>
                     </div>
                   </SelectItem>
@@ -191,7 +171,7 @@ export function QRExport({ className }: QRExportProps) {
         <div className="grid grid-cols-1 gap-3">
           <Button
             onClick={() => downloadPDF(selectedTheme || "modern")}
-            disabled={!qrDataUrl || !isMounted}
+            disabled={!(qrDataUrl && isMounted)}
             className="h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white cursor-pointer relative z-10"
             type="button"
           >
@@ -199,9 +179,7 @@ export function QRExport({ className }: QRExportProps) {
               <FileText className="h-5 w-5" />
               <span className="font-medium">Download as PDF</span>
               {options.enablePdfPassword && (
-                <span className="text-xs bg-white/20 px-2 py-1 rounded">
-                  🔒 Protected
-                </span>
+                <span className="text-xs bg-white/20 px-2 py-1 rounded">🔒 Protected</span>
               )}
             </div>
           </Button>
@@ -246,9 +224,7 @@ export function QRExport({ className }: QRExportProps) {
           <div className="text-xs text-muted-foreground space-y-1">
             <div className="flex justify-between">
               <span>Format:</span>
-              <span className="font-medium">
-                {options.format.toUpperCase()}
-              </span>
+              <span className="font-medium">{options.format.toUpperCase()}</span>
             </div>
             <div className="flex justify-between">
               <span>Size:</span>
@@ -258,16 +234,12 @@ export function QRExport({ className }: QRExportProps) {
             </div>
             <div className="flex justify-between">
               <span>Error Correction:</span>
-              <span className="font-medium">
-                {options.errorCorrectionLevel}
-              </span>
+              <span className="font-medium">{options.errorCorrectionLevel}</span>
             </div>
             {qrDataUrl && (
               <div className="flex justify-between">
                 <span>Status:</span>
-                <span className="font-medium text-green-600">
-                  Ready to download
-                </span>
+                <span className="font-medium text-green-600">Ready to download</span>
               </div>
             )}
           </div>

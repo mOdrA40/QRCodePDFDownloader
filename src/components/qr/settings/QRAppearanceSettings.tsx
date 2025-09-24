@@ -9,11 +9,7 @@ import { useId } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getColorThemes, useQRContext } from "@/contexts";
 
 export function QRAppearanceSettings() {
@@ -35,13 +31,11 @@ export function QRAppearanceSettings() {
         <div className="grid grid-cols-3 gap-2">
           {presetColors.map((preset) => (
             <Tooltip key={preset.name}>
-              <TooltipTrigger asChild>
+              <TooltipTrigger asChild={true}>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() =>
-                    handleColorPresetClick(preset.foreground, preset.background)
-                  }
+                  onClick={() => handleColorPresetClick(preset.foreground, preset.background)}
                   className="h-12 p-1"
                 >
                   <div
@@ -76,14 +70,14 @@ export function QRAppearanceSettings() {
               value={options.foreground}
               onChange={(e) => updateOption("foreground", e.target.value)}
               className="w-12 h-10 p-1 border rounded"
-              suppressHydrationWarning
+              suppressHydrationWarning={true}
             />
             <Input
               value={options.foreground}
               onChange={(e) => updateOption("foreground", e.target.value)}
               className="flex-1"
               placeholder="#000000"
-              suppressHydrationWarning
+              suppressHydrationWarning={true}
             />
           </div>
         </div>
@@ -99,14 +93,14 @@ export function QRAppearanceSettings() {
               value={options.background}
               onChange={(e) => updateOption("background", e.target.value)}
               className="w-12 h-10 p-1 border rounded"
-              suppressHydrationWarning
+              suppressHydrationWarning={true}
             />
             <Input
               value={options.background}
               onChange={(e) => updateOption("background", e.target.value)}
               className="flex-1"
               placeholder="#ffffff"
-              suppressHydrationWarning
+              suppressHydrationWarning={true}
             />
           </div>
         </div>

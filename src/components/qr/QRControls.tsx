@@ -9,13 +9,7 @@ import { FileText, Zap } from "lucide-react";
 import { useId } from "react";
 import { DragDropZone } from "@/components/drag-drop-zone";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -47,17 +41,13 @@ export function QRControls({ className }: QRControlsProps) {
   };
 
   return (
-    <Card
-      className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}
-    >
+    <Card className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}>
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2">
           <FileText className="h-5 w-5 text-blue-600" />
           Content & Text
         </CardTitle>
-        <CardDescription>
-          Enter the text or URL you want to encode in your QR code
-        </CardDescription>
+        <CardDescription>Enter the text or URL you want to encode in your QR code</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
@@ -70,7 +60,7 @@ export function QRControls({ className }: QRControlsProps) {
             value={state.options.text}
             onChange={(e) => handleTextChange(e.target.value)}
             className="mt-2 min-h-[100px] resize-none"
-            suppressHydrationWarning
+            suppressHydrationWarning={true}
           />
 
           {/* Generate QR Button - Explicit user action */}
@@ -91,9 +81,7 @@ export function QRControls({ className }: QRControlsProps) {
         </div>
 
         <div>
-          <Label className="text-sm font-medium mb-2 block">
-            Quick Samples
-          </Label>
+          <Label className="text-sm font-medium mb-2 block">Quick Samples</Label>
           <div className="flex flex-wrap gap-2">
             {sampleTexts.map((sample) => (
               <Button
@@ -120,7 +108,7 @@ export function QRControls({ className }: QRControlsProps) {
             value={state.options.logoUrl}
             onChange={(e) => handleLogoUrlChange(e.target.value)}
             className="mt-2"
-            suppressHydrationWarning
+            suppressHydrationWarning={true}
           />
         </div>
 

@@ -8,11 +8,7 @@
  * @module
  */
 
-import type {
-  ApiFromModules,
-  FilterApi,
-  FunctionReference,
-} from "convex/server";
+import type { ApiFromModules, FilterApi, FunctionReference } from "convex/server";
 import type * as qrHistory from "../qrHistory.js";
 import type * as userPreferences from "../userPreferences.js";
 
@@ -28,11 +24,5 @@ declare const fullApi: ApiFromModules<{
   qrHistory: typeof qrHistory;
   userPreferences: typeof userPreferences;
 }>;
-export declare const api: FilterApi<
-  typeof fullApi,
-  FunctionReference<any, "public">
->;
-export declare const internal: FilterApi<
-  typeof fullApi,
-  FunctionReference<any, "internal">
->;
+export declare const api: FilterApi<typeof fullApi, FunctionReference<any, "public">>;
+export declare const internal: FilterApi<typeof fullApi, FunctionReference<any, "internal">>;

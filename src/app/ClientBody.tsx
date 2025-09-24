@@ -2,11 +2,7 @@
 
 import { useEffect } from "react";
 
-export default function ClientBody({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function ClientBody({ children }: { children: React.ReactNode }) {
   // Ensure proper scrolling behavior
   useEffect(() => {
     // This runs only on the client after hydration

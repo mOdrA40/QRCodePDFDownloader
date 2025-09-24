@@ -10,8 +10,8 @@ import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithAuth0 } from "convex/react-auth0";
 import type { ReactNode } from "react";
 import { AuthRecovery } from "@/components/auth/AuthRecovery";
-import "@/utils/authDebug"; 
-import "@/utils/auth0-error-suppressor"; 
+import "@/utils/authDebug";
+import "@/utils/auth0-error-suppressor";
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL || "");
 
@@ -25,14 +25,14 @@ const onRedirectCallback = (appState?: { returnTo?: string }) => {
   console.log("Auth0 onRedirectCallback called", { appState });
 };
 
-
 export function ConvexClientProvider({ children }: ConvexClientProviderProps) {
   return (
     <Auth0Provider
       domain={process.env.NEXT_PUBLIC_AUTH0_DOMAIN || ""}
       clientId={process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID || ""}
       authorizationParams={{
-        redirect_uri: typeof window === "undefined" ? "" : `${window.location.origin}/auth/callback`,
+        redirect_uri:
+          typeof window === "undefined" ? "" : `${window.location.origin}/auth/callback`,
         scope: "openid profile email offline_access",
       }}
       useRefreshTokens={true}
@@ -40,9 +40,7 @@ export function ConvexClientProvider({ children }: ConvexClientProviderProps) {
       onRedirectCallback={onRedirectCallback}
     >
       <ConvexProviderWithAuth0 client={convex}>
-        <AuthRecovery>
-          {children}
-        </AuthRecovery>
+        <AuthRecovery>{children}</AuthRecovery>
       </ConvexProviderWithAuth0>
     </Auth0Provider>
   );

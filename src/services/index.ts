@@ -3,9 +3,7 @@
  * Central export point for all service modules
  */
 
-export {
-  simpleBrowserDetectionService as browserDetectionService,
-} from "./browser-detection-simple";
+export { simpleBrowserDetectionService as browserDetectionService } from "./browser-detection-simple";
 export { FileService, fileService } from "./file-service";
 export { geolocationService } from "./geolocation-service";
 export { PDFService, pdfService } from "./pdf-service";

@@ -30,14 +30,7 @@ const DANGEROUS_PATTERNS = [
 ];
 
 // Allowed URL schemes
-const ALLOWED_URL_SCHEMES = [
-  "http:",
-  "https:",
-  "mailto:",
-  "tel:",
-  "sms:",
-  "ftp:",
-];
+const ALLOWED_URL_SCHEMES = ["http:", "https:", "mailto:", "tel:", "sms:", "ftp:"];
 
 /**
  * Sanitizes text input to prevent XSS and injection attacks
@@ -60,9 +53,7 @@ export function sanitizeText(input: string): string {
     .filter((char) => {
       const code = char.charCodeAt(0);
       // Allow newline (10), tab (9), and printable characters (32-126)
-      return (
-        code === 9 || code === 10 || (code >= 32 && code <= 126) || code > 127
-      );
+      return code === 9 || code === 10 || (code >= 32 && code <= 126) || code > 127;
     })
     .join("");
 
@@ -89,10 +80,7 @@ export function sanitizeUrl(url: string): string | null {
     }
 
     // Additional validation for specific schemes
-    if (
-      parsedUrl.protocol === "javascript:" ||
-      parsedUrl.protocol === "data:"
-    ) {
+    if (parsedUrl.protocol === "javascript:" || parsedUrl.protocol === "data:") {
       return null;
     }
 
@@ -131,10 +119,7 @@ export function validateFileName(fileName: string): boolean {
 /**
  * Validates file type against allowed types
  */
-export function validateFileType(
-  fileType: string,
-  allowedTypes: string[],
-): boolean {
+export function validateFileType(fileType: string, allowedTypes: string[]): boolean {
   if (typeof fileType !== "string" || !Array.isArray(allowedTypes)) {
     return false;
   }

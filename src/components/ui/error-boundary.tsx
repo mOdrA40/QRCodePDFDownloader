@@ -8,13 +8,7 @@
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Button } from "./button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "./card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./card";
 
 interface Props {
   children: ReactNode;
@@ -78,9 +72,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <CardContent className="space-y-4">
             {process.env.NODE_ENV === "development" && this.state.error && (
               <details className="text-sm">
-                <summary className="cursor-pointer font-medium">
-                  Error Details
-                </summary>
+                <summary className="cursor-pointer font-medium">Error Details</summary>
                 <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-auto">
                   {this.state.error.toString()}
                   {this.state.errorInfo?.componentStack}

@@ -1,24 +1,9 @@
 "use client";
 
-import {
-  Calendar,
-  CreditCard,
-  Link2,
-  Mail,
-  MapPin,
-  Phone,
-  Wifi,
-  Zap,
-} from "lucide-react";
+import { Calendar, CreditCard, Link2, Mail, MapPin, Phone, Wifi, Zap } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   EmailModal,
   EventModal,
@@ -119,9 +104,7 @@ export function QuickActions({ onQuickAction }: QuickActionsProps) {
             <Zap className="h-5 w-5 text-amber-600" />
             Quick Actions
           </CardTitle>
-          <CardDescription>
-            Generate QR codes for common use cases instantly
-          </CardDescription>
+          <CardDescription>Generate QR codes for common use cases instantly</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-3">

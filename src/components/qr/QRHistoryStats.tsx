@@ -6,17 +6,11 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Activity, BarChart3, Calendar, FileImage, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  BarChart3, 
-  Calendar, 
-  FileImage, 
-  TrendingUp,
-  Activity
-} from "lucide-react";
+import { api } from "@/convex/_generated/api";
 
 export function QRHistoryStats() {
   const stats = useQuery(api.qrHistory.getQRStatistics);
@@ -96,9 +90,7 @@ export function QRHistoryStats() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stat.description}
-                </p>
+                <p className="text-xs text-muted-foreground">{stat.description}</p>
               </CardContent>
             </Card>
           );

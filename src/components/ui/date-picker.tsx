@@ -1,40 +1,34 @@
 "use client";
 
-import * as React from "react";
 import { Calendar as CalendarIcon } from "lucide-react";
-
-import { cn } from "@/lib/utils";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 // Simple date formatter with responsive format
 const formatDate = (date: Date): string => {
   // Check if mobile screen
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
 
   if (isMobile) {
     // Shorter format for mobile
     const options: Intl.DateTimeFormatOptions = {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     };
-    return date.toLocaleDateString('en-US', options);
-  } else {
-    // Full format for desktop
-    const options: Intl.DateTimeFormatOptions = {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    };
-    return date.toLocaleDateString('en-US', options);
+    return date.toLocaleDateString("en-US", options);
   }
+  // Full format for desktop
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
+  return date.toLocaleDateString("en-US", options);
 };
 
 interface DatePickerProps {
@@ -63,10 +57,12 @@ export function DatePicker({
       const target = event.target as Element;
 
       // Don't close if clicking on Select dropdown elements
-      if (target.closest('[data-radix-select-content]') ||
-          target.closest('[data-radix-select-trigger]') ||
-          target.closest('[data-radix-select-item]') ||
-          target.closest('[data-radix-popper-content-wrapper]')) {
+      if (
+        target.closest("[data-radix-select-content]") ||
+        target.closest("[data-radix-select-trigger]") ||
+        target.closest("[data-radix-select-item]") ||
+        target.closest("[data-radix-popper-content-wrapper]")
+      ) {
         return;
       }
 
@@ -76,8 +72,8 @@ export function DatePicker({
     };
 
     if (open) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
     }
 
     return undefined;
@@ -88,23 +84,24 @@ export function DatePicker({
       <Popover
         open={open}
         onOpenChange={(newOpen) => {
-          if (!newOpen) {
+          if (newOpen) {
+            setOpen(true);
+          } else {
             setTimeout(() => {
               const activeElement = document.activeElement;
-              const isSelectInteraction = activeElement?.closest('[data-radix-select-content]') ||
-                                        activeElement?.closest('[data-radix-select-trigger]') ||
-                                        document.querySelector('[data-radix-select-content][data-state="open"]');
+              const isSelectInteraction =
+                activeElement?.closest("[data-radix-select-content]") ||
+                activeElement?.closest("[data-radix-select-trigger]") ||
+                document.querySelector('[data-radix-select-content][data-state="open"]');
 
               if (!isSelectInteraction) {
                 setOpen(false);
               }
             }, 50);
-          } else {
-            setOpen(true);
           }
         }}
       >
-        <PopoverTrigger asChild>
+        <PopoverTrigger asChild={true}>
           <Button
             id={id}
             type="button"
@@ -128,7 +125,7 @@ export function DatePicker({
               onDateChange?.(selectedDate);
               setOpen(false);
             }}
-            initialFocus
+            initialFocus={true}
           />
         </PopoverContent>
       </Popover>

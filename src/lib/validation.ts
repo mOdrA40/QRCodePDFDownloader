@@ -33,9 +33,8 @@ export interface ValidationResult<T = unknown> {
 /**
  * Validates QR options comprehensively
  */
-export function validateQROptions(
-  options: Partial<QROptions>,
-): ValidationResult<QROptions> {
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Comprehensive validation requires extensive checks
+export function validateQROptions(options: Partial<QROptions>): ValidationResult<QROptions> {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -110,11 +109,7 @@ export function validateQROptions(
 
   // Validate logo size
   if (options.logoSize !== undefined) {
-    if (
-      typeof options.logoSize !== "number" ||
-      options.logoSize < 20 ||
-      options.logoSize > 200
-    ) {
+    if (typeof options.logoSize !== "number" || options.logoSize < 20 || options.logoSize > 200) {
       errors.push("Logo size must be between 20 and 200 pixels");
     }
   }
@@ -138,9 +133,9 @@ export function validateQROptions(
     format: options.format || "png",
     logoUrl: options.logoUrl ? sanitizeUrl(options.logoUrl) || "" : "",
     logoSize: options.logoSize || 60,
-    logoBackground: options.logoBackground || false,
+    logoBackground: options.logoBackground ?? false,
     pdfPassword: options.pdfPassword || "",
-    enablePdfPassword: options.enablePdfPassword || false,
+    enablePdfPassword: options.enablePdfPassword ?? false,
   };
 
   return {
@@ -154,8 +149,9 @@ export function validateQROptions(
 /**
  * Validates PDF generation options
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Comprehensive PDF validation requires extensive checks
 export function validatePDFOptions(
-  options: Partial<PDFGenerationOptions>,
+  options: Partial<PDFGenerationOptions>
 ): ValidationResult<PDFGenerationOptions> {
   const errors: string[] = [];
   const warnings: string[] = [];
@@ -206,9 +202,7 @@ export function validatePDFOptions(
     } else {
       for (const keyword of options.keywords) {
         if (typeof keyword !== "string" || keyword.length > 50) {
-          errors.push(
-            "Each keyword must be a string with less than 50 characters",
-          );
+          errors.push("Each keyword must be a string with less than 50 characters");
           break;
         }
       }
@@ -281,10 +275,7 @@ export function validatePDFOptions(
 /**
  * Validates file upload configuration
  */
-export function validateFileUpload(
-  file: File,
-  config: FileUploadConfig,
-): ValidationResult<File> {
+export function validateFileUpload(file: File, config: FileUploadConfig): ValidationResult<File> {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -301,7 +292,7 @@ export function validateFileUpload(
   // Validate file size
   if (!validateFileSize(file.size, config.maxSize)) {
     errors.push(
-      `File size exceeds maximum allowed size of ${Math.round(config.maxSize / 1024 / 1024)}MB`,
+      `File size exceeds maximum allowed size of ${Math.round(config.maxSize / 1024 / 1024)}MB`
     );
   }
 

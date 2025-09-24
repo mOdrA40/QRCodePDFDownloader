@@ -19,20 +19,20 @@ interface DuplicateCheckResult {
   error: Error | null;
 }
 
-export function useDuplicateCheck({ 
-  textContent, 
-  enabled = true 
+export function useDuplicateCheck({
+  textContent,
+  enabled = true,
 }: UseDuplicateCheckProps): DuplicateCheckResult {
   // Only check if enabled and textContent is not empty
   const shouldCheck = enabled && textContent.trim().length > 0;
-  
+
   const result = useQuery(
     api.qrHistory.checkDuplicateQR,
     shouldCheck ? { textContent: textContent.trim() } : "skip"
   );
 
   return {
-    isDuplicate: result?.isDuplicate || false,
+    isDuplicate: result?.isDuplicate ?? false,
     existingQR: result?.existingQR || null,
     isLoading: result === undefined && shouldCheck,
     error: null, // Convex handles errors internally

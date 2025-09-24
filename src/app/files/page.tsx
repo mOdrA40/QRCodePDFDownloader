@@ -6,11 +6,11 @@
 "use client";
 
 import { useAuth0 } from "@auth0/auth0-react";
+import { ArrowLeft, LogIn, QrCode } from "lucide-react";
+import Link from "next/link";
 import { QRHistoryList } from "@/components/qr/QRHistoryList";
 import { QRHistoryStats } from "@/components/qr/QRHistoryStats";
-import { ArrowLeft, QrCode, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import styles from "./files.module.css";
 
 export default function FilesPage() {
@@ -19,15 +19,19 @@ export default function FilesPage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 overflow-x-hidden ${styles.forceContain}`}>
-        <div className={`container mx-auto py-4 xs:py-6 sm:py-8 px-3 xs:px-4 sm:px-6 ${styles.filesContainer}`}>
+      <div
+        className={`min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 overflow-x-hidden ${styles.forceContain}`}
+      >
+        <div
+          className={`container mx-auto py-4 xs:py-6 sm:py-8 px-3 xs:px-4 sm:px-6 ${styles.filesContainer}`}
+        >
           <div className="animate-pulse">
-            <div className="h-6 xs:h-8 bg-muted rounded w-32 xs:w-48 mb-4 xs:mb-6"></div>
-            <div className="h-24 xs:h-32 bg-muted rounded mb-4 xs:mb-6"></div>
+            <div className="h-6 xs:h-8 bg-muted rounded w-32 xs:w-48 mb-4 xs:mb-6" />
+            <div className="h-24 xs:h-32 bg-muted rounded mb-4 xs:mb-6" />
             <div className="space-y-3 xs:space-y-4">
-              <div className="h-16 xs:h-20 bg-muted rounded"></div>
-              <div className="h-16 xs:h-20 bg-muted rounded"></div>
-              <div className="h-16 xs:h-20 bg-muted rounded"></div>
+              <div className="h-16 xs:h-20 bg-muted rounded" />
+              <div className="h-16 xs:h-20 bg-muted rounded" />
+              <div className="h-16 xs:h-20 bg-muted rounded" />
             </div>
           </div>
         </div>
@@ -38,8 +42,12 @@ export default function FilesPage() {
   // Not authenticated
   if (!user) {
     return (
-      <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 overflow-x-hidden ${styles.forceContain}`}>
-        <div className={`container mx-auto py-4 xs:py-6 sm:py-8 px-3 xs:px-4 sm:px-6 ${styles.filesContainer}`}>
+      <div
+        className={`min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 overflow-x-hidden ${styles.forceContain}`}
+      >
+        <div
+          className={`container mx-auto py-4 xs:py-6 sm:py-8 px-3 xs:px-4 sm:px-6 ${styles.filesContainer}`}
+        >
           <div className="text-center py-8 xs:py-12">
             <QrCode className="h-12 xs:h-16 w-12 xs:w-16 mx-auto mb-3 xs:mb-4 text-muted-foreground" />
             <h1 className="text-lg xs:text-xl sm:text-2xl font-bold mb-2">Sign In Required</h1>
@@ -57,13 +65,17 @@ export default function FilesPage() {
   }
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 overflow-x-hidden ${styles.forceContain}`}>
-      <div className={`container mx-auto py-4 xs:py-6 sm:py-8 px-3 xs:px-4 sm:px-6 ${styles.filesContainer}`}>
+    <div
+      className={`min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 overflow-x-hidden ${styles.forceContain}`}
+    >
+      <div
+        className={`container mx-auto py-4 xs:py-6 sm:py-8 px-3 xs:px-4 sm:px-6 ${styles.filesContainer}`}
+      >
         {/* Header */}
         <div className={`mb-6 xs:mb-8 ${styles.headerContainer}`}>
           <div className={styles.headerContent}>
             <div className={styles.headerTop}>
-              <Button variant="ghost" size="sm" asChild className="shrink-0 h-8 px-2">
+              <Button variant="ghost" size="sm" asChild={true} className="shrink-0 h-8 px-2">
                 <Link href="/" className="flex items-center gap-1.5">
                   <ArrowLeft className="h-3.5 w-3.5" />
                   <span className="text-sm hidden xs:inline">Back to Generator</span>
@@ -76,9 +88,7 @@ export default function FilesPage() {
                   <QrCode className="h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
                 <div className={`min-w-0 flex-1 ${styles.headerMain}`}>
-                  <h1 className={`${styles.headerTitle} ${styles.safeText}`}>
-                    My QR Codes
-                  </h1>
+                  <h1 className={`${styles.headerTitle} ${styles.safeText}`}>My QR Codes</h1>
                   <p className={`${styles.headerSubtitle} ${styles.safeText}`}>
                     Manage your QR code history and download previous creations
                   </p>

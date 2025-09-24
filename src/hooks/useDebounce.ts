@@ -3,7 +3,7 @@
  * Debounces a value to prevent excessive API calls or computations
  */
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * Hook that debounces a value

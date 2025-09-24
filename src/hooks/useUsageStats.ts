@@ -5,12 +5,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { storageService } from "@/services";
-import type {
-  QRErrorCorrectionLevel,
-  QRImageFormat,
-  UsageAnalytics,
-  UsageStats,
-} from "@/types";
+import type { QRErrorCorrectionLevel, QRImageFormat, UsageAnalytics, UsageStats } from "@/types";
 
 interface UseUsageStatsReturn {
   stats: UsageStats;
@@ -33,9 +28,7 @@ interface UseUsageStatsReturn {
 }
 
 export function useUsageStats(): UseUsageStatsReturn {
-  const [stats, setStats] = useState<UsageStats>(
-    storageService.getUsageStats(),
-  );
+  const [stats, setStats] = useState<UsageStats>(storageService.getUsageStats());
   const [analytics, setAnalytics] = useState<UsageAnalytics>({
     totalEvents: 0,
     uniqueDays: 0,
@@ -72,9 +65,7 @@ export function useUsageStats(): UseUsageStatsReturn {
 
     // Calculate basic metrics
     const totalEvents = events.length;
-    const uniqueDays = new Set(
-      events.map((e) => new Date(e.timestamp).toDateString()),
-    ).size;
+    const uniqueDays = new Set(events.map((e) => new Date(e.timestamp).toDateString())).size;
     const averagePerDay = uniqueDays > 0 ? totalEvents / uniqueDays : 0;
 
     // Find most used format
@@ -84,12 +75,11 @@ export function useUsageStats(): UseUsageStatsReturn {
         acc[format] = (acc[format] || 0) + 1;
         return acc;
       },
-      {} as Record<string, number>,
+      {} as Record<string, number>
     );
 
     const mostUsedFormat =
-      Object.entries(formatCounts).sort(([, a], [, b]) => b - a)[0]?.[0] ||
-      "png";
+      Object.entries(formatCounts).sort(([, a], [, b]) => b - a)[0]?.[0] || "png";
 
     // Find most used size
     const sizeCounts = events.reduce(
@@ -98,13 +88,11 @@ export function useUsageStats(): UseUsageStatsReturn {
         acc[size] = (acc[size] || 0) + 1;
         return acc;
       },
-      {} as Record<number, number>,
+      {} as Record<number, number>
     );
 
     const mostUsedSize =
-      Number(
-        Object.entries(sizeCounts).sort(([, a], [, b]) => b - a)[0]?.[0],
-      ) || 512;
+      Number(Object.entries(sizeCounts).sort(([, a], [, b]) => b - a)[0]?.[0]) || 512;
 
     // Find peak usage day
     const dailyCounts = events.reduce(
@@ -113,11 +101,10 @@ export function useUsageStats(): UseUsageStatsReturn {
         acc[day] = (acc[day] || 0) + 1;
         return acc;
       },
-      {} as Record<string, number>,
+      {} as Record<string, number>
     );
 
-    const peakUsageDay =
-      Object.entries(dailyCounts).sort(([, a], [, b]) => b - a)[0]?.[0] || "";
+    const peakUsageDay = Object.entries(dailyCounts).sort(([, a], [, b]) => b - a)[0]?.[0] || "";
 
     // Calculate trends (simplified)
     const now = new Date();
@@ -174,19 +161,15 @@ export function useUsageStats(): UseUsageStatsReturn {
             ? currentStats.todayGenerated + 1
             : 1,
           favoriteFormat: metadata.format,
-          averageSize: Math.round(
-            (currentStats.averageSize + metadata.size) / 2,
-          ),
+          averageSize: Math.round((currentStats.averageSize + metadata.size) / 2),
           lastUsed: new Date().toLocaleString(),
           formatUsage: {
             ...currentStats.formatUsage,
-            [metadata.format]:
-              (currentStats.formatUsage[metadata.format] || 0) + 1,
+            [metadata.format]: (currentStats.formatUsage[metadata.format] || 0) + 1,
           },
           sizeDistribution: {
             ...currentStats.sizeDistribution,
-            [metadata.size]:
-              (currentStats.sizeDistribution[metadata.size] || 0) + 1,
+            [metadata.size]: (currentStats.sizeDistribution[metadata.size] || 0) + 1,
           },
           dailyUsage: {
             ...currentStats.dailyUsage,
@@ -198,12 +181,10 @@ export function useUsageStats(): UseUsageStatsReturn {
         setStats(updatedStats);
         setAnalytics(calculateAnalytics());
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to record QR generation",
-        );
+        setError(err instanceof Error ? err.message : "Failed to record QR generation");
       }
     },
-    [calculateAnalytics],
+    [calculateAnalytics]
   );
 
   /**
@@ -221,12 +202,10 @@ export function useUsageStats(): UseUsageStatsReturn {
 
         setAnalytics(calculateAnalytics());
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to record download",
-        );
+        setError(err instanceof Error ? err.message : "Failed to record download");
       }
     },
-    [calculateAnalytics],
+    [calculateAnalytics]
   );
 
   /**
@@ -244,12 +223,10 @@ export function useUsageStats(): UseUsageStatsReturn {
 
         setAnalytics(calculateAnalytics());
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to record preset action",
-        );
+        setError(err instanceof Error ? err.message : "Failed to record preset action");
       }
     },
-    [calculateAnalytics],
+    [calculateAnalytics]
   );
 
   /**

@@ -16,6 +16,7 @@ import {
 import { useId, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Dialog,
   DialogContent,
@@ -40,7 +41,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { DatePicker } from "@/components/ui/date-picker";
 import { CustomTimePicker } from "@/components/ui/time-picker";
 import { qrFormatService } from "@/services/qr-format-service";
 import { securityService } from "@/services/security-service";
@@ -62,7 +62,7 @@ export function WiFiModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
   const passwordId = useId();
   const [errors, setErrors] = useState<{ ssid?: string }>({});
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrors({});
@@ -78,10 +78,7 @@ export function WiFiModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
       const wifiString = `WIFI:T:${security};S:${ssid};P:${password};H:${hidden};;`;
 
       // Security validation first
-      const securityValidation = securityService.validateInput(
-        wifiString,
-        "wifi",
-      );
+      const securityValidation = securityService.validateInput(wifiString, "wifi");
       if (!securityValidation.isValid) {
         setErrors({
           ssid: `Security Error: ${securityValidation.errors.join(", ")}`,
@@ -91,10 +88,7 @@ export function WiFiModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
       }
 
       // Show security warnings if any
-      if (
-        securityValidation.warnings.length > 0 &&
-        securityValidation.riskLevel !== "low"
-      ) {
+      if (securityValidation.warnings.length > 0 && securityValidation.riskLevel !== "low") {
         toast.warning("Security Warning", {
           description: securityValidation.warnings[0],
           icon: <AlertTriangle className="h-4 w-4" />,
@@ -105,7 +99,7 @@ export function WiFiModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
       // Validate and optimize format for maximum compatibility
       const validation = qrFormatService.validateAndOptimize(
         securityValidation.sanitizedInput || wifiString,
-        "wifi",
+        "wifi"
       );
 
       if (!validation.isValid) {
@@ -139,7 +133,7 @@ export function WiFiModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
       setPassword("");
       setSecurity("WPA");
       setHidden(false);
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to generate WiFi QR code");
     } finally {
       setLoading(false);
@@ -156,9 +150,7 @@ export function WiFiModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
             </div>
             WiFi Network
           </DialogTitle>
-          <DialogDescription>
-            Create a QR code for WiFi network connection
-          </DialogDescription>
+          <DialogDescription>Create a QR code for WiFi network connection</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -230,7 +222,7 @@ export function PhoneModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
   const [errors, setErrors] = useState<{ phone?: string }>({});
   const phoneId = useId();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrors({});
@@ -256,7 +248,7 @@ export function PhoneModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
       });
       onOpenChange(false);
       setPhone(undefined);
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to generate phone QR code");
     } finally {
       setLoading(false);
@@ -273,9 +265,7 @@ export function PhoneModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
             </div>
             Phone Number
           </DialogTitle>
-          <DialogDescription>
-            Create a QR code for phone number dialing
-          </DialogDescription>
+          <DialogDescription>Create a QR code for phone number dialing</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <PhoneInput
@@ -286,7 +276,7 @@ export function PhoneModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
             placeholder="Enter phone number"
             defaultCountry="ID"
             enableIPDetection={true}
-            required
+            required={true}
             error={errors.phone}
           />
 
@@ -326,7 +316,7 @@ export function EmailModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
     return emailRegex.test(email);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrors({});
@@ -351,10 +341,7 @@ export function EmailModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
       if (params.length > 0) mailtoUrl += `?${params.join("&")}`;
 
       // Security validation first
-      const securityValidation = securityService.validateInput(
-        mailtoUrl,
-        "email",
-      );
+      const securityValidation = securityService.validateInput(mailtoUrl, "email");
       if (!securityValidation.isValid) {
         setErrors({
           email: `Security Error: ${securityValidation.errors.join(", ")}`,
@@ -364,10 +351,7 @@ export function EmailModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
       }
 
       // Show security warnings if any
-      if (
-        securityValidation.warnings.length > 0 &&
-        securityValidation.riskLevel !== "low"
-      ) {
+      if (securityValidation.warnings.length > 0 && securityValidation.riskLevel !== "low") {
         toast.warning("Security Warning", {
           description: securityValidation.warnings[0],
           icon: <AlertTriangle className="h-4 w-4" />,
@@ -378,7 +362,7 @@ export function EmailModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
       // Validate and optimize format for maximum compatibility
       const validation = qrFormatService.validateAndOptimize(
         securityValidation.sanitizedInput || mailtoUrl,
-        "email",
+        "email"
       );
 
       if (!validation.isValid) {
@@ -409,7 +393,7 @@ export function EmailModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
       setEmail("");
       setSubject("");
       setBody("");
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to generate email QR code");
     } finally {
       setLoading(false);
@@ -426,9 +410,7 @@ export function EmailModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
             </div>
             Email
           </DialogTitle>
-          <DialogDescription>
-            Create a QR code for email composition
-          </DialogDescription>
+          <DialogDescription>Create a QR code for email composition</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -491,17 +473,13 @@ export function EmailModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
 }
 
 // Location Modal Component
-export function LocationModal({
-  open,
-  onOpenChange,
-  onGenerate,
-}: BaseModalProps) {
+export function LocationModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ address?: string }>({});
   const addressId = useId();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrors({});
@@ -520,7 +498,7 @@ export function LocationModal({
       });
       onOpenChange(false);
       setAddress("");
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to generate location QR code");
     } finally {
       setLoading(false);
@@ -537,9 +515,7 @@ export function LocationModal({
             </div>
             Location
           </DialogTitle>
-          <DialogDescription>
-            Create a QR code for location or address
-          </DialogDescription>
+          <DialogDescription>Create a QR code for location or address</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -598,7 +574,7 @@ export function EventModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
   const locationId = useId();
   const descriptionId = useId();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrors({});
@@ -619,11 +595,11 @@ export function EventModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
       }
 
       // Combine date and time
-      const [hours, minutes] = time.split(':');
+      const [hours, minutes] = time.split(":");
       const eventDate = new Date(date);
       eventDate.setHours(
-        parseInt(hours || '0', 10),
-        parseInt(minutes || '0', 10),
+        Number.parseInt(hours || "0", 10),
+        Number.parseInt(minutes || "0", 10),
         0,
         0
       );
@@ -646,7 +622,7 @@ export function EventModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
       setTime("12:00");
       setLocation("");
       setDescription("");
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to generate event QR code");
     } finally {
       setLoading(false);
@@ -663,9 +639,7 @@ export function EventModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
             </div>
             Event
           </DialogTitle>
-          <DialogDescription>
-            Create a QR code for calendar event
-          </DialogDescription>
+          <DialogDescription>Create a QR code for calendar event</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -765,11 +739,7 @@ export function EventModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
 }
 
 // Website Modal Component
-export function WebsiteModal({
-  open,
-  onOpenChange,
-  onGenerate,
-}: BaseModalProps) {
+export function WebsiteModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ url?: string }>({});
@@ -784,7 +754,7 @@ export function WebsiteModal({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrors({});
@@ -810,7 +780,7 @@ export function WebsiteModal({
       });
       onOpenChange(false);
       setUrl("");
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to generate website QR code");
     } finally {
       setLoading(false);
@@ -827,9 +797,7 @@ export function WebsiteModal({
             </div>
             Website
           </DialogTitle>
-          <DialogDescription>
-            Create a QR code for website URL
-          </DialogDescription>
+          <DialogDescription>Create a QR code for website URL</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -899,17 +867,16 @@ export function VCardModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
     return emailRegex.test(email);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex form validation logic required
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrors({});
 
     const newErrors: { name?: string; email?: string; phone?: string } = {};
     if (!name.trim()) newErrors.name = "Full name is required";
-    if (email && !validateEmail(email))
-      newErrors.email = "Please enter a valid email address";
-    if (phone && !validatePhoneNumber(phone))
-      newErrors.phone = "Please enter a valid phone number";
+    if (email && !validateEmail(email)) newErrors.email = "Please enter a valid email address";
+    if (phone && !validatePhoneNumber(phone)) newErrors.phone = "Please enter a valid phone number";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -924,9 +891,7 @@ export function VCardModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
       if (company) vCard += `\nORG:${company}`;
       if (title) vCard += `\nTITLE:${title}`;
       if (website) {
-        const fullWebsite = website.startsWith("http")
-          ? website
-          : `https://${website}`;
+        const fullWebsite = website.startsWith("http") ? website : `https://${website}`;
         vCard += `\nURL:${fullWebsite}`;
       }
       vCard += "\nEND:VCARD";
@@ -943,7 +908,7 @@ export function VCardModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
       setCompany("");
       setTitle("");
       setWebsite("");
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to generate contact QR code");
     } finally {
       setLoading(false);
@@ -960,9 +925,7 @@ export function VCardModal({ open, onOpenChange, onGenerate }: BaseModalProps) {
             </div>
             Contact Card
           </DialogTitle>
-          <DialogDescription>
-            Create a QR code for contact information (vCard)
-          </DialogDescription>
+          <DialogDescription>Create a QR code for contact information (vCard)</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -1076,7 +1039,7 @@ export function SMSModal({ open, onOpenChange, onGenerate }: SMSModalProps) {
   const phoneInputId = useId();
   const messageInputId = useId();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrors({});
@@ -1130,7 +1093,7 @@ export function SMSModal({ open, onOpenChange, onGenerate }: SMSModalProps) {
       onOpenChange(false);
       setPhone(undefined);
       setMessage("");
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to generate SMS QR code");
     } finally {
       setLoading(false);
@@ -1147,9 +1110,7 @@ export function SMSModal({ open, onOpenChange, onGenerate }: SMSModalProps) {
             </div>
             SMS Message
           </DialogTitle>
-          <DialogDescription>
-            Create a QR code for SMS message
-          </DialogDescription>
+          <DialogDescription>Create a QR code for SMS message</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <PhoneInput
@@ -1160,7 +1121,7 @@ export function SMSModal({ open, onOpenChange, onGenerate }: SMSModalProps) {
             placeholder="Enter phone number"
             defaultCountry="ID"
             enableIPDetection={true}
-            required
+            required={true}
             error={errors.phone}
           />
 

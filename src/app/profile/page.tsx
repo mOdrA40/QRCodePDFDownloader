@@ -6,13 +6,13 @@
 "use client";
 
 import { useAuth0 } from "@auth0/auth0-react";
-import { ArrowLeft, User, Mail, Calendar, Shield, LogIn, Copy, Check } from "lucide-react";
+import { ArrowLeft, Calendar, Check, Copy, LogIn, Mail, Shield, User } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useState } from "react";
-import Link from "next/link";
 import styles from "./profile.module.css";
 
 export default function ProfilePage() {
@@ -25,7 +25,7 @@ export default function ProfilePage() {
       setCopiedField(field);
       setTimeout(() => setCopiedField(null), 2000);
     } catch (err) {
-      console.error('Failed to copy text: ', err);
+      console.error("Failed to copy text: ", err);
     }
   };
 
@@ -35,8 +35,8 @@ export default function ProfilePage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 overflow-x-hidden">
         <div className="w-full max-w-[calc(100vw-1.5rem)] mx-auto py-4 xs:py-6 sm:py-8 px-3 xs:px-4 sm:px-6">
           <div className="animate-pulse">
-            <div className="h-6 xs:h-8 bg-muted rounded w-24 xs:w-32 mb-4 xs:mb-6"></div>
-            <div className="h-48 xs:h-64 bg-muted rounded"></div>
+            <div className="h-6 xs:h-8 bg-muted rounded w-24 xs:w-32 mb-4 xs:mb-6" />
+            <div className="h-48 xs:h-64 bg-muted rounded" />
           </div>
         </div>
       </div>
@@ -64,22 +64,27 @@ export default function ProfilePage() {
     );
   }
 
-  const userInitials = user.name
-    ?.split(' ')
-    .map((n: string) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2) || 'U';
+  const userInitials =
+    user.name
+      ?.split(" ")
+      .map((n: string) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) || "U";
 
   return (
     <TooltipProvider>
-      <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 overflow-x-hidden ${styles.forceContain}`}>
-        <div className={`w-full max-w-[calc(100vw-1.5rem)] mx-auto py-4 xs:py-6 sm:py-8 px-3 xs:px-4 sm:px-6 ${styles.profileContainer}`}>
+      <div
+        className={`min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 overflow-x-hidden ${styles.forceContain}`}
+      >
+        <div
+          className={`w-full max-w-[calc(100vw-1.5rem)] mx-auto py-4 xs:py-6 sm:py-8 px-3 xs:px-4 sm:px-6 ${styles.profileContainer}`}
+        >
           {/* Header */}
           <div className={`mb-6 xs:mb-8 ${styles.headerContainer}`}>
             <div className={styles.headerContent}>
               <div className={styles.headerTop}>
-                <Button variant="ghost" size="sm" asChild className="shrink-0 h-8 px-2">
+                <Button variant="ghost" size="sm" asChild={true} className="shrink-0 h-8 px-2">
                   <Link href="/" className="flex items-center gap-1.5">
                     <ArrowLeft className="h-3.5 w-3.5" />
                     <span className="text-sm hidden xs:inline">Back to Generator</span>
@@ -92,9 +97,7 @@ export default function ProfilePage() {
                     <User className="h-4 w-4 xs:h-5 xs:w-5 sm:h-6 sm:w-6 text-white" />
                   </div>
                   <div className={`min-w-0 flex-1 ${styles.headerMain}`}>
-                    <h1 className={`${styles.headerTitle} ${styles.safeText}`}>
-                      Profile
-                    </h1>
+                    <h1 className={`${styles.headerTitle} ${styles.safeText}`}>Profile</h1>
                     <p className={`${styles.headerSubtitle} ${styles.safeText}`}>
                       View and manage your account information
                     </p>
@@ -126,10 +129,14 @@ export default function ProfilePage() {
                       {userInitials}
                     </AvatarFallback>
                   </Avatar>
-                  <div className={`text-center xs:text-left min-w-0 flex-1 w-full ${styles.textContainer}`}>
+                  <div
+                    className={`text-center xs:text-left min-w-0 flex-1 w-full ${styles.textContainer}`}
+                  >
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <h2 className={`text-lg xs:text-xl sm:text-2xl font-semibold cursor-help ${styles.truncateText}`}>
+                      <TooltipTrigger asChild={true}>
+                        <h2
+                          className={`text-lg xs:text-xl sm:text-2xl font-semibold cursor-help ${styles.truncateText}`}
+                        >
                           {user.name || "User"}
                         </h2>
                       </TooltipTrigger>
@@ -138,8 +145,10 @@ export default function ProfilePage() {
                       </TooltipContent>
                     </Tooltip>
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p className={`text-muted-foreground text-xs xs:text-sm sm:text-base cursor-help mt-1 ${styles.emailText}`}>
+                      <TooltipTrigger asChild={true}>
+                        <p
+                          className={`text-muted-foreground text-xs xs:text-sm sm:text-base cursor-help mt-1 ${styles.emailText}`}
+                        >
                           {user.email}
                         </p>
                       </TooltipTrigger>
@@ -152,14 +161,18 @@ export default function ProfilePage() {
 
                 {/* Profile Details */}
                 <div className="grid gap-3 xs:gap-4">
-                  <div className={`flex items-start gap-2 xs:gap-3 p-2 xs:p-3 bg-muted/50 rounded-lg ${styles.subCard}`}>
+                  <div
+                    className={`flex items-start gap-2 xs:gap-3 p-2 xs:p-3 bg-muted/50 rounded-lg ${styles.subCard}`}
+                  >
                     <Mail className="h-3.5 w-3.5 xs:h-4 xs:w-4 text-muted-foreground shrink-0 mt-0.5" />
                     <div className={`min-w-0 flex-1 ${styles.textContainer}`}>
                       <p className="text-xs xs:text-sm font-medium">Email</p>
                       <div className="flex items-center gap-1 xs:gap-2">
                         <Tooltip>
-                          <TooltipTrigger asChild>
-                            <p className={`text-xs xs:text-sm text-muted-foreground cursor-help break-anywhere ${styles.emailText} ${styles.safeText}`}>
+                          <TooltipTrigger asChild={true}>
+                            <p
+                              className={`text-xs xs:text-sm text-muted-foreground cursor-help break-anywhere ${styles.emailText} ${styles.safeText}`}
+                            >
                               {user.email}
                             </p>
                           </TooltipTrigger>
@@ -171,9 +184,9 @@ export default function ProfilePage() {
                           variant="ghost"
                           size="sm"
                           className="h-5 w-5 xs:h-6 xs:w-6 p-0 shrink-0"
-                          onClick={() => copyToClipboard(user.email || '', 'email')}
+                          onClick={() => copyToClipboard(user.email || "", "email")}
                         >
-                          {copiedField === 'email' ? (
+                          {copiedField === "email" ? (
                             <Check className="h-2.5 w-2.5 xs:h-3 xs:w-3 text-green-600" />
                           ) : (
                             <Copy className="h-2.5 w-2.5 xs:h-3 xs:w-3" />
@@ -183,14 +196,18 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  <div className={`flex items-start gap-2 xs:gap-3 p-2 xs:p-3 bg-muted/50 rounded-lg ${styles.subCard}`}>
+                  <div
+                    className={`flex items-start gap-2 xs:gap-3 p-2 xs:p-3 bg-muted/50 rounded-lg ${styles.subCard}`}
+                  >
                     <Shield className="h-3.5 w-3.5 xs:h-4 xs:w-4 text-muted-foreground shrink-0 mt-0.5" />
                     <div className={`min-w-0 flex-1 ${styles.textContainer}`}>
                       <p className="text-xs xs:text-sm font-medium">User ID</p>
                       <div className="flex items-center gap-1 xs:gap-2">
                         <Tooltip>
-                          <TooltipTrigger asChild>
-                            <p className={`text-xs xs:text-sm text-muted-foreground cursor-help break-anywhere ${styles.userIdText} ${styles.safeText}`}>
+                          <TooltipTrigger asChild={true}>
+                            <p
+                              className={`text-xs xs:text-sm text-muted-foreground cursor-help break-anywhere ${styles.userIdText} ${styles.safeText}`}
+                            >
                               {user.sub}
                             </p>
                           </TooltipTrigger>
@@ -202,9 +219,9 @@ export default function ProfilePage() {
                           variant="ghost"
                           size="sm"
                           className="h-5 w-5 xs:h-6 xs:w-6 p-0 shrink-0"
-                          onClick={() => copyToClipboard(user.sub || '', 'userId')}
+                          onClick={() => copyToClipboard(user.sub || "", "userId")}
                         >
-                          {copiedField === 'userId' ? (
+                          {copiedField === "userId" ? (
                             <Check className="h-2.5 w-2.5 xs:h-3 xs:w-3 text-green-600" />
                           ) : (
                             <Copy className="h-2.5 w-2.5 xs:h-3 xs:w-3" />
@@ -229,10 +246,10 @@ export default function ProfilePage() {
 
                 {/* Actions */}
                 <div className="flex flex-col xs:flex-row gap-2 xs:gap-3 pt-3 xs:pt-4">
-                  <Button asChild className="w-full xs:w-auto text-sm">
+                  <Button asChild={true} className="w-full xs:w-auto text-sm">
                     <Link href="/files">View My QR Codes</Link>
                   </Button>
-                  <Button variant="outline" asChild className="w-full xs:w-auto text-sm">
+                  <Button variant="outline" asChild={true} className="w-full xs:w-auto text-sm">
                     <a href="/auth/logout">Logout</a>
                   </Button>
                 </div>

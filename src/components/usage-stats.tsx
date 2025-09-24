@@ -3,22 +3,14 @@
 import { BarChart3, Clock, TrendingUp, Zap } from "lucide-react";
 import { memo } from "react";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useUsageStats } from "@/hooks";
 
 interface UsageStatsProps {
   className?: string;
 }
 
-export const UsageStats = memo(function UsageStats({
-  className,
-}: UsageStatsProps) {
+export const UsageStats = memo(function UsageStats({ className }: UsageStatsProps) {
   const { stats, isLoading, error } = useUsageStats();
 
   const formatNumber = (num: number): string => {
@@ -30,9 +22,7 @@ export const UsageStats = memo(function UsageStats({
 
   if (error) {
     return (
-      <Card
-        className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}
-      >
+      <Card className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}>
         <CardContent className="p-6">
           <div className="text-center text-red-500">
             <p className="text-sm">Failed to load usage statistics</p>
@@ -43,9 +33,7 @@ export const UsageStats = memo(function UsageStats({
   }
 
   return (
-    <Card
-      className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}
-    >
+    <Card className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`}>
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2">
           <BarChart3 className="h-5 w-5 text-emerald-600" />
@@ -54,9 +42,7 @@ export const UsageStats = memo(function UsageStats({
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-emerald-600" />
           )}
         </CardTitle>
-        <CardDescription>
-          Track your QR code generation activity
-        </CardDescription>
+        <CardDescription>Track your QR code generation activity</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-4">
@@ -75,9 +61,7 @@ export const UsageStats = memo(function UsageStats({
               <Zap className="h-4 w-4 text-green-500" />
               <span className="text-sm font-medium">Today</span>
             </div>
-            <div className="text-2xl font-bold text-green-600">
-              {stats.todayGenerated}
-            </div>
+            <div className="text-2xl font-bold text-green-600">{stats.todayGenerated}</div>
           </div>
 
           <div className="space-y-2">
@@ -93,9 +77,7 @@ export const UsageStats = memo(function UsageStats({
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">Avg. Size</span>
             </div>
-            <div className="text-lg font-semibold text-muted-foreground">
-              {stats.averageSize}px
-            </div>
+            <div className="text-lg font-semibold text-muted-foreground">{stats.averageSize}px</div>
           </div>
         </div>
 

@@ -3,6 +3,7 @@
  * Central export point for all custom hooks
  */
 
+export { useDebouncedDuplicateCheck, useDuplicateCheck } from "./useDuplicateCheck";
 export { useFileHandler } from "./useFileHandler";
 export {
   useAppSettings,
@@ -11,7 +12,6 @@ export {
 } from "./useLocalStorage";
 export { useQRGenerator } from "./useQRGenerator";
 export { useUsageStats } from "./useUsageStats";
-export { useDuplicateCheck, useDebouncedDuplicateCheck } from "./useDuplicateCheck";
 
 // Hook utilities
 export const hookUtils = {

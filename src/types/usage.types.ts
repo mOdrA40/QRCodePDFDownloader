@@ -16,12 +16,7 @@ export interface UsageStats {
 
 // Usage event for tracking
 export interface UsageEvent {
-  type:
-    | "qr_generated"
-    | "pdf_downloaded"
-    | "image_downloaded"
-    | "preset_saved"
-    | "preset_loaded";
+  type: "qr_generated" | "pdf_downloaded" | "image_downloaded" | "preset_saved" | "preset_loaded";
   timestamp: Date;
   metadata: {
     format?: string;

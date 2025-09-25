@@ -29,25 +29,23 @@ export const QRPreview = memo(function QRPreview({ className }: QRPreviewProps) 
     boolean,
   ];
 
-  // Use context QR data if available, otherwise generate preview
+  // Generate real-time preview based on current options
   useEffect(() => {
-    // If context has QR data (from main generation), use it
-    if (contextQrDataUrl) {
-      setQrDataUrl(contextQrDataUrl);
-      setIsLoading(false);
+    // Always clear preview when text is empty
+    if (!options.text.trim()) {
+      setQrDataUrl("");
       return;
     }
 
-    // Only generate preview if no context data and component is visible
-    if (!(options.text.trim() && isIntersecting)) {
-      setQrDataUrl("");
+    // Only generate preview if component is visible
+    if (!isIntersecting) {
       return;
     }
 
     const generatePreview = async () => {
       setIsLoading(true);
       try {
-        // Use cache for preview generation to avoid duplicate work
+        // Always generate fresh preview for real-time updates
         const result = await qrService.generateQRCode(
           options.text,
           {
@@ -61,7 +59,7 @@ export const QRPreview = memo(function QRPreview({ className }: QRPreviewProps) 
             format: "png",
           },
           true
-        ); // Enable cache
+        ); // Enable cache for performance
         setQrDataUrl(result.dataUrl);
       } catch (error) {
         console.error("QR preview generation failed:", error);
@@ -72,7 +70,7 @@ export const QRPreview = memo(function QRPreview({ className }: QRPreviewProps) 
     };
 
     // Debounce preview generation for better UX
-    const debounceTimer = setTimeout(generatePreview, 200); // Reduced debounce for faster response
+    const debounceTimer = setTimeout(generatePreview, 200);
     return () => clearTimeout(debounceTimer);
   }, [
     options.text,
@@ -82,8 +80,15 @@ export const QRPreview = memo(function QRPreview({ className }: QRPreviewProps) 
     options.foreground,
     options.background,
     isIntersecting,
-    contextQrDataUrl, // Add context data as dependency
   ]);
+
+  // Sync with context QR data only when it's updated (for export purposes)
+  useEffect(() => {
+    if (contextQrDataUrl && contextQrDataUrl !== qrDataUrl) {
+      // Update preview with full-size generated QR for export
+      setQrDataUrl(contextQrDataUrl);
+    }
+  }, [contextQrDataUrl, qrDataUrl]);
 
   return (
     <Card className={`shadow-xl bg-card/80 backdrop-blur border-border ${className}`} ref={ref}>

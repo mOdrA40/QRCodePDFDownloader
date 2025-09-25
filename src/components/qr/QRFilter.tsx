@@ -6,7 +6,7 @@
 "use client";
 
 import { Calendar, Filter, Image, Settings, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,6 +42,8 @@ const AVAILABLE_FORMATS = ["png", "jpeg", "webp", "svg"];
 export function QRFilter({ onFilterChange, totalItems, filteredItems }: QRFilterProps) {
   const [filters, setFilters] = useState<QRFilterOptions>(DEFAULT_FILTERS);
   const [isOpen, setIsOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const [availableHeight, setAvailableHeight] = useState<number>(400);
 
   const updateFilters = useCallback(
     (newFilters: Partial<QRFilterOptions>) => {
@@ -57,22 +59,94 @@ export function QRFilter({ onFilterChange, totalItems, filteredItems }: QRFilter
     onFilterChange(DEFAULT_FILTERS);
   }, [onFilterChange]);
 
-  // Allow global scroll when dropdown is open
+  // Calculate available height for dropdown when it opens
+  useEffect(() => {
+    if (isOpen && triggerRef.current) {
+      const triggerRect = triggerRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const spaceBelow = viewportHeight - triggerRect.bottom;
+      const minHeight = 200;
+      const maxHeight = Math.max(minHeight, spaceBelow - 20);
+
+      setAvailableHeight(maxHeight);
+    }
+  }, [isOpen]);
+
+  // Enhanced scroll handling for dropdown
   useEffect(() => {
     if (isOpen) {
-      // Prevent body scroll lock that might be applied by Radix
+      // Comprehensive scroll lock prevention
+      const html = document.documentElement;
       const body = document.body;
-      const originalOverflow = body.style.overflow;
-      const originalPaddingRight = body.style.paddingRight;
 
-      // Ensure body can scroll
-      body.style.overflow = "auto";
-      body.style.paddingRight = originalPaddingRight;
+      // Store original values
+      const originalHtmlOverflow = html.style.overflow;
+      const originalBodyOverflow = body.style.overflow;
+      const originalHtmlOverflowY = html.style.overflowY;
+      const originalBodyOverflowY = body.style.overflowY;
+      const originalBodyPaddingRight = body.style.paddingRight;
+
+      // Force enable scrolling on both html and body
+      html.style.overflow = "visible";
+      html.style.overflowY = "auto";
+      body.style.overflow = "visible";
+      body.style.overflowY = "auto";
+      body.style.paddingRight = originalBodyPaddingRight;
+
+      // Additional safety: remove any scroll-lock classes that might be applied
+      body.classList.remove("overflow-hidden");
+      html.classList.remove("overflow-hidden");
+
+      // Enhanced global scroll handling for dropdown that extends beyond viewport
+      const handleGlobalWheel = (e: WheelEvent) => {
+        const target = e.target as Element;
+        const dropdownContent = target.closest("[data-radix-dropdown-menu-content]");
+        const dropdownScrollArea = target.closest(".overflow-y-auto");
+
+        // If scrolling within dropdown's scroll area, let it handle internally
+        if (dropdownScrollArea && dropdownContent?.contains(dropdownScrollArea)) {
+          return; // Let dropdown handle its own scrolling
+        }
+
+        // If not scrolling within dropdown, ensure page can scroll
+        if (!dropdownContent) {
+          // Force enable page scroll
+          e.stopPropagation();
+
+          // Additional safety: ensure body can scroll
+          if (document.body.style.overflow === "hidden") {
+            document.body.style.overflow = "auto";
+          }
+        }
+      };
+
+      // Add passive wheel listener for better performance
+      document.addEventListener("wheel", handleGlobalWheel, { passive: true });
+
+      // Additional: Handle touch scroll for mobile devices
+      const handleTouchMove = (e: TouchEvent) => {
+        const target = e.target as Element;
+        const dropdownContent = target.closest("[data-radix-dropdown-menu-content]");
+
+        // Allow page scroll on touch devices when not in dropdown
+        if (!dropdownContent) {
+          e.stopPropagation();
+        }
+      };
+
+      document.addEventListener("touchmove", handleTouchMove, { passive: true });
 
       return () => {
-        // Restore original styles when dropdown closes
-        body.style.overflow = originalOverflow;
-        body.style.paddingRight = originalPaddingRight;
+        // Restore all original styles
+        html.style.overflow = originalHtmlOverflow;
+        html.style.overflowY = originalHtmlOverflowY;
+        body.style.overflow = originalBodyOverflow;
+        body.style.overflowY = originalBodyOverflowY;
+        body.style.paddingRight = originalBodyPaddingRight;
+
+        // Remove all event listeners
+        document.removeEventListener("wheel", handleGlobalWheel);
+        document.removeEventListener("touchmove", handleTouchMove);
       };
     }
 
@@ -95,7 +169,7 @@ export function QRFilter({ onFilterChange, totalItems, filteredItems }: QRFilter
       {/* Filter Dropdown */}
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen} modal={false}>
         <DropdownMenuTrigger asChild={true}>
-          <Button variant="outline" size="sm" className="relative">
+          <Button ref={triggerRef} variant="outline" size="sm" className="relative">
             <Settings className="h-4 w-4 mr-2" />
             Filter
             {activeFilterCount > 0 && (
@@ -110,35 +184,60 @@ export function QRFilter({ onFilterChange, totalItems, filteredItems }: QRFilter
         </DropdownMenuTrigger>
 
         <DropdownMenuContent
-          className="w-72 sm:w-80 md:w-96 max-h-[80vh] sm:max-h-[85vh] min-w-[280px] z-50"
+          className="w-72 sm:w-80 md:w-96 min-w-[280px] z-50"
           align="end"
           side="bottom"
-          sideOffset={12}
+          sideOffset={8}
           alignOffset={0}
           avoidCollisions={false}
-          collisionPadding={16}
+          collisionPadding={0}
+          style={{
+            // Dynamic max-height based on available space below trigger
+            maxHeight: `${availableHeight}px`,
+            // Ensure dropdown can extend beyond viewport if needed for global scroll
+            minHeight: "200px",
+          }}
           onCloseAutoFocus={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => {
             e.preventDefault();
             setIsOpen(false);
           }}
           onPointerDownOutside={(e) => {
-            // Allow scrolling outside the dropdown without closing it
+            // Enhanced outside click handling for better scroll behavior
             const target = e.target as Element;
 
-            // Don't close dropdown if clicking on scrollbar or scroll area
+            // Don't close dropdown if interacting with scroll elements or page scroll
             if (
               target.closest("[data-radix-scroll-area-viewport]") ||
               target.closest("[data-radix-scroll-area-scrollbar]") ||
+              target.closest("[data-radix-dropdown-menu-content]") ||
               target.tagName === "HTML" ||
-              target.tagName === "BODY"
+              target.tagName === "BODY" ||
+              // Allow scrollbar interactions
+              target.closest("::-webkit-scrollbar") ||
+              // Check if it's a scroll event on the page
+              target === document.documentElement ||
+              target === document.body
             ) {
               e.preventDefault();
               return;
             }
 
-            // Close dropdown for other outside clicks
+            // Close dropdown for genuine outside clicks
             setIsOpen(false);
+          }}
+          onInteractOutside={(e) => {
+            // Additional handler for interaction outside
+            const target = e.target as Element;
+
+            // Prevent closing on scroll interactions
+            if (
+              target.tagName === "HTML" ||
+              target.tagName === "BODY" ||
+              target.closest("[data-radix-scroll-area-viewport]")
+            ) {
+              e.preventDefault();
+            }
           }}
         >
           {/* Header */}
@@ -162,8 +261,18 @@ export function QRFilter({ onFilterChange, totalItems, filteredItems }: QRFilter
 
           <DropdownMenuSeparator />
 
-          {/* Scrollable Content */}
-          <div className="max-h-[60vh] sm:max-h-[65vh] md:max-h-[70vh] overflow-y-auto overflow-x-hidden">
+          {/* Scrollable Content with dynamic height calculation */}
+          <div
+            className="overflow-y-auto overflow-x-hidden"
+            style={{
+              // Use calculated available height minus header space
+              maxHeight: `${Math.max(150, availableHeight - 80)}px`,
+              // Ensure smooth scrolling within dropdown
+              scrollBehavior: "smooth",
+              // Prevent scroll from bubbling to parent
+              overscrollBehavior: "contain",
+            }}
+          >
             <div className="p-1">
               {/* Date Range Filter */}
               <div className="px-2 py-3">

@@ -44,23 +44,21 @@ export const QRCard = memo(function QRCard({
 }: QRCardProps) {
   return (
     <Card
-      className={`hover:shadow-md transition-all duration-300 ${styles.qrCard} h-full ${
+      className={`hover:shadow-md transition-all duration-300 w-full max-w-full overflow-hidden h-full ${
         isDeleting ? "opacity-50 pointer-events-none" : ""
       }`}
     >
       <CardContent className="p-3 xs:p-4">
-        <div className={styles.qrCardContent}>
-          {/* QR Preview Placeholder */}
-          <div
-            className={`bg-muted rounded-lg flex items-center justify-center ${styles.qrPreview}`}
-          >
+        <div className="flex items-start gap-2 xs:gap-3 lg:gap-4 w-full min-w-0">
+          {/* QR Preview Placeholder  */}
+          <div className="shrink-0 w-8 h-8 xs:w-10 xs:h-10 sm:w-16 sm:h-16 bg-muted rounded-lg flex items-center justify-center">
             <QrCode className="h-6 w-6 xs:h-8 xs:w-8 text-muted-foreground" />
           </div>
 
           {/* QR Details */}
-          <div className={styles.qrDetails}>
+          <div className="flex-1 min-w-0 overflow-hidden">
             <div className="flex items-start gap-2 mb-2">
-              <h3 className={`font-medium ${styles.qrTitle} ${styles.safeText}`}>
+              <h3 className={`font-medium mb-2 leading-snug ${styles.safeText}`}>
                 {qr.textContent.length > 40
                   ? `${qr.textContent.substring(0, 40)}...`
                   : qr.textContent}
@@ -70,16 +68,18 @@ export const QRCard = memo(function QRCard({
               </Badge>
             </div>
 
-            <div className={styles.qrMeta}>
-              <div className={styles.qrMetaRow}>
-                <span className={styles.qrMetaItem}>
+            <div className="flex flex-col gap-1 text-xs xs:text-sm sm:text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 flex-wrap xs:flex-row xs:gap-4 lg:gap-6">
+                <span className="flex items-center gap-1 whitespace-nowrap">
                   <Calendar className="h-3 w-3" />
                   {new Date(qr.createdAt).toLocaleDateString()}
                 </span>
-                <span className={styles.qrMetaItem}>{qr.qrSettings.size}px</span>
+                <span className="flex items-center gap-1 whitespace-nowrap">
+                  {qr.qrSettings.size}px
+                </span>
               </div>
-              <div className={styles.qrMetaRow}>
-                <span className={styles.qrMetaItem}>
+              <div className="flex items-center gap-2 flex-wrap xs:flex-row xs:gap-4 lg:gap-6">
+                <span className="flex items-center gap-1 whitespace-nowrap">
                   {qr.qrSettings.errorCorrectionLevel} Error Correction
                 </span>
               </div>
@@ -87,7 +87,7 @@ export const QRCard = memo(function QRCard({
           </div>
 
           {/* Actions */}
-          <div className={styles.qrActions}>
+          <div className="shrink-0 ml-auto">
             <DropdownMenu>
               <DropdownMenuTrigger asChild={true}>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0 xs:h-9 xs:w-9">

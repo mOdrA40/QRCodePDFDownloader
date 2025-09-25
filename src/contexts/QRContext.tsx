@@ -25,6 +25,7 @@ type QRAction =
   | { type: "SET_OPTIONS"; payload: QROptions }
   | { type: "UPDATE_OPTION"; payload: { key: keyof QROptions; value: unknown } }
   | { type: "SET_QR_DATA"; payload: string }
+  | { type: "CLEAR_QR_DATA" }
   | { type: "SET_GENERATING"; payload: boolean }
   | { type: "SET_PROGRESS"; payload: number }
   | { type: "SET_STATE"; payload: ComponentState }
@@ -92,8 +93,8 @@ function qrReducer(state: QRState, action: QRAction): QRState {
     case "SET_OPTIONS":
       return { ...state, options: action.payload };
 
-    case "UPDATE_OPTION":
-      return {
+    case "UPDATE_OPTION": {
+      const newState = {
         ...state,
         options: {
           ...state.options,
@@ -101,8 +102,19 @@ function qrReducer(state: QRState, action: QRAction): QRState {
         },
       };
 
+      // Clear generated QR data when text changes to force real-time preview
+      if (action.payload.key === "text") {
+        newState.qrDataUrl = "";
+      }
+
+      return newState;
+    }
+
     case "SET_QR_DATA":
       return { ...state, qrDataUrl: action.payload };
+
+    case "CLEAR_QR_DATA":
+      return { ...state, qrDataUrl: "" };
 
     case "SET_GENERATING":
       return { ...state, isGenerating: action.payload };
@@ -168,9 +180,16 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
 
         // Handle duplicate QR response
         if (saveResult && !saveResult.success && saveResult.isDuplicate) {
-          toast.info("QR code already exists in your history", {
+          const shortText = options.text.substring(0, 50);
+          const displayText = options.text.length > 50 ? `${shortText}...` : shortText;
+          toast.info(`QR code "${displayText}" already exists in your history`, {
             description: "This QR code content has been generated before.",
             duration: 4000,
+          });
+        } else if (saveResult?.success) {
+          toast.success("QR code saved to history!", {
+            description: "You can find it in your QR history.",
+            duration: 3000,
           });
         }
       } catch (error) {
@@ -257,10 +276,10 @@ export function QRProvider({ children }: { children: React.ReactNode }) {
         saveToHistoryAsync(state.options, result).catch((error) => {
           console.warn("Failed to save QR to history:", error);
         });
+      } else {
+        // Show success message for non-authenticated users
+        toast.success("QR code generated successfully!");
       }
-
-      // Show success message immediately
-      toast.success("QR code generated successfully!");
     } catch (error) {
       dispatch({ type: "SET_STATE", payload: "error" });
       const errorMessage = error instanceof Error ? error.message : "Failed to generate QR code";

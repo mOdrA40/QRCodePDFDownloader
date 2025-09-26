@@ -542,7 +542,7 @@ export class PDFService {
     this.addInfoField(
       pdf,
       "Security Type:",
-      String(data.security || ""),
+      String(data.security || data.type || ""),
       theme,
       x,
       currentY,

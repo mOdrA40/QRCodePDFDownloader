@@ -5,6 +5,7 @@
 
 "use client";
 
+import { useAuth0 } from "@auth0/auth0-react";
 import { FileText, Zap } from "lucide-react";
 import { useId } from "react";
 import { DragDropZone } from "@/components/drag-drop-zone";
@@ -29,6 +30,7 @@ const sampleTexts = [
 
 export function QRControls({ className }: QRControlsProps) {
   const { state, updateOption, generateAndSaveQR } = useQRContext();
+  const { user } = useAuth0();
   const textId = useId();
   const logoUrlId = useId();
 
@@ -63,20 +65,33 @@ export function QRControls({ className }: QRControlsProps) {
             suppressHydrationWarning={true}
           />
 
-          {/* Generate QR Button - Explicit user action */}
-          <div className="mt-3 flex justify-center">
-            <Button
-              onClick={generateAndSaveQR}
-              disabled={!state.options.text.trim() || state.isGenerating}
-              className="w-full sm:w-auto px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
-            >
-              <Zap className="h-4 w-4 mr-2" />
-              {state.isGenerating ? "Generating..." : "Generate QR Code"}
-            </Button>
-          </div>
+          {/* Generate QR Button - Conditional rendering based on auth status */}
+          {user && (
+            <div className="mt-3 flex justify-center">
+              <Button
+                onClick={generateAndSaveQR}
+                disabled={!state.options.text.trim() || state.isGenerating}
+                className="w-full sm:w-auto px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                <Zap className="h-4 w-4 mr-2" />
+                {state.isGenerating ? "Saving..." : "Save to History"}
+              </Button>
+            </div>
+          )}
 
           <p className="text-xs text-muted-foreground mt-2 text-center">
-            Click to generate and save QR code to your history
+            {user ? (
+              "Click to save QR code to your history"
+            ) : (
+              <>
+                <span className="xl:hidden">
+                  QR code preview is available below. Sign in to save to history.
+                </span>
+                <span className="hidden xl:inline">
+                  QR code preview is available on the right. Sign in to save to history.
+                </span>
+              </>
+            )}
           </p>
         </div>
 

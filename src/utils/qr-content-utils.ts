@@ -163,13 +163,20 @@ function parseEmailContent(text: string): Record<string, unknown> {
 }
 
 function parseWiFiContent(text: string): Record<string, unknown> {
-  const match = text.match(/WIFI:T:([^;]*);S:([^;]*);P:([^;]*);H:([^;]*);?/);
+  // Parse WiFi QR format: WIFI:T:security;S:ssid;P:password;H:hidden;;
+  const match = text.match(/WIFI:T:([^;]*);S:([^;]*);P:([^;]*);H:([^;]*);/);
   if (match) {
+    const securityType = match[1] || "WPA";
+    const ssid = match[2] || "";
+    const password = match[3] || "";
+    const hidden = match[4] === "true";
+
     return {
-      type: match[1] || "WPA",
-      ssid: match[2] || "",
-      password: match[3] || "",
-      hidden: match[4] === "true",
+      type: securityType,
+      security: securityType, // Add security field for PDF compatibility
+      ssid,
+      password,
+      hidden,
     };
   }
   return { text };

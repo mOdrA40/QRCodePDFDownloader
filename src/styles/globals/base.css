@@ -73,9 +73,9 @@
 
 /* HTML and Body Base Styles */
 html, body {
-  overflow-x: hidden;
-  max-width: 100vw;
   box-sizing: border-box;
+  width: 100%;
+  min-height: 100vh;
 }
 
 *, *::before, *::after {
@@ -98,5 +98,39 @@ html, body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Fix for dropdown and portal positioning issues */
+  [data-radix-popper-content-wrapper] {
+    z-index: 50 !important;
+  }
+
+  /* Ensure proper viewport handling */
+  html {
+    overflow-x: hidden;
+  }
+
+  /* Prevent layout shifts from dropdowns */
+  [data-state="open"] {
+    overflow: visible;
+  }
+
+  /* Fix for Radix UI Portal background issues */
+  [data-radix-portal] {
+    background: transparent !important;
+  }
+
+  /* Ensure dropdown content doesn't affect layout */
+  [data-radix-select-content],
+  [data-radix-dropdown-menu-content] {
+    position: fixed !important;
+    background: hsl(var(--popover)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+  }
+
+  /* Prevent body overflow issues when dropdowns are open */
+  body:has([data-state="open"]) {
+    overflow-x: hidden !important;
+    width: 100% !important;
   }
 }

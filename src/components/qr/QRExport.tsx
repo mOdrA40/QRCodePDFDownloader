@@ -5,7 +5,7 @@
 
 "use client";
 
-import { Download, FileText, Image, Palette, Zap } from "lucide-react";
+import { Download, FileText, Image, Palette } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ShareOptions } from "@/components/share-options";
@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useQRContext, useSettingsContext } from "@/contexts";
+import { useQRContext } from "@/contexts";
 import { fileService, pdfService } from "@/services";
 
 interface QRExportProps {
@@ -26,9 +26,8 @@ interface QRExportProps {
 }
 
 export function QRExport({ className }: QRExportProps) {
-  const { state, generateAndSaveQR } = useQRContext();
-  const { state: settingsState } = useSettingsContext();
-  const { qrDataUrl, options, isGenerating } = state;
+  const { state } = useQRContext();
+  const { qrDataUrl, options } = state;
 
   // Fix hydration mismatch by initializing state after mount
   const [selectedTheme, setSelectedTheme] = useState<"modern" | "elegant" | "professional" | null>(
@@ -197,27 +196,6 @@ export function QRExport({ className }: QRExportProps) {
         </div>
 
         <ShareOptions qrDataUrl={qrDataUrl} qrText={options.text} />
-
-        {!settingsState.previewMode && (
-          <Button
-            onClick={generateAndSaveQR}
-            disabled={!options.text.trim() || isGenerating}
-            className="w-full h-12"
-            variant="secondary"
-          >
-            {isGenerating ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Zap className="h-4 w-4 mr-2" />
-                Generate QR Code
-              </>
-            )}
-          </Button>
-        )}
 
         {/* Download Info */}
         <div className="pt-4 border-t border-border">

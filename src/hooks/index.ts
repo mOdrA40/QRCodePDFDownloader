@@ -3,6 +3,18 @@
  * Central export point for all custom hooks
  */
 
+import * as React from "react";
+
+// Profile-related hooks (organized in profile folder)
+export {
+  type AuthGuardState,
+  type CopyState,
+  useAuthGuard,
+  useCopyToClipboard,
+  useUserInitials,
+} from "./profile";
+
+// General hooks
 export { useDebouncedDuplicateCheck, useDuplicateCheck } from "./useDuplicateCheck";
 export { useFileHandler } from "./useFileHandler";
 export {
@@ -59,5 +71,3 @@ export const hookUtils = {
     return isMounted;
   },
 };
-
-import * as React from "react";

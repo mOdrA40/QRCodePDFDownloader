@@ -18,9 +18,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useUserInitials } from "@/hooks/profile";
 
 export function AuthButton() {
   const { user, isLoading, loginWithRedirect, logout } = useAuth0();
+
+  // Always call hooks at the top level
+  const userInitials = useUserInitials(user?.name);
 
   // Loading state
   if (isLoading) {
@@ -43,13 +47,6 @@ export function AuthButton() {
   }
 
   // Authenticated - show user avatar with dropdown
-  const userInitials =
-    user.name
-      ?.split(" ")
-      .map((n: string) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2) || "U";
 
   return (
     <DropdownMenu>

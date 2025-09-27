@@ -18,6 +18,13 @@ export {
   useCopyToClipboard,
   useUserInitials,
 } from "./profile";
+// Settings-related hooks (organized in settings folder)
+export {
+  type SettingsAuthState,
+  type UserPreferencesState,
+  useSettingsAuth,
+  useUserPreferences,
+} from "./settings";
 
 // General hooks
 export { useDebouncedDuplicateCheck, useDuplicateCheck } from "./useDuplicateCheck";

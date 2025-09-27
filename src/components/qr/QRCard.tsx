@@ -16,7 +16,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import styles from "../../app/files/files.module.css";
 
 interface QRCardProps {
   qr: {
@@ -58,7 +57,7 @@ export const QRCard = memo(function QRCard({
           {/* QR Details */}
           <div className="flex-1 min-w-0 overflow-hidden">
             <div className="flex items-start gap-2 mb-2">
-              <h3 className={`font-medium mb-2 leading-snug ${styles.safeText}`}>
+              <h3 className="font-medium mb-2 leading-snug break-words overflow-wrap-break-word hyphens-auto max-w-full">
                 {qr.textContent.length > 40
                   ? `${qr.textContent.substring(0, 40)}...`
                   : qr.textContent}

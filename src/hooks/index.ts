@@ -5,6 +5,11 @@
 
 import * as React from "react";
 
+// Files-related hooks (organized in files folder)
+export {
+  type FilesAuthState,
+  useFilesAuth,
+} from "./files";
 // Profile-related hooks (organized in profile folder)
 export {
   type AuthGuardState,

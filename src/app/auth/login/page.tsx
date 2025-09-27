@@ -169,7 +169,7 @@ export default function LoginPage() {
             {/* Smooth Progress Bar */}
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-4 overflow-hidden shadow-inner">
               <div
-                className={`bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full progress-bar-smooth ${
+                className={`bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-[width] duration-700 ease-out ${
                   isRedirecting ? "auth-progress-login auth-progress-pulse" : "w-3/5"
                 }`}
               />

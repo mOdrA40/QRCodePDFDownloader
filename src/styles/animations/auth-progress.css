@@ -1,9 +1,9 @@
 /**
- * Authentication Component Styles
- * Progress bar animations and auth-related UI components
+ * Authentication Progress Animations
+ * Custom keyframe animations for authentication flow progress bars
  */
 
-/* Authentication Progress Bar Animations */
+/* Progress Completion Animation */
 @keyframes progressComplete {
   0% { width: 60%; }
   25% { width: 75%; }
@@ -12,6 +12,7 @@
   100% { width: 95%; }
 }
 
+/* Login Progress Animation */
 @keyframes loginProgress {
   0% { width: 60%; }
   25% { width: 70%; }
@@ -20,6 +21,7 @@
   100% { width: 90%; }
 }
 
+/* Progress Pulse Animation */
 @keyframes progressPulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.8; }
@@ -36,9 +38,4 @@
 
 .auth-progress-pulse {
   animation: progressPulse 2s ease-in-out infinite;
-}
-
-/* Smooth progress bar base styles */
-.progress-bar-smooth {
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }

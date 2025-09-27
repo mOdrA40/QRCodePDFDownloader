@@ -1,9 +1,8 @@
 /**
- * Material UI Component Overrides
- * Custom styling for Material UI TimePicker and related components
+ * Material UI TimePicker Overrides
  */
 
-/* Material UI TimePicker z-index fixes for dialog modals */
+/* Z-Index Fixes for Dialog Modals */
 .MuiPickersPopper-root {
   z-index: 9999 !important;
 }

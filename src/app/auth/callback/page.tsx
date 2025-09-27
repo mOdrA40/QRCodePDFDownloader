@@ -239,7 +239,7 @@ function CallbackPageContent() {
           {/* Smooth Progress Bar */}
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-4 overflow-hidden shadow-inner">
             <div
-              className={`bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full progress-bar-smooth auth-progress-pulse ${
+              className={`bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-[width] duration-700 ease-out auth-progress-pulse ${
                 progressStage === "initializing"
                   ? "w-1/4"
                   : progressStage === "processing"

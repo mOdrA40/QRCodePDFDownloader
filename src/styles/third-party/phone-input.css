@@ -1,6 +1,5 @@
 /**
- * Phone Input Component Styles
- * Custom styling for react-phone-number-input component
+ * Phone Input Third-Party Overrides
  */
 
 /* Base Phone Input Container */
@@ -9,6 +8,7 @@
   align-items: stretch;
 }
 
+/* Country Select Container */
 .phone-input-container .PhoneInputCountry {
   display: flex;
   align-items: center;

@@ -1,14 +1,14 @@
 /**
  * Global Styles Index
- * Central import point for all global styles
+ * Central import point for all organized styles
  */
 
 /* Base styles, Tailwind, and Design Tokens */
 @import './base.css';
 
-/* Component-specific styles */
-@import '../components/authentication.css';
-@import '../components/phone-input.css';
+/* Custom Animations */
+@import '../animations/auth-progress.css';
 
-/* Vendor overrides */
-@import '../vendor/material-ui.css';
+/* Third-Party Library Overrides */
+@import '../third-party/phone-input.css';
+@import '../third-party/material-ui-timepicker.css';

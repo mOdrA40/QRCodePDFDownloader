@@ -10,6 +10,11 @@ export {
   type FilesAuthState,
   useFilesAuth,
 } from "./files";
+// Home-related hooks (organized in home folder)
+export {
+  type HomeLayoutState,
+  useHomeLayout,
+} from "./home";
 // Profile-related hooks (organized in profile folder)
 export {
   type AuthGuardState,

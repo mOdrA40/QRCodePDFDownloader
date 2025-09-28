@@ -8,7 +8,7 @@
 import { memo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useUserInitials } from "@/hooks/profile";
+import { useUserInitials } from "@/hooks";
 
 interface ProfileAvatarProps {
   user: {

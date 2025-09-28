@@ -9,7 +9,7 @@ import { Check, Copy, type LucideIcon } from "lucide-react";
 import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useCopyToClipboard } from "@/hooks/profile";
+import { useCopyToClipboard } from "@/hooks";
 
 interface ProfileDetailItemProps {
   icon: LucideIcon;

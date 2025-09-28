@@ -18,7 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useUserInitials } from "@/hooks/profile";
+import { useUserInitials } from "@/hooks";
 
 export function AuthButton() {
   const { user, isLoading, loginWithRedirect, logout } = useAuth0();

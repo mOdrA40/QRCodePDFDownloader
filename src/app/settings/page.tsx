@@ -11,7 +11,7 @@ import {
   SettingsContent,
   SettingsHeader,
 } from "@/components/features/settings";
-import { useSettingsAuth, useUserPreferences } from "@/hooks/settings";
+import { useSettingsAuth, useUserPreferences } from "@/hooks";
 
 export default function SettingsPage() {
   const { user, isLoading, isAuthenticated, loginWithRedirect } = useSettingsAuth();

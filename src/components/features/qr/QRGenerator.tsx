@@ -8,7 +8,7 @@
 
 import { HomeContent, HomeHeader, HomeNavigation } from "@/components/features/home";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useHomeLayout } from "@/hooks/home";
+import { useHomeLayout } from "@/hooks";
 
 interface QRGeneratorProps {
   className?: string;

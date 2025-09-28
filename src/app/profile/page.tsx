@@ -15,7 +15,7 @@ import {
 } from "@/components/features/profile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useAuthGuard } from "@/hooks/profile";
+import { useAuthGuard } from "@/hooks";
 import { formatDate } from "@/lib/utils";
 
 export default function ProfilePage() {

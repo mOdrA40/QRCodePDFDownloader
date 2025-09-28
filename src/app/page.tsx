@@ -8,7 +8,7 @@
 import { HomeContent, HomeHeader, HomeNavigation } from "@/components/features/home";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProviders } from "@/contexts";
-import { useHomeLayout } from "@/hooks/home";
+import { useHomeLayout } from "@/hooks";
 
 export default function QRCodePDFDownloader() {
   const { containerClass } = useHomeLayout();

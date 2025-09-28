@@ -1,13 +1,13 @@
 /**
- * Contexts barrel export and combined provider
- * Central export point for all context providers
+ * App Providers Component
+ * Combined provider component that wraps the entire application
  */
 
 "use client";
 
 import type React from "react";
-import { QRProvider, useQRContext } from "./QRContext";
-import { getColorThemes, SettingsProvider, useSettingsContext } from "./SettingsContext";
+import { QRProvider, useQRContext } from "../features/qr";
+import { SettingsProvider, useSettingsContext } from "../global";
 
 // Combined provider component
 interface AppProvidersProps {
@@ -21,17 +21,6 @@ export function AppProviders({ children }: AppProvidersProps) {
     </SettingsProvider>
   );
 }
-
-// Re-export all context hooks and utilities
-export {
-  // QR Context
-  QRProvider,
-  useQRContext,
-  // Settings Context
-  SettingsProvider,
-  useSettingsContext,
-  getColorThemes,
-};
 
 // Combined hook for accessing all contexts
 export function useAppContext() {

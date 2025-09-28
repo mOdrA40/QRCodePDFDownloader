@@ -6,7 +6,7 @@
 "use client";
 
 import { FilesAuthRequired, FilesHeader, FilesList, FilesStats } from "@/components/features/files";
-import { useFilesAuth } from "@/hooks/files";
+import { useFilesAuth } from "@/hooks";
 
 export default function FilesPage() {
   const { isLoading, isAuthenticated, loginWithRedirect } = useFilesAuth();

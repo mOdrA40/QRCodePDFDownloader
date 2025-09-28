@@ -5,8 +5,8 @@
 
 "use client";
 
-import { AuthButton } from "@/components/auth/AuthButton";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { AuthButton } from "@/components/features/auth";
+import { ThemeToggle } from "@/components/shared/layout";
 
 export function HomeNavigation() {
   return (

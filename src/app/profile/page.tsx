@@ -12,7 +12,7 @@ import {
   ProfileAvatar,
   ProfileDetailItem,
   ProfileHeader,
-} from "@/components/profile";
+} from "@/components/features/profile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuthGuard } from "@/hooks/profile";

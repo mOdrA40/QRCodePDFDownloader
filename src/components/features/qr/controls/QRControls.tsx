@@ -8,13 +8,13 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { FileText, Zap } from "lucide-react";
 import { useId } from "react";
-import { DragDropZone } from "@/components/drag-drop-zone";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useQRContext } from "@/contexts";
+import { DragDropZone } from "./drag-drop-zone";
 
 interface QRControlsProps {
   className?: string;

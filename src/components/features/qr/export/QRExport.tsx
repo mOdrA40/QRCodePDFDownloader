@@ -8,7 +8,6 @@
 import { Download, FileText, Image, Palette } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ShareOptions } from "@/components/share-options";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -20,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { useQRContext } from "@/contexts";
 import { fileService, pdfService } from "@/services";
+import { ShareOptions } from "./share-options";
 
 interface QRExportProps {
   className?: string;

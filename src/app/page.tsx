@@ -5,7 +5,7 @@
 
 "use client";
 
-import { HomeContent, HomeHeader, HomeNavigation } from "@/components/home";
+import { HomeContent, HomeHeader, HomeNavigation } from "@/components/features/home";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProviders } from "@/contexts";
 import { useHomeLayout } from "@/hooks/home";

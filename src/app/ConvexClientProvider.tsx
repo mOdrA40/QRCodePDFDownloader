@@ -9,7 +9,7 @@ import { Auth0Provider } from "@auth0/auth0-react";
 import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithAuth0 } from "convex/react-auth0";
 import type { ReactNode } from "react";
-import { AuthRecovery } from "@/components/auth/AuthRecovery";
+import { AuthRecovery } from "@/components/features/auth";
 import "@/utils/authDebug";
 import "@/utils/auth0-error-suppressor";
 

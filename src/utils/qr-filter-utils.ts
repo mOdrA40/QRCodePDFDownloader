@@ -3,7 +3,7 @@
  * Helper functions for filtering QR history data
  */
 
-import type { QRFilterOptions } from "@/components/qr/QRFilter";
+import type { QRFilterOptions } from "@/components/features/qr/history/QRFilter";
 
 export interface QRHistoryItem {
   _id: string;

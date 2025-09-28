@@ -5,8 +5,9 @@
 
 "use client";
 
-import { QRExport, QRPreview } from "@/components/qr";
-import { UsageStats } from "@/components/usage-stats";
+import { QRExport } from "@/components/features/qr/export";
+import { QRPreview } from "@/components/features/qr/preview";
+import { UsageStats } from "@/components/shared/analytics";
 
 export function HomeRightPanel() {
   return (

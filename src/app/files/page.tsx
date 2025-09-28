@@ -5,7 +5,7 @@
 
 "use client";
 
-import { FilesAuthRequired, FilesHeader, FilesList, FilesStats } from "@/components/files";
+import { FilesAuthRequired, FilesHeader, FilesList, FilesStats } from "@/components/features/files";
 import { useFilesAuth } from "@/hooks/files";
 
 export default function FilesPage() {

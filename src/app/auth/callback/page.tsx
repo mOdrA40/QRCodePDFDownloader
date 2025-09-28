@@ -8,7 +8,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { CallbackErrorBoundary } from "@/components/auth/CallbackErrorBoundary";
+import { CallbackErrorBoundary } from "@/components/features/auth";
 import { getCallbackError, isValidAuthCallback } from "@/utils/auth-cleanup";
 import { restoreConsoleError, suppressAuth0Errors } from "@/utils/auth0-error-suppressor";
 

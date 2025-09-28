@@ -6,7 +6,7 @@
 "use client";
 
 import { memo } from "react";
-import { QRHistoryList } from "@/components/qr/QRHistoryList";
+import { QRHistoryList } from "@/components/features/qr/history";
 
 export const FilesList = memo(function FilesList() {
   return (

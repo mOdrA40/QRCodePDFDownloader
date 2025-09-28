@@ -6,7 +6,11 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { SettingsAuthRequired, SettingsContent, SettingsHeader } from "@/components/settings";
+import {
+  SettingsAuthRequired,
+  SettingsContent,
+  SettingsHeader,
+} from "@/components/features/settings";
 import { useSettingsAuth, useUserPreferences } from "@/hooks/settings";
 
 export default function SettingsPage() {

@@ -5,8 +5,7 @@
 
 "use client";
 
-import { QRControls, QRSettings } from "@/components/qr";
-import { QuickActions } from "@/components/quick-actions";
+import { QRControls, QRSettings, QuickActions } from "@/components/features/qr/controls";
 import { useQRContext } from "@/contexts";
 
 export function HomeLeftPanel() {

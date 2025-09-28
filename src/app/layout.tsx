@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "@/styles/globals/index.css";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/shared/providers";
 import { Toaster } from "@/components/ui/sonner";
 import ClientBody from "./ClientBody";
 import { ConvexClientProvider } from "./ConvexClientProvider";

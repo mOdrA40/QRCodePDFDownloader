@@ -1,5 +1,6 @@
 /**
- * Performance Backward Compatibility Export
+ * Performance Utilities Barrel Export
+ * Central export point for all performance optimization utilities
  */
 
 // Performance hooks
@@ -8,18 +9,18 @@ export {
   useExpensiveCalculation,
   usePerformanceMonitor,
   useThrottle,
-} from "./performance/hooks";
+} from "./hooks";
 
 // Lazy loading utilities
 export {
   useIntersectionObserver,
   useLazyImage,
   useLazyLoad,
-} from "./performance/lazy-loading";
+} from "./lazy-loading";
 
 // Performance monitoring utilities
 export {
   useBatchProcessor,
   useMemoryMonitor,
   useVirtualScroll,
-} from "./performance/monitoring";
+} from "./monitoring";

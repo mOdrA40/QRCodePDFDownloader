@@ -11,7 +11,7 @@ import "react-phone-number-input/style.css";
 import { AlertCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { geolocationService } from "@/services/geolocation-service";
+import { geolocationService } from "@/services";
 
 interface PhoneInputProps {
   value?: PhoneValue | undefined;

@@ -3,7 +3,7 @@
  * Central export point for all library utilities in the application
  */
 
-// Core utilities 
+// Core utilities
 export * from "./core";
 // Performance utilities
 export * from "./performance";

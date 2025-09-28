@@ -10,8 +10,8 @@ import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithAuth0 } from "convex/react-auth0";
 import type { ReactNode } from "react";
 import { AuthRecovery } from "@/components/features/auth";
-import "@/utils/authDebug";
-import "@/utils/auth0-error-suppressor";
+import "@/utils/features/auth/auth-debug";
+import "@/utils/features/auth/auth0-error-suppressor";
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL || "");
 

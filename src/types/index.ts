@@ -1,18 +1,25 @@
 /**
- * Central export file for all type definitions
- * This file provides a single import point for all types across the application
+ * Central export file for all type definitions.
  */
 
-// File handling types
+// Core types
 export type {
-  DownloadOptions,
-  ExportResult,
-  FileProcessingResult,
-  FileUploadConfig,
-  FileValidationResult,
-  PDFGenerationOptions,
-  SupportedFileType,
-} from "./file.types";
+  ApiResponse,
+  AppConfig,
+  AppError,
+  PaginatedResponse,
+} from "./core";
+// Core application types
+export * from "./core";
+// Feature-specific types
+export * from "./features";
+// Usage statistics types
+export type {
+  UsageAnalytics,
+  UsageEvent,
+  UsagePreferences,
+  UsageStats,
+} from "./features/analytics";
 // QR Code types
 export type {
   QRColorTheme,
@@ -27,7 +34,7 @@ export type {
   QRPreset,
   QRSizePreset,
   QRValidationResult,
-} from "./qr.types";
+} from "./features/qr";
 // UI and component types
 export type {
   ComponentState,
@@ -42,48 +49,18 @@ export type {
   Theme,
   ToastNotification,
   ValidationState,
-} from "./ui.types";
-// Usage statistics types
+} from "./features/ui";
+// File handling types
 export type {
-  UsageAnalytics,
-  UsageEvent,
-  UsagePreferences,
-  UsageStats,
-} from "./usage.types";
-
-// Common utility types
-export interface ApiResponse<T = unknown> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
-
-export interface PaginatedResponse<T = unknown> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  hasNext: boolean;
-  hasPrev: boolean;
-}
-
-// Error types
-export interface AppError {
-  code: string;
-  message: string;
-  details?: Record<string, unknown>;
-  timestamp: Date;
-}
-
-// Configuration types
-export interface AppConfig {
-  maxFileSize: number;
-  supportedFormats: string[];
-  defaultQRSize: number;
-  defaultErrorCorrection: "L" | "M" | "Q" | "H";
-  enableAnalytics: boolean;
-  enableLocalStorage: boolean;
-  previewMode?: boolean;
-  autoGenerate?: boolean;
-}
+  DownloadOptions,
+  ExportResult,
+  FileProcessingResult,
+  FileUploadConfig,
+  FileValidationResult,
+  PDFGenerationOptions,
+  SupportedFileType,
+} from "./infrastructure";
+// Infrastructure types
+export * from "./infrastructure";
+// Shared utility types
+export * from "./shared";

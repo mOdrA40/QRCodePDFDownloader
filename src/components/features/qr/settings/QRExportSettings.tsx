@@ -19,7 +19,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useQRContext, useSettingsContext } from "@/contexts";
 import type { QRImageFormat } from "@/types";
-import { QR_FORMAT_INFO } from "@/utils/qr-content-utils";
+import { QR_FORMAT_INFO } from "@/utils/features/qr";
 
 export function QRExportSettings() {
   const { state, updateOption } = useQRContext();

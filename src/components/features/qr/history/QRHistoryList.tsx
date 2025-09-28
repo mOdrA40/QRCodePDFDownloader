@@ -17,7 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { useDebounce } from "@/hooks";
-import { applyQRFilters, type QRHistoryItem } from "@/utils/qr-filter-utils";
+import { applyQRFilters, type QRHistoryItem } from "@/utils/features/qr";
 import { QRCard } from "./QRCard";
 import { QRFilter, type QRFilterOptions } from "./QRFilter";
 

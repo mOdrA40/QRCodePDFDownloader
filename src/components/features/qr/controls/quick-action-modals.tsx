@@ -42,8 +42,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { CustomTimePicker } from "@/components/ui/time-picker";
-import { qrFormatService } from "@/services/qr-format-service";
-import { securityService } from "@/services/security-service";
+import { qrFormatService, securityService } from "@/services";
 
 interface BaseModalProps {
   open: boolean;

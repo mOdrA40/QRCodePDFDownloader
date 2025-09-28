@@ -1,12 +1,13 @@
 /**
- * Services barrel export
- * Central export point for all service modules
+ * Services Barrel Export
+ * Central export point for all service modules in the application
  */
 
-export { simpleBrowserDetectionService as browserDetectionService } from "./browser-detection-simple";
-export { FileService, fileService } from "./file-service";
-export { geolocationService } from "./geolocation-service";
-export { PDFService, pdfService } from "./pdf-service";
-export { QRDataValidator, qrDataValidator } from "./qr-data-validator";
-export { QRService, qrService } from "./qr-service";
-export { StorageService, storageService } from "./storage-service";
+// Core business logic services
+export * from "./core";
+
+// Infrastructure services
+export * from "./infrastructure";
+
+// Utility services
+export * from "./utils";

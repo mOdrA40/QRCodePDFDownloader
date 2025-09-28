@@ -13,7 +13,7 @@ import type {
   QROptions,
   QRValidationResult,
 } from "@/types";
-import { QRGenerationMethod, simpleBrowserDetectionService } from "./browser-detection-simple";
+import { QRGenerationMethod, simpleBrowserDetectionService } from "../../utils/browser-detection";
 
 // Browser capability detection interface
 interface BrowserCapabilities {

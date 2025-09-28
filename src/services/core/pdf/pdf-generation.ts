@@ -1,8 +1,8 @@
 import jsPDF from "jspdf";
 import type { ExportResult, PDFGenerationOptions } from "@/types";
-import { type ParsedQRContent, parseQRContent } from "@/utils/qr-content-utils";
-import { qrDataValidator } from "./qr-data-validator";
-import { securityService } from "./security-service";
+import { type ParsedQRContent, parseQRContent } from "@/utils/features/qr";
+import { securityService } from "../../infrastructure/security";
+import { qrDataValidator } from "../qr/qr-validation";
 
 // Enhanced interfaces for better type safety and extensibility
 

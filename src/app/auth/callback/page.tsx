@@ -9,8 +9,12 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { CallbackErrorBoundary } from "@/components/features/auth";
-import { getCallbackError, isValidAuthCallback } from "@/utils/auth-cleanup";
-import { restoreConsoleError, suppressAuth0Errors } from "@/utils/auth0-error-suppressor";
+import {
+  getCallbackError,
+  isValidAuthCallback,
+  restoreConsoleError,
+  suppressAuth0Errors,
+} from "@/utils/features/auth";
 
 function CallbackPageContent() {
   const { isLoading, error, isAuthenticated, handleRedirectCallback } = useAuth0();
@@ -54,7 +58,7 @@ function CallbackPageContent() {
 
           // Clear any stale auth state
           try {
-            const { clearAuth0State } = await import("@/utils/auth-cleanup");
+            const { clearAuth0State } = await import("@/utils/features/auth");
             clearAuth0State();
           } catch (error) {
             console.warn("Error clearing auth state:", error);

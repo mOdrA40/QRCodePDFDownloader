@@ -7,7 +7,7 @@
 
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useState } from "react";
-import { clearAuth0State } from "@/utils/auth-cleanup";
+import { clearAuth0State } from "@/utils/features/auth";
 
 interface AuthRecoveryProps {
   children: React.ReactNode;

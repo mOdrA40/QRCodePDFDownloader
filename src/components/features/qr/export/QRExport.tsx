@@ -18,7 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useQRContext } from "@/contexts";
-import { fileService, pdfService } from "@/services";
+import { useUsageStats } from "@/hooks";
+import { fileService, pdfService, qrService } from "@/services";
 import { ShareOptions } from "./share-options";
 
 interface QRExportProps {
@@ -28,6 +29,8 @@ interface QRExportProps {
 export function QRExport({ className }: QRExportProps) {
   const { state } = useQRContext();
   const { qrDataUrl, options } = state;
+
+  const { recordDownload } = useUsageStats();
 
   // Fix hydration mismatch by initializing state after mount
   const [selectedTheme, setSelectedTheme] = useState<"modern" | "elegant" | "professional" | null>(
@@ -61,18 +64,39 @@ export function QRExport({ className }: QRExportProps) {
     setIsMounted(true);
   }, []);
 
-  const downloadPDF = async (theme: "modern" | "elegant" | "professional" = "modern") => {
-    if (!qrDataUrl) {
-      toast.error("Please generate a QR code first");
-      return;
+  const ensureQrDataUrl = async (forPdf: boolean): Promise<string | null> => {
+    if (qrDataUrl) return qrDataUrl;
+    if (!options.text.trim()) return null;
+    try {
+      const result = await qrService.generateQRCode(
+        options.text,
+        {
+          size: options.size,
+          margin: options.margin,
+          errorCorrectionLevel: options.errorCorrectionLevel,
+          color: { dark: options.foreground, light: options.background },
+          format: forPdf ? "png" : options.format,
+        },
+        false
+      );
+      return result.dataUrl;
+    } catch (_e) {
+      toast.error("Failed to generate QR for download");
+      return null;
     }
+  };
 
+  const downloadPDF = async (theme: "modern" | "elegant" | "professional" = "modern") => {
     // Always proceed with PDF download - no browser restrictions
     await performPDFDownload(theme);
   };
 
   const performPDFDownload = async (theme: "modern" | "elegant" | "professional") => {
     try {
+      const dataUrl = await ensureQrDataUrl(true);
+      if (!dataUrl) {
+        return;
+      }
       const pdfOptions: {
         title: string;
         author: string;
@@ -90,13 +114,15 @@ export function QRExport({ className }: QRExportProps) {
         pdfOptions.password = options.pdfPassword;
       }
 
-      const result = await pdfService.generatePDF(qrDataUrl, options.text, pdfOptions);
+      const result = await pdfService.generatePDF(dataUrl, options.text, pdfOptions);
 
       if (result.success) {
         toast.success("PDF generated successfully!", {
           description: `Theme: ${theme.charAt(0).toUpperCase() + theme.slice(1)} | Type: ${result.contentType || "Unknown"}`,
           duration: 4000,
         });
+        // Track usage in guest mode via localStorage
+        recordDownload("pdf", "pdf", options.size);
       } else {
         toast.error(result.error || "Failed to generate PDF");
       }
@@ -105,18 +131,24 @@ export function QRExport({ className }: QRExportProps) {
     }
   };
 
-  const downloadImage = () => {
-    if (!qrDataUrl) {
-      toast.error("Please generate a QR code first");
+  const downloadImage = async () => {
+    if (!options.text.trim()) {
+      toast.error("Please enter text to generate QR first");
       return;
     }
 
-    const result = fileService.downloadFile(qrDataUrl, {
+    const dataUrl = await ensureQrDataUrl(false);
+    if (!dataUrl) return;
+
+    const result = fileService.downloadFile(dataUrl, {
       filename: `qr-code-${Date.now()}`,
       format: options.format,
     });
 
-    if (!result.success) {
+    if (result.success) {
+      // Track usage in guest mode via localStorage
+      recordDownload("image", options.format, options.size);
+    } else {
       toast.error(result.error || "Failed to download image");
     }
   };
@@ -170,7 +202,7 @@ export function QRExport({ className }: QRExportProps) {
         <div className="grid grid-cols-1 gap-3">
           <Button
             onClick={() => downloadPDF(selectedTheme || "modern")}
-            disabled={!(qrDataUrl && isMounted)}
+            disabled={!(options.text.trim() && isMounted)}
             className="h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white cursor-pointer relative z-10"
             type="button"
           >
@@ -185,7 +217,7 @@ export function QRExport({ className }: QRExportProps) {
 
           <Button
             onClick={downloadImage}
-            disabled={!qrDataUrl}
+            disabled={!options.text.trim()}
             variant="outline"
             className="h-14 border-2 cursor-pointer relative z-10"
             type="button"

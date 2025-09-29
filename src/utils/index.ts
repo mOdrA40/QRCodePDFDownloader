@@ -5,10 +5,6 @@
 
 // Feature-specific utilities
 export * from "./features";
-
-// Shared utilities
-export * from "./shared";
-
 // Auth utilities
 export {
   clearAuth0State,
@@ -20,7 +16,6 @@ export {
   restoreConsoleError,
   suppressAuth0Errors,
 } from "./features/auth";
-
 // QR utilities
 export type { ParsedQRContent, QRContentType, QRFilterOptions, QRHistoryItem } from "./features/qr";
 export {
@@ -33,3 +28,5 @@ export {
   QR_FORMAT_INFO,
   searchQRHistory,
 } from "./features/qr";
+// Shared utilities
+export * from "./shared";

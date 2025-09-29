@@ -243,15 +243,19 @@ export const getQRStatistics = query({
     const todayStart = new Date().setHours(0, 0, 0, 0);
     const todayGenerated = recentQRs.filter((qr) => qr.createdAt >= todayStart).length;
 
-    // Calculate format usage efficiently
+    // Calculate format usage and average size efficiently
     const formatUsage: Record<string, number> = {};
     let favoriteFormat = "png";
     let maxCount = 0;
+    let totalSize = 0;
 
     for (const qr of recentQRs) {
       const format = qr.qrSettings.format;
       const count = (formatUsage[format] || 0) + 1;
       formatUsage[format] = count;
+
+      // Track total size for average calculation
+      totalSize += qr.qrSettings.size;
 
       if (count > maxCount) {
         maxCount = count;
@@ -259,10 +263,14 @@ export const getQRStatistics = query({
       }
     }
 
+    // Calculate average size
+    const averageSize = totalGenerated > 0 ? Math.round(totalSize / totalGenerated) : 512;
+
     return {
       totalGenerated,
       todayGenerated,
       favoriteFormat,
+      averageSize,
       formatUsage,
       lastUsed: recentQRs[0]?.createdAt
         ? new Date(recentQRs[0].createdAt).toLocaleDateString()

@@ -21,7 +21,7 @@ interface UseUsageStatsReturn {
     hasLogo?: boolean;
     textLength: number;
   }) => void;
-  recordDownload: (type: "pdf" | "image", format?: string) => void;
+  recordDownload: (type: "pdf" | "image", format?: string, size?: number) => void;
   recordPresetAction: (action: "saved" | "loaded") => void;
   clearStats: () => void;
   refreshStats: () => void;
@@ -180,6 +180,9 @@ export function useUsageStats(): UseUsageStatsReturn {
         storageService.updateUsageStats(updatedStats);
         setStats(updatedStats);
         setAnalytics(calculateAnalytics());
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("usage-stats-updated"));
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to record QR generation");
       }
@@ -191,16 +194,59 @@ export function useUsageStats(): UseUsageStatsReturn {
    * Records download event
    */
   const recordDownload = useCallback(
-    (type: "pdf" | "image", format?: string) => {
+    (type: "pdf" | "image", format?: string, size?: number) => {
       try {
         setError(null);
 
+        const metadata: { format?: string; size?: number } = { format: format ?? "unknown" };
+        if (typeof size === "number") {
+          metadata.size = size;
+        }
         storageService.recordUsageEvent({
           type: type === "pdf" ? "pdf_downloaded" : "image_downloaded",
-          metadata: { format: format ?? "unknown" },
+          metadata,
         });
 
+        // Update stats treating a successful download as a completed generation for guests
+        const currentStats = storageService.getUsageStats();
+        const today = new Date().toDateString();
+        const usedFormat = format ?? currentStats.favoriteFormat ?? "png";
+        const usedSize = size ?? currentStats.averageSize ?? 512;
+
+        const newFormatUsage = {
+          ...currentStats.formatUsage,
+          [usedFormat]: (currentStats.formatUsage[usedFormat] || 0) + 1,
+        };
+
+        const favoriteFormat =
+          Object.entries(newFormatUsage).sort(([, a], [, b]) => b - a)[0]?.[0] || usedFormat;
+
+        const updatedStats: UsageStats = {
+          ...currentStats,
+          totalGenerated: currentStats.totalGenerated + 1,
+          todayGenerated: currentStats.lastUsed.includes(today)
+            ? currentStats.todayGenerated + 1
+            : 1,
+          favoriteFormat,
+          averageSize: Math.round((currentStats.averageSize + usedSize) / 2),
+          lastUsed: new Date().toLocaleString(),
+          formatUsage: newFormatUsage,
+          sizeDistribution: {
+            ...currentStats.sizeDistribution,
+            [usedSize]: (currentStats.sizeDistribution[usedSize] || 0) + 1,
+          },
+          dailyUsage: {
+            ...currentStats.dailyUsage,
+            [today]: (currentStats.dailyUsage[today] || 0) + 1,
+          },
+        };
+
+        storageService.updateUsageStats(updatedStats);
+        setStats(updatedStats);
         setAnalytics(calculateAnalytics());
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("usage-stats-updated"));
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to record download");
       }
@@ -293,6 +339,23 @@ export function useUsageStats(): UseUsageStatsReturn {
 
     return () => clearInterval(interval);
   }, []);
+  // Sync across components within the same tab using a custom event
+  useEffect(() => {
+    const handler = () => {
+      const currentStats = storageService.getUsageStats();
+      setStats(currentStats);
+      setAnalytics(calculateAnalytics());
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("usage-stats-updated", handler as EventListener);
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("usage-stats-updated", handler as EventListener);
+      }
+    };
+  }, [calculateAnalytics]);
 
   return {
     stats,
